@@ -11,13 +11,17 @@
     "debug": "~2.1.1",
     "express": "~4.12.2",
     "jade": "~1.9.2",
+    "lodash": "^3.6.0",
     "manifoldjs": "git://github.com/manifoldjs/ManifoldJS.git",
     "morgan": "~1.5.1",
     "multer": "^0.1.8",
+    "node-uuid": "^1.4.3",
+    "redis": "^0.12.1",
     "serve-favicon": "~2.2.0"
   },
   "devDependencies": {
     "chai": "^2.2.0",
+    "fakeredis": "^0.3.1",
     "grunt": "^0.4.5",
     "grunt-contrib-jshint": "^0.11.1",
     "grunt-contrib-qunit": "^0.7.0",
@@ -25,6 +29,7 @@
     "grunt-mocha-test": "^0.12.7",
     "istanbul": "^0.3.13",
     "mocha": "^2.2.4",
+    "sinon": "^1.14.1",
     "supertest": "^0.15.0"
   }
 }

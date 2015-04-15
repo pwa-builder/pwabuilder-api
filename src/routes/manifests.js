@@ -2,41 +2,53 @@
 
 var express = require('express'),
     router = express.Router(),
+    uuid = require('node-uuid'),
+    _ = require('lodash'),
     manifold = require('manifoldjs'),
     manifestTools = manifold.manifestTools;
 
-router
-    .get('/', function(req,res) {
-        res.json();
-    })
-    .post('/',function(req,res,next){
-        console.log('files',req.files);
 
-        if(req.body.siteUrl){
-            manifestTools.getManifestFromSite(req.body.siteUrl, function(err, manifestInfo) {
-                if (err) {
-                    //Connection error or invalid manifest format
-                    console.log(err);
-                    return next(err);
-                }
+module.exports = function(client){
 
-                res.json(manifestInfo.content);
+    return router
+        .get('/:id',function(req,res,next){
+            client.get(req.params.id,function(err,reply){
+                if(err) return next(err);
+                if(!reply) return res.status(404).send('NOT FOUND');
+
+                var manifest = JSON.parse(reply);
+                res.json(manifest);
             });
-        }else if(req.files.file){
-            var file = req.files.file;
+        })
+        .post('/',function(req,res,next){
+            if(req.body.siteUrl){
+                manifestTools.getManifestFromSite(req.body.siteUrl, function(err, manifestInfo) {
+                    if (err) {
+                        console.log(err);
+                        return next(err);
+                    }
 
-            manifestTools.getManifestFromFile (file.path, function (err, manifestInfo) {
-                if (err) {
-                    // File error or invalid manifest format
-                    console.log(err);
-                    return next(err);
-                }
+                    var manifest = _.assign(manifestInfo.content,{id: uuid.v4()});
+                    client.set(manifest.id,JSON.stringify(manifest));
 
-                res.json(manifestInfo.content);
-            });
-        }else{
-            next(new Error('No url or manifest provided'));
-        }
-    });
+                    res.json(manifest);
+                });
+            }else if(req.files.file){
+                var file = req.files.file;
 
-module.exports = router;
+                manifestTools.getManifestFromFile (file.path, function (err, manifestInfo) {
+                    if (err) {
+                        console.log(err);
+                        return next(err);
+                    }
+
+                    var manifest = _.assign(manifestInfo.content,{id: uuid.v4()});
+                    client.set(manifest.id,JSON.stringify(manifest));
+
+                    res.json(manifest);
+                });
+            }else{
+                next(new Error('No url or manifest provided'));
+            }
+        });
+};
