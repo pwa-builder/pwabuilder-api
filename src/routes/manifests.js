@@ -50,5 +50,18 @@ module.exports = function(client){
             }else{
                 next(new Error('No url or manifest provided'));
             }
+        })
+        .put('/:id',function(req,res,next){
+            client.get(req.params.id,function(err,reply){
+                if(err) return next(err);
+                if(!reply) return res.status(404).send('NOT FOUND');
+
+                var manifest = JSON.parse(reply);
+
+                manifest = _.assign(manifest,req.body);
+                client.set(manifest.id,JSON.stringify(manifest));
+
+                res.json(manifest);
+            });
         });
 };

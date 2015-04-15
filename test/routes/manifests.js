@@ -98,7 +98,8 @@ describe('manifests',function(){
                     .end(function(err){
                         if(err) return done(err);
 
-                        expect(client.set.calledOnce).to.be.true;
+                        expect(client.set.calledOnce).to.equal(true);
+                        client.set.restore();
                         done();
                     });
             });
@@ -127,5 +128,66 @@ describe('manifests',function(){
                     .end(done);
             });
         });
+    });
+
+    describe('update route',function(){
+        var req;
+
+        before(function(){
+            var app = manifold.init(client);
+            req = request(app);
+        });
+
+        afterEach(function(done){
+            client.flushdb(done);
+        });
+
+        describe('with an existing manifest',function(){
+            var manifestId;
+
+            beforeEach(function(){
+                manifestId = uuid.v4();
+                client.set(manifestId,JSON.stringify({
+                    id: manifestId,
+                    name: 'Foo Web Enterprises, LLC.',
+                    short_name: 'Foo'
+                }));
+            });
+
+            it('should update the record',function(done){
+                var name = 'Bar Interwebs Associates, Inc.';
+
+                req.put('/manifests/'+manifestId)
+                    .send({name: name})
+                    .expect(function(res){
+                        expect(res.body.name).to.equal(name);
+                    })
+                    .end(done);
+            });
+
+            it('should save the manifest to redis',function(done){
+                sinon.spy(client,'set');
+
+                req.put('/manifests/'+manifestId)
+                    .send({ name: 'Bar' })
+                    .end(function(err){
+                        if(err) return done(err);
+
+                        expect(client.set.calledOnce).to.equal(true);
+
+                        client.set.restore();
+                        done();
+                    });
+            });
+        });
+
+        describe('without a manifest',function(){
+            it('should return a 404',function(done){
+                req.put('/manifests/foo')
+                    .expect(404)
+                    .end(done);
+            });
+        });
+
     });
 });
