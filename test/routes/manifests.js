@@ -186,6 +186,47 @@ describe('manifests',function(){
                         done();
                     });
             });
+
+            it('should include any suggestions returned from the validator',function(done){
+                req.put('/manifests/'+manifestId)
+                    .send({ name: 'Bar' })
+                    .expect(function(res){
+                        expect(res.body.suggestions.hap_urlAccess[0]).to.equal('It is recommended to specify a set of access rules that represent the navigation scope of the application');
+                    })
+                    .end(done);
+            });
+        });
+
+        describe('with invalid data',function(){
+            var manifestId;
+
+            beforeEach(function(){
+                manifestId = uuid.v4();
+                client.set(manifestId,JSON.stringify({
+                    id: manifestId,
+                    format: 'w3c',
+                    content: {
+                        name: 'Foo Web Enterprises, LLC.',
+                        short_name: 'Foo',
+                    }
+                }));
+            });
+
+            it('should return a 422',function(done){
+                req.put('/manifests/'+manifestId)
+                    .send({ name: 'Bar' })
+                    .expect(422)
+                    .end(done);
+            });
+
+            it('should return an errors response',function(done){
+                req.put('/manifests/'+manifestId)
+                    .send({ name: 'Bar' })
+                    .expect(function(res){
+                        expect(res.body.errors.start_url[0]).to.equal('The start URL for the target web site is required');
+                    })
+                    .end(done);
+            });
         });
 
         describe('without a manifest',function(){

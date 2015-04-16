@@ -14,6 +14,49 @@ function createManifest(manifestInfo,client,res){
     res.json(manifest);
 }
 
+function assignSuggestions(suggestions,manifest){
+    var suggestion = { suggestions: {}};
+
+    _.each(suggestions,function(s){
+        if(suggestion.suggestions[s.member]){
+            suggestion.suggestions[s.member].push(s.description);
+        }else{
+            suggestion.suggestions[s.member] = [s.description];
+        }
+    });
+
+    manifest = _.assign(manifest,suggestion);
+}
+
+function assignWarnings(warnings, manifest){
+    if(warnings.length > 0){
+        var warning = { warnings: {}};
+
+        _.each(warnings,function(w){
+            if(warning.warnings[w.member]){
+                warning.warnings[w.member].push(w.description);
+            }else{
+                warning.warnings[w.member] = [w.description];
+            }
+        });
+
+        manifest = _.assign(manifest,warning);
+    }
+}
+
+function sendValidationErrors(errors, res){
+    var errorRes = { errors: {}};
+    _.each(errors,function(error){
+        if(errorRes.errors[error.member]){
+            errorRes.errors[error.member].push(error.description);
+        }else{
+            errorRes.errors[error.member] = [error.description];
+        }
+    });
+
+    return res.status(422).json(errorRes);
+}
+
 module.exports = function(client){
     return router
         .get('/:id',function(req,res,next){
@@ -60,19 +103,20 @@ module.exports = function(client){
                 manifest.content = _.assign(manifest.content,req.body);
 
                 manifestTools.validateManifest(manifest, ['windows','ios'], function(err,results){
-                    var errors = _.filter(results,{level: 'error'});
+                    var errors = _.filter(results,{level: 'error'}),
+                        suggestions = _.filter(results,{level: 'suggestion'}),
+                        warnings = _.filter(results,{level: 'warning'});
 
                     if(errors.length > 0){
-                        var errorRes = { errors: {}};
-                        _.each(errors,function(error){
-                            if(errorRes.errors[error.member]){
-                                errorRes.errors[error.member].push(error.description);
-                            }else{
-                                errorRes.errors[error.member] = [error.description];
-                            }
-                        });
+                        return sendValidationErrors(errors,res);
+                    }
 
-                        return res.status(422).json(errorRes);
+                    if(suggestions.length > 0){
+                        assignSuggestions(suggestions,manifest);
+                    }
+
+                    if(warnings.length > 0){
+                        assignWarnings(warnings,manifest);
                     }
 
 
