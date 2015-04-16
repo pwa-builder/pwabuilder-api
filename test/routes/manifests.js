@@ -33,8 +33,11 @@ describe('manifests',function(){
         beforeEach(function(){
             manifestId = uuid.v4();
             client.set(manifestId,JSON.stringify({
-                name: 'Foo Web Enterprises, LLC.',
-                short_name: 'Foo'
+                format: 'w3c',
+                content: {
+                    name: 'Foo Web Enterprises, LLC.',
+                    short_name: 'Foo'
+                }
             }));
         });
 
@@ -45,7 +48,7 @@ describe('manifests',function(){
         it('should find the manifest',function(done){
             req.get('/manifests/'+manifestId)
                 .expect(function(res){
-                    expect(res.body.name).to.equal('Foo Web Enterprises, LLC.');
+                    expect(res.body.content.name).to.equal('Foo Web Enterprises, LLC.');
                 })
                 .end(done);
         });
@@ -75,7 +78,7 @@ describe('manifests',function(){
                     .send({ siteUrl: 'http://www.bamideas.com' })
                     .expect(function(res){
                         var result = res.body;
-                        expect(result.start_url).to.equal('http://www.bamideas.com');
+                        expect(result.content.start_url).to.equal('http://www.bamideas.com');
                     })
                     .end(done);
             });
@@ -85,7 +88,7 @@ describe('manifests',function(){
                     .send({ siteUrl: 'http://www.bamideas.com' })
                     .expect(function(res){
                         var result = res.body;
-                        expect(result.short_name).to.equal('WwwBamideasCom');
+                        expect(result.content.short_name).to.equal('WwwBamideasCom');
                     })
                     .end(done);
             });
@@ -111,7 +114,7 @@ describe('manifests',function(){
                     .send({ siteUrl: 'http://meteorite.azurewebsites.net' })
                     .expect(function(res){
                         var result = res.body;
-                        expect(result.name).to.equal('Web Application Template');
+                        expect(result.content.name).to.equal('Web Application Template');
                     })
                     .end(done);
             });
@@ -123,7 +126,7 @@ describe('manifests',function(){
                     .attach('file','test/fixtures/manifest.json')
                     .expect(function(res){
                         var result = res.body;
-                        expect(result.short_name).to.equal('THW');
+                        expect(result.content.short_name).to.equal('THW');
                     })
                     .end(done);
             });
@@ -149,8 +152,12 @@ describe('manifests',function(){
                 manifestId = uuid.v4();
                 client.set(manifestId,JSON.stringify({
                     id: manifestId,
-                    name: 'Foo Web Enterprises, LLC.',
-                    short_name: 'Foo'
+                    format: 'w3c',
+                    content: {
+                        name: 'Foo Web Enterprises, LLC.',
+                        short_name: 'Foo',
+                        start_url: 'www.fwellc.com'
+                    }
                 }));
             });
 
@@ -160,7 +167,7 @@ describe('manifests',function(){
                 req.put('/manifests/'+manifestId)
                     .send({name: name})
                     .expect(function(res){
-                        expect(res.body.name).to.equal(name);
+                        expect(res.body.content.name).to.equal(name);
                     })
                     .end(done);
             });

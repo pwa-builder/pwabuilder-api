@@ -7,9 +7,14 @@ var express = require('express'),
     manifold = require('manifoldjs'),
     manifestTools = manifold.manifestTools;
 
+function createManifest(manifestInfo,client,res){
+    var manifest = _.assign(manifestInfo,{id: uuid.v4()});
+    client.set(manifest.id,JSON.stringify(manifest));
+
+    res.json(manifest);
+}
 
 module.exports = function(client){
-
     return router
         .get('/:id',function(req,res,next){
             client.get(req.params.id,function(err,reply){
@@ -28,10 +33,7 @@ module.exports = function(client){
                         return next(err);
                     }
 
-                    var manifest = _.assign(manifestInfo.content,{id: uuid.v4()});
-                    client.set(manifest.id,JSON.stringify(manifest));
-
-                    res.json(manifest);
+                    createManifest(manifestInfo,client,res);
                 });
             }else if(req.files.file){
                 var file = req.files.file;
@@ -42,10 +44,7 @@ module.exports = function(client){
                         return next(err);
                     }
 
-                    var manifest = _.assign(manifestInfo.content,{id: uuid.v4()});
-                    client.set(manifest.id,JSON.stringify(manifest));
-
-                    res.json(manifest);
+                    createManifest(manifestInfo,client,res);
                 });
             }else{
                 next(new Error('No url or manifest provided'));
@@ -58,10 +57,29 @@ module.exports = function(client){
 
                 var manifest = JSON.parse(reply);
 
-                manifest = _.assign(manifest,req.body);
-                client.set(manifest.id,JSON.stringify(manifest));
+                manifest.content = _.assign(manifest.content,req.body);
 
-                res.json(manifest);
+                manifestTools.validateManifest(manifest, ['windows','ios'], function(err,results){
+                    var errors = _.filter(results,{level: 'error'});
+
+                    if(errors.length > 0){
+                        var errorRes = { errors: {}};
+                        _.each(errors,function(error){
+                            if(errorRes.errors[error.member]){
+                                errorRes.errors[error.member].push(error.description);
+                            }else{
+                                errorRes.errors[error.member] = [error.description];
+                            }
+                        });
+
+                        return res.status(422).json(errorRes);
+                    }
+
+
+                    client.set(manifest.id,JSON.stringify(manifest));
+                    res.json(manifest);
+                });
             });
         });
 };
+
