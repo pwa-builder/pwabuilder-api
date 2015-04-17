@@ -5,7 +5,13 @@ var express = require('express'),
     uuid = require('node-uuid'),
     _ = require('lodash'),
     manifold = require('manifoldjs'),
-    manifestTools = manifold.manifestTools;
+    manifestTools = manifold.manifestTools,
+    projectBuilder = manifold.projectBuilder,
+    fs = require('fs'),
+    path = require('path'),
+    rimraf = require('rimraf'),
+    outputDir = path.join(__dirname, '../../tmp'),
+    platforms = ['windows', 'android', 'ios', 'chrome', 'firefox'];
 
 function createManifest(manifestInfo,client,res){
     var manifest = _.assign(manifestInfo,{id: uuid.v4()});
@@ -29,19 +35,17 @@ function assignSuggestions(suggestions,manifest){
 }
 
 function assignWarnings(warnings, manifest){
-    if(warnings.length > 0){
-        var warning = { warnings: {}};
+    var warning = { warnings: {}};
 
-        _.each(warnings,function(w){
-            if(warning.warnings[w.member]){
-                warning.warnings[w.member].push(w.description);
-            }else{
-                warning.warnings[w.member] = [w.description];
-            }
-        });
+    _.each(warnings,function(w){
+        if(warning.warnings[w.member]){
+            warning.warnings[w.member].push(w.description);
+        }else{
+            warning.warnings[w.member] = [w.description];
+        }
+    });
 
-        manifest = _.assign(manifest,warning);
-    }
+    manifest = _.assign(manifest,warning);
 }
 
 function sendValidationErrors(errors, res){
@@ -102,7 +106,7 @@ module.exports = function(client){
 
                 manifest.content = _.assign(manifest.content,req.body);
 
-                manifestTools.validateManifest(manifest, ['windows','ios'], function(err,results){
+                manifestTools.validateManifest(manifest, platforms, function(err,results){
                     var errors = _.filter(results,{level: 'error'}),
                         suggestions = _.filter(results,{level: 'suggestion'}),
                         warnings = _.filter(results,{level: 'warning'});
@@ -123,6 +127,31 @@ module.exports = function(client){
                     client.set(manifest.id,JSON.stringify(manifest));
                     res.json(manifest);
                 });
+            });
+        })
+        .post('/:id/build',function(req,res,next){
+            client.get(req.params.id,function(err,reply){
+                if(err) return next(err);
+                if(!reply) return res.status(404).send('NOT FOUND');
+
+                var manifest = JSON.parse(reply),
+                    output = path.join(outputDir,manifest.id);
+
+                rimraf(output,function(err){
+                    if(err){ return next(err); }
+
+                    projectBuilder.createApps(manifest, output, platforms, false, function (err) {
+                        if (err) {
+                            return next(err);
+                        }
+
+                        console.log('applications created!');
+                        var files = fs.readdirSync(outputDir);
+
+                        res.json(files);
+                    });
+                });
+
             });
         });
 };

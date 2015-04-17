@@ -29,7 +29,6 @@ describe('manifests',function(){
             req = request(app);
         });
 
-
         beforeEach(function(){
             manifestId = uuid.v4();
             client.set(manifestId,JSON.stringify({
