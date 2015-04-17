@@ -76,7 +76,6 @@ module.exports = function(client){
             if(req.body.siteUrl){
                 manifestTools.getManifestFromSite(req.body.siteUrl, function(err, manifestInfo) {
                     if (err) {
-                        console.log(err);
                         return next(err);
                     }
 
@@ -87,7 +86,6 @@ module.exports = function(client){
 
                 manifestTools.getManifestFromFile (file.path, function (err, manifestInfo) {
                     if (err) {
-                        console.log(err);
                         return next(err);
                     }
 
@@ -145,9 +143,7 @@ module.exports = function(client){
                             return next(err);
                         }
 
-                        console.log('applications created!');
                         var files = fs.readdirSync(outputDir);
-
                         res.json(files);
                     });
                 });

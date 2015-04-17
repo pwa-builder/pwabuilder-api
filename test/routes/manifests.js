@@ -130,6 +130,15 @@ describe('manifests',function(){
                     .end(done);
             });
         });
+
+        describe('with a site that does not exist',function(){
+            it('should return a 422',function(done){
+                req.post('/manifest')
+                    .send({siteUrl: 'http://www.bamideasz.com'})
+                    .expect(404)
+                    .end(done);
+            });
+        });
     });
 
     describe('update route',function(){
