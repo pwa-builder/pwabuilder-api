@@ -76,7 +76,11 @@ module.exports = function(client){
             if(req.body.siteUrl){
                 manifestTools.getManifestFromSite(req.body.siteUrl, function(err, manifestInfo) {
                     if (err) {
-                        return next(err);
+                        if(err.message === 'Failed to retrieve manifest from site.'){
+                            return res.status(422).json({error: 'Failed to retrieve manifest from site.'});
+                        }else{
+                            return next(err);
+                        }
                     }
 
                     createManifest(manifestInfo,client,res);

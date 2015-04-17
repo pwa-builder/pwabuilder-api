@@ -133,9 +133,9 @@ describe('manifests',function(){
 
         describe('with a site that does not exist',function(){
             it('should return a 422',function(done){
-                req.post('/manifest')
+                req.post('/manifests')
                     .send({siteUrl: 'http://www.bamideasz.com'})
-                    .expect(404)
+                    .expect(422)
                     .end(done);
             });
         });
