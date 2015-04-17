@@ -29,12 +29,14 @@ describe('manifests',function(){
             req = request(app);
         });
 
-
         beforeEach(function(){
             manifestId = uuid.v4();
             client.set(manifestId,JSON.stringify({
-                name: 'Foo Web Enterprises, LLC.',
-                short_name: 'Foo'
+                format: 'w3c',
+                content: {
+                    name: 'Foo Web Enterprises, LLC.',
+                    short_name: 'Foo'
+                }
             }));
         });
 
@@ -45,7 +47,7 @@ describe('manifests',function(){
         it('should find the manifest',function(done){
             req.get('/manifests/'+manifestId)
                 .expect(function(res){
-                    expect(res.body.name).to.equal('Foo Web Enterprises, LLC.');
+                    expect(res.body.content.name).to.equal('Foo Web Enterprises, LLC.');
                 })
                 .end(done);
         });
@@ -75,7 +77,7 @@ describe('manifests',function(){
                     .send({ siteUrl: 'http://www.bamideas.com' })
                     .expect(function(res){
                         var result = res.body;
-                        expect(result.start_url).to.equal('http://www.bamideas.com');
+                        expect(result.content.start_url).to.equal('http://www.bamideas.com');
                     })
                     .end(done);
             });
@@ -85,7 +87,7 @@ describe('manifests',function(){
                     .send({ siteUrl: 'http://www.bamideas.com' })
                     .expect(function(res){
                         var result = res.body;
-                        expect(result.short_name).to.equal('WwwBamideasCom');
+                        expect(result.content.short_name).to.equal('WwwBamideasCom');
                     })
                     .end(done);
             });
@@ -111,7 +113,7 @@ describe('manifests',function(){
                     .send({ siteUrl: 'http://meteorite.azurewebsites.net' })
                     .expect(function(res){
                         var result = res.body;
-                        expect(result.name).to.equal('Web Application Template');
+                        expect(result.content.name).to.equal('Web Application Template');
                     })
                     .end(done);
             });
@@ -123,8 +125,17 @@ describe('manifests',function(){
                     .attach('file','test/fixtures/manifest.json')
                     .expect(function(res){
                         var result = res.body;
-                        expect(result.short_name).to.equal('THW');
+                        expect(result.content.short_name).to.equal('THW');
                     })
+                    .end(done);
+            });
+        });
+
+        describe('with a site that does not exist',function(){
+            it('should return a 422',function(done){
+                req.post('/manifests')
+                    .send({siteUrl: 'http://www.bamideasz.com'})
+                    .expect(422)
                     .end(done);
             });
         });
@@ -149,8 +160,12 @@ describe('manifests',function(){
                 manifestId = uuid.v4();
                 client.set(manifestId,JSON.stringify({
                     id: manifestId,
-                    name: 'Foo Web Enterprises, LLC.',
-                    short_name: 'Foo'
+                    format: 'w3c',
+                    content: {
+                        name: 'Foo Web Enterprises, LLC.',
+                        short_name: 'Foo',
+                        start_url: 'www.fwellc.com'
+                    }
                 }));
             });
 
@@ -160,7 +175,7 @@ describe('manifests',function(){
                 req.put('/manifests/'+manifestId)
                     .send({name: name})
                     .expect(function(res){
-                        expect(res.body.name).to.equal(name);
+                        expect(res.body.content.name).to.equal(name);
                     })
                     .end(done);
             });
@@ -179,6 +194,47 @@ describe('manifests',function(){
                         done();
                     });
             });
+
+            it('should include any suggestions returned from the validator',function(done){
+                req.put('/manifests/'+manifestId)
+                    .send({ name: 'Bar' })
+                    .expect(function(res){
+                        expect(res.body.suggestions.hap_urlAccess[0]).to.equal('It is recommended to specify a set of access rules that represent the navigation scope of the application');
+                    })
+                    .end(done);
+            });
+        });
+
+        describe('with invalid data',function(){
+            var manifestId;
+
+            beforeEach(function(){
+                manifestId = uuid.v4();
+                client.set(manifestId,JSON.stringify({
+                    id: manifestId,
+                    format: 'w3c',
+                    content: {
+                        name: 'Foo Web Enterprises, LLC.',
+                        short_name: 'Foo',
+                    }
+                }));
+            });
+
+            it('should return a 422',function(done){
+                req.put('/manifests/'+manifestId)
+                    .send({ name: 'Bar' })
+                    .expect(422)
+                    .end(done);
+            });
+
+            it('should return an errors response',function(done){
+                req.put('/manifests/'+manifestId)
+                    .send({ name: 'Bar' })
+                    .expect(function(res){
+                        expect(res.body.errors.start_url[0]).to.equal('The start URL for the target web site is required');
+                    })
+                    .end(done);
+            });
         });
 
         describe('without a manifest',function(){
@@ -188,6 +244,5 @@ describe('manifests',function(){
                     .end(done);
             });
         });
-
     });
 });
