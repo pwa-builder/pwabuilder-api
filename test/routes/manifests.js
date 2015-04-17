@@ -236,6 +236,5 @@ describe('manifests',function(){
                     .end(done);
             });
         });
-
     });
 });
