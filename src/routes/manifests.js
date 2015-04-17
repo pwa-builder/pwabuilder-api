@@ -10,8 +10,9 @@ var express = require('express'),
     fs = require('fs'),
     path = require('path'),
     rimraf = require('rimraf'),
+    archiver = require('archiver'),
     outputDir = path.join(__dirname, '../../tmp'),
-    platforms = ['windows', 'android', 'ios', 'chrome', 'firefox'];
+    platforms = ['android', 'ios', 'chrome', 'firefox'];
 
 function createManifest(manifestInfo,client,res){
     var manifest = _.assign(manifestInfo,{id: uuid.v4()});
@@ -147,8 +148,23 @@ module.exports = function(client){
                             return next(err);
                         }
 
-                        var files = fs.readdirSync(outputDir);
-                        res.json(files);
+                        var archive = archiver('zip'),
+                            zip = fs.createWriteStream(path.join(output,manifest.content.short_name+'.zip'));
+
+                        zip.on('close',function(){
+                            console.log(archive.pointer() + ' total bytes');
+                            console.log('archiver has been finalized and the output file descriptor has closed.');
+
+                            res.json({archive: 'success'});
+                        });
+
+                        archive.on('error',function(err){
+                            next(err);
+                        });
+
+                        archive.pipe(zip);
+
+                        archive.directory(path.join(output,manifest.content.short_name),'projects').finalize();
                     });
                 });
 
