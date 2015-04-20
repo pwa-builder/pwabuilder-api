@@ -65,16 +65,6 @@ function sendValidationErrors(errors, res){
     return res.status(422).json(errorRes);
 }
 
-function deleteDir(directory){
-    return Q.Promise(function(resolve, reject){
-        rimraf(directory, function(err){
-            if(err) { return reject(err); }
-
-            resolve();
-        });
-    });
-}
-
 function createProjects(manifest, outputDir, platforms, buildCordova){
     return Q.Promise(function(resolve, reject){
         console.log('Building the project',manifest,outputDir,platforms,buildCordova);
@@ -230,8 +220,7 @@ module.exports = function(client){
                     output = path.join(outputDir,manifest.id),
                     blobService = azure.createBlobService(config.azure.account_name,config.azure.access_key);
 
-                deleteDir(output)
-                    .then(function(){ return createProjects(manifest,output,platforms,false); })
+                createProjects(manifest,output,platforms,false)
                     .then(function(){ return createZip(output,manifest); })
                     .then(function(){ return createContainer(blobService, manifest); })
                     .then(function(){ return uploadZip(blobService,manifest,output); })
