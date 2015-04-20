@@ -1,0 +1,12 @@
+{
+    "redis": {
+        "host": "localhost",
+        "port": 6379,
+        "database": 0
+    },
+    "azure":{
+        "account_name": "manifolddev",
+        "access_key":"y4nxuSBfRtukWKATRZR7Ji3zx+6hEtAGUwKxUQmuUY7q94lp1NqO453nNbiX/tYg7xnPUSojXMY8lQ5xJqClmw=="
+    },
+    "platforms": ["windows", "android", "ios", "chrome", "firefox"]
+}

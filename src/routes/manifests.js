@@ -14,7 +14,8 @@ var express = require('express'),
     archiver = require('archiver'),
     azure = require('azure-storage'),
     outputDir = path.join(__dirname, '../../tmp'),
-    platforms = ['android', 'ios', 'chrome', 'firefox'];
+    config = require(path.join(__dirname,'../config')),
+    platforms = config.platforms;
 
 function createManifest(manifestInfo,client,res){
     var manifest = _.assign(manifestInfo,{id: uuid.v4()});
@@ -224,7 +225,7 @@ module.exports = function(client){
 
                 var manifest = JSON.parse(reply),
                     output = path.join(outputDir,manifest.id),
-                    blobService = azure.createBlobService('manifolddev','y4nxuSBfRtukWKATRZR7Ji3zx+6hEtAGUwKxUQmuUY7q94lp1NqO453nNbiX/tYg7xnPUSojXMY8lQ5xJqClmw==');
+                    blobService = azure.createBlobService(config.azure.account_name,config.azure.access_key);
 
                 deleteDir(output)
                     .then(function(){ return createProjects(manifest,output,platforms,false); })
