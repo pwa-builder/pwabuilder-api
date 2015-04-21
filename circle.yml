@@ -1,3 +1,6 @@
+test:
+    override:
+      - grunt
 deployment:
     staging:
         branch: 1.0.0
