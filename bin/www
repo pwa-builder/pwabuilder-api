@@ -8,7 +8,17 @@
 
 var Manifold = require('../src/app'),
     redis = require('redis'),
-    app = Manifold.init(redis.createClient()),
+    config = require('../src/config');
+
+var redisOptions = {};
+
+if(config.redis.password){
+    redisOptions.auth_pass = config.redis.password;
+}
+
+console.log('Connecting to Redis:',config.redis,redisOptions);
+
+var app = Manifold.init(redis.createClient(config.redis.port,config.redis.host,redisOptions)),
     debug = require('debug')('manifold-api:server'),
     http = require('http');
 
