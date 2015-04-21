@@ -7,11 +7,15 @@ var express = require('express'),
     manifold = require('manifoldjs'),
     manifestTools = manifold.manifestTools,
     projectBuilder = manifold.projectBuilder,
+    Q = require('q'),
     fs = require('fs'),
     path = require('path'),
     rimraf = require('rimraf'),
+    archiver = require('archiver'),
+    azure = require('azure-storage'),
     outputDir = path.join(__dirname, '../../tmp'),
-    platforms = ['windows', 'android', 'ios', 'chrome', 'firefox'];
+    config = require(path.join(__dirname,'../config')),
+    platforms = config.platforms;
 
 function createManifest(manifestInfo,client,res){
     var manifest = _.assign(manifestInfo,{id: uuid.v4()});
@@ -59,6 +63,82 @@ function sendValidationErrors(errors, res){
     });
 
     return res.status(422).json(errorRes);
+}
+
+function createProjects(manifest, outputDir, platforms, buildCordova){
+    return Q.Promise(function(resolve, reject){
+        console.log('Building the project',manifest,outputDir,platforms,buildCordova);
+        try{
+            projectBuilder.createApps(manifest, outputDir, platforms, buildCordova, function (err) {
+
+                if(err){
+                    return reject(err);
+                }
+
+                resolve();
+            });
+        }catch(e){
+            reject(e);
+        }
+    });
+}
+
+function createZip(output,manifest){
+    return Q.Promise(function(resolve,reject){
+        var archive = archiver('zip'),
+        zip = fs.createWriteStream(path.join(output,manifest.content.short_name+'.zip'));
+
+        zip.on('close',function(){
+            console.log(archive.pointer() + ' total bytes');
+            console.log('archiver has been finalized and the output file descriptor has closed.');
+
+            resolve();
+        });
+
+        archive.on('error',function(err){
+            reject(err);
+        });
+
+        archive.pipe(zip);
+
+        archive.directory(path.join(output,manifest.content.short_name),'projects').finalize();
+    });
+}
+
+function createContainer(blobService, manifest){
+    return Q.Promise(function(resolve,reject){
+        blobService.createContainerIfNotExists(manifest.id, {publicAccessLevel: 'blob'}, function(err) {
+            if(err){ return reject(err); }
+            return resolve();
+        });
+    });
+}
+
+function uploadZip(blobService, manifest, outputDir){
+    return Q.Promise(function(resolve,reject){
+        blobService.createBlockBlobFromLocalFile(manifest.id, manifest.content.short_name, path.join(outputDir,manifest.content.short_name+'.zip'), function(err){
+            if(err){ return reject(err); }
+            rimraf(outputDir,function(err){
+                if(err){ return reject(err); }
+                return resolve();
+            });
+        });
+    });
+}
+
+function getUrlForZip(blobService,manifest){
+    var container = manifest.id,
+    blob = manifest.content.short_name,
+    accessPolicy = {
+        AccessPolicy: {
+            Permissions: azure.BlobUtilities.SharedAccessPermissions.READ,
+            Start: new Date(),
+            Expiry: azure.date.minutesFromNow(60)
+        }
+    };
+
+    var sasToken = blobService.generateSharedAccessSignature(container, blob, accessPolicy);
+    return blobService.getUrl(container,blob,sasToken,true);
 }
 
 module.exports = function(client){
@@ -137,21 +217,18 @@ module.exports = function(client){
                 if(!reply) return res.status(404).send('NOT FOUND');
 
                 var manifest = JSON.parse(reply),
-                    output = path.join(outputDir,manifest.id);
+                    output = path.join(outputDir,manifest.id),
+                    blobService = azure.createBlobService(config.azure.account_name,config.azure.access_key);
 
-                rimraf(output,function(err){
-                    if(err){ return next(err); }
-
-                    projectBuilder.createApps(manifest, output, platforms, false, function (err) {
-                        if (err) {
-                            return next(err);
-                        }
-
-                        var files = fs.readdirSync(outputDir);
-                        res.json(files);
+                createProjects(manifest,output,platforms,false)
+                    .then(function(){ return createZip(output,manifest); })
+                    .then(function(){ return createContainer(blobService, manifest); })
+                    .then(function(){ return uploadZip(blobService,manifest,output); })
+                    .then(function(){ return getUrlForZip(blobService,manifest); })
+                    .then(function(url){ res.json({archive: url}); })
+                    .fail(function(error){
+                        return next(error);
                     });
-                });
-
             });
         });
 };
