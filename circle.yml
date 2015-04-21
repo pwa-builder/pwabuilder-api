@@ -1,6 +1,10 @@
 machine:
     node:
         version: 0.12.2
+dependencies:
+    override:
+        - npm install
+        - npm install grunt-cli -g
 test:
     override:
       - grunt
