@@ -11,5 +11,3 @@ deployment:
           - git remote add azure 'https://baminteractive:A7t@aQWVeDGrEWCX7V,>^Zw^pGf#xr[T@manifold-api-staging.scm.azurewebsites.net:443/manifold-api-staging.git' || true
           - git checkout -b deploy
           - git push --force azure deploy:master
-    production:
-        branch: master
