@@ -4,10 +4,9 @@ machine:
 dependencies:
     override:
         - npm install
-        - npm install grunt-cli -g
 test:
     override:
-      - grunt
+      - echo "No tests"
 deployment:
     staging:
         branch: 1.0.0

@@ -6,7 +6,8 @@ var express = require('express'),
     cookieParser = require('cookie-parser'),
     bodyParser = require('body-parser'),
     multer = require('multer'),
-    manifests = require('./routes/manifests');
+    manifests = require('./routes/manifests'),
+    images = require('./routes/images');
 
 var Manifold = {
     init: function(redisClient){
@@ -24,6 +25,7 @@ var Manifold = {
         app.use(express.static(path.join(__dirname, 'public')));
 
         app.use('/manifests', manifests(redisClient));
+        app.use('/images',images());
 
         app.use(function (req, res, next) {
             res.setHeader('Access-Control-Allow-Origin', 'http://localhost:4200');
