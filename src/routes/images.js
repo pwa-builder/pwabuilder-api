@@ -8,11 +8,17 @@ var express = require('express'),
 module.exports = function(){
     return router
         .post('/',function(req,res,next){
-            var stream = request(req.body.image.src);
+            var stream = request
+                .get(req.body.image.src)
+                .on('error',function(err){
+                    console.log(err);
+                    res.status(422).json({ error: err });
+                });
+
             imagesize(stream, function (err, result) {
                 if(err){ return next(err); }
 
-                res.json(result); // {type, width, height}
+                res.json({ meta: result }); // {type, width, height}
             });
         });
 };
