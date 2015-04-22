@@ -1,35 +1,17 @@
 'use strict';
+/* global req:true */
+/* global client:true */
+
+require('../util');
 
 var chai = require('chai'),
     expect = chai.expect,
-    request = require('supertest'),
-    redis = require('redis'),
-    fakeredis = require('fakeredis'),
     sinon = require('sinon'),
-    uuid = require('node-uuid'),
-    rimraf = require('rimraf'),
-    path = require('path'),
-    manifold = require('../../src/app');
+    uuid = require('node-uuid');
 
 describe('manifests',function(){
-    var client;
-
-    before(function(){
-        sinon.stub(redis,'createClient',fakeredis.createClient);
-        client = redis.createClient();
-    });
-
-    after(function(){
-        redis.createClient.restore();
-    });
-
     describe('show route',function(){
-        var req, manifestId;
-
-        before(function(){
-            var app = manifold.init(client);
-            req = request(app);
-        });
+        var manifestId;
 
         beforeEach(function(){
             manifestId = uuid.v4();
@@ -40,10 +22,6 @@ describe('manifests',function(){
                     short_name: 'Foo'
                 }
             }));
-        });
-
-        afterEach(function(done){
-            client.flushdb(done);
         });
 
         it('should find the manifest',function(done){
@@ -62,17 +40,6 @@ describe('manifests',function(){
     });
 
     describe('create route',function(){
-        var req;
-
-        before(function(){
-            var app = manifold.init(client);
-            req = request(app);
-        });
-
-        afterEach(function(done){
-            client.flushdb(done);
-        });
-
         describe('with a site with no manifest',function(){
             it('should return a json file with the start_url',function(done){
                 req.post('/manifests')
@@ -144,17 +111,6 @@ describe('manifests',function(){
     });
 
     describe('update route',function(){
-        var req;
-
-        before(function(){
-            var app = manifold.init(client);
-            req = request(app);
-        });
-
-        afterEach(function(done){
-            client.flushdb(done);
-        });
-
         describe('with an existing manifest',function(){
             var manifestId;
 
