@@ -11,6 +11,7 @@ var express = require('express'),
     fs = require('fs'),
     path = require('path'),
     rimraf = require('rimraf'),
+    wrench = require('wrench'),
     archiver = require('archiver'),
     azure = require('azure-storage'),
     outputDir = path.join(__dirname, '../../tmp'),
@@ -74,6 +75,8 @@ function createProjects(manifest, outputDir, platforms, buildCordova){
                 if(err){
                     return reject(err);
                 }
+
+                wrench.chmodSyncRecursive(outputDir,'0755');
 
                 return resolve();
             });
