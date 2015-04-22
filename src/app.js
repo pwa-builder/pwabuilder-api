@@ -24,9 +24,6 @@ var Manifold = {
         app.use(cookieParser());
         app.use(express.static(path.join(__dirname, 'public')));
 
-        app.use('/manifests', manifests(redisClient));
-        app.use('/images',images());
-
         app.use(function (req, res, next) {
             res.setHeader('Access-Control-Allow-Origin', 'http://localhost:4200');
             res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
@@ -34,6 +31,9 @@ var Manifold = {
             res.setHeader('Access-Control-Allow-Credentials', true);
             next();
         });
+
+        app.use('/manifests', manifests(redisClient));
+        app.use('/images',images());
 
         // catch 404 and forward to error handler
         app.use(function(req, res, next) {

@@ -5,7 +5,7 @@
     <databaseInfo>
         <version>134481920</version>
         <UUID>6EA1A6BB-BF2A-4FBF-8AD5-2C0504CFBBE6</UUID>
-        <nextObjectID>123</nextObjectID>
+        <nextObjectID>125</nextObjectID>
         <metadata>
             <plist version="1.0">
                 <dict>
@@ -175,7 +175,7 @@
         <attribute name="redirectauthorization" type="bool">0</attribute>
         <attribute name="method" type="string">POST</attribute>
         <attribute name="followredirects" type="bool">0</attribute>
-        <attribute name="order" type="int64">3</attribute>
+        <attribute name="order" type="int64">4</attribute>
         <attribute name="name" type="string">Build project</attribute>
         <relationship name="parent" type="0/1" destination="LMREQUESTTREEITEM" idrefs="z120"></relationship>
         <relationship name="children" type="0/0" destination="LMREQUESTTREEITEM"></relationship>
@@ -227,7 +227,7 @@
         <attribute name="order" type="int64">0</attribute>
         <attribute name="name" type="string">manifests</attribute>
         <relationship name="parent" type="0/1" destination="LMREQUESTTREEITEM"></relationship>
-        <relationship name="children" type="0/0" destination="LMREQUESTTREEITEM" idrefs="z107 z108 z112 z102"></relationship>
+        <relationship name="children" type="0/0" destination="LMREQUESTTREEITEM" idrefs="z107 z108 z112 z102 z124"></relationship>
         <relationship name="bodyparameters" type="0/0" destination="LMKEYVALUE"></relationship>
         <relationship name="headers" type="0/0" destination="LMKEYVALUE"></relationship>
         <relationship name="urlparameters" type="0/0" destination="LMKEYVALUE"></relationship>
@@ -267,5 +267,30 @@
         <relationship name="groupforheaders" type="0/1" destination="LMREQUESTGROUP"></relationship>
         <relationship name="groupforurlparameters" type="0/1" destination="LMREQUESTGROUP"></relationship>
         <relationship name="request" type="0/1" destination="LMREQUEST" idrefs="z122"></relationship>
+    </object>
+    <object type="LMREQUEST" id="z124">
+        <attribute name="uuid" type="string">C8F0E9D1-50DE-49C0-928C-32DBD9EF2F20</attribute>
+        <attribute name="url" type="string">["http:\\/\\/",{"data":{"environmentVariable":"86D75205-6B00-4E18-8580-CB1094D18F62"},"identifier":"com.luckymarmot.EnvironmentVariableDynamicValue"},":",{"data":{"environmentVariable":"BA35653F-EDE5-4DE4-A95E-5CFBB6D6A388"},"identifier":"com.luckymarmot.EnvironmentVariableDynamicValue"},"\\/manifests\\/6dee33e0-20a3-4c31-9f6e-4f003c2bae14"]</attribute>
+        <attribute name="storecookies" type="bool">1</attribute>
+        <attribute name="sendcookies" type="bool">1</attribute>
+        <attribute name="redirectmethod" type="bool">0</attribute>
+        <attribute name="redirectauthorization" type="bool">0</attribute>
+        <attribute name="method" type="string">GET</attribute>
+        <attribute name="followredirects" type="bool">0</attribute>
+        <attribute name="order" type="int64">3</attribute>
+        <attribute name="name" type="string">Get Existing Manifest Duplicate</attribute>
+        <relationship name="parent" type="0/1" destination="LMREQUESTTREEITEM" idrefs="z120"></relationship>
+        <relationship name="children" type="0/0" destination="LMREQUESTTREEITEM"></relationship>
+        <relationship name="headers" type="0/0" destination="LMKEYVALUE" idrefs="z125"></relationship>
+    </object>
+    <object type="LMKEYVALUE" id="z125">
+        <attribute name="value" type="string"></attribute>
+        <attribute name="order" type="int64">0</attribute>
+        <attribute name="name" type="string"></attribute>
+        <attribute name="enabled" type="bool">1</attribute>
+        <relationship name="groupforbodyparameters" type="0/1" destination="LMREQUESTGROUP"></relationship>
+        <relationship name="groupforheaders" type="0/1" destination="LMREQUESTGROUP"></relationship>
+        <relationship name="groupforurlparameters" type="0/1" destination="LMREQUESTGROUP"></relationship>
+        <relationship name="request" type="0/1" destination="LMREQUEST" idrefs="z124"></relationship>
     </object>
 </database>
