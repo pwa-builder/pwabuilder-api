@@ -11,7 +11,7 @@ var express = require('express'),
     fs = require('fs'),
     path = require('path'),
     rimraf = require('rimraf'),
-    wrench = require('wrench'),
+    //wrench = require('wrench'),
     archiver = require('archiver'),
     azure = require('azure-storage'),
     outputDir = path.join(__dirname, '../../tmp'),
@@ -76,8 +76,6 @@ function createProjects(manifest, outputDir, platforms, buildCordova){
                     return reject(err);
                 }
 
-                wrench.chmodSyncRecursive(outputDir,'0755');
-
                 return resolve();
             });
         }catch(e){
@@ -121,11 +119,10 @@ function uploadZip(blobService, manifest, outputDir){
     return Q.Promise(function(resolve,reject){
         blobService.createBlockBlobFromLocalFile(manifest.id, manifest.content.short_name, path.join(outputDir,manifest.content.short_name+'.zip'), function(err){
             if(err){ return reject(err); }
-            //rimraf(outputDir,{ maxBusyTries: 20 },function(err){
-                //if(err){ return reject(err); }
-                //return resolve();
-            //});
-            return resolve();
+            rimraf(outputDir,{ maxBusyTries: 20 },function(err){
+                if(err){ return reject(err); }
+                return resolve();
+            });
         });
     });
 }
