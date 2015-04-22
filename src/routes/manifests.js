@@ -118,10 +118,11 @@ function uploadZip(blobService, manifest, outputDir){
     return Q.Promise(function(resolve,reject){
         blobService.createBlockBlobFromLocalFile(manifest.id, manifest.content.short_name, path.join(outputDir,manifest.content.short_name+'.zip'), function(err){
             if(err){ return reject(err); }
-            rimraf(outputDir,{ maxBusyTries: 20 },function(err){
-                if(err){ return reject(err); }
-                return resolve();
-            });
+            //rimraf(outputDir,{ maxBusyTries: 20 },function(err){
+                //if(err){ return reject(err); }
+                //return resolve();
+            //});
+            return resolve();
         });
     });
 }
