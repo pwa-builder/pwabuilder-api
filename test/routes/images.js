@@ -5,6 +5,7 @@ require('../util');
 
 describe('images route',function(){
     describe('getting meta for an image',function(){
+        this.timeout(5000);
         it('should get the width, height, and type',function(done){
             req.post('/images')
                 .send({image:{src: 'https://dl.dropboxusercontent.com/u/1802855/BXH4wm4CEAAAdEO.jpg-large.jpeg'}})
