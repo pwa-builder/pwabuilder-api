@@ -14,9 +14,13 @@ var express = require('express'),
     //wrench = require('wrench'),
     archiver = require('archiver'),
     azure = require('azure-storage'),
+    log = require('loglevel'),
     outputDir = path.join(__dirname, '../../tmp'),
     config = require(path.join(__dirname,'../config')),
     platforms = config.platforms;
+
+global.logLevel = 'debug';
+log.setLevel(global.logLevel);
 
 function createManifest(manifestInfo,client,res){
     var manifest = _.assign(manifestInfo,{id: uuid.v4()});

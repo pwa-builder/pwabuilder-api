@@ -15,6 +15,7 @@
     "imagesize": "^1.0.0",
     "jade": "~1.9.2",
     "lodash": "^3.6.0",
+    "loglevel": "^1.2.0",
     "manifoldjs": "git://github.com/manifoldjs/ManifoldJS.git",
     "morgan": "~1.5.1",
     "multer": "^0.1.8",
