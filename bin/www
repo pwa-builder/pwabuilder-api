@@ -16,7 +16,7 @@ if(config.redis.password){
     redisOptions.auth_pass = config.redis.password;
 }
 
-console.log('Connecting to Redis:',config.redis,redisOptions);
+console.log('Connecting to Redis...');
 
 var app = Manifold.init(redis.createClient(config.redis.port,config.redis.host,redisOptions)),
     debug = require('debug')('manifold-api:server'),

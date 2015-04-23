@@ -70,26 +70,40 @@ function sendValidationErrors(errors, res){
     return res.status(422).json(errorRes);
 }
 
+function normalizeStartUrl(manifest){
+    return Q.Promise(function(resolve,reject){
+        console.log('Validating start url...');
+        manifestTools.validateAndNormalizeStartUrl(manifest.content.start_url,manifest,function(err,normManifest){
+            if(err){
+                console.log('Normalizing Error',err);
+                return reject(err);
+            }
+
+            manifest = _.assign(manifest,normManifest);
+
+            resolve(manifest);
+        });
+    });
+}
+
 function createProjects(manifest, outputDir, platforms, buildCordova){
     return Q.Promise(function(resolve, reject){
-        console.log('Building the project',manifest,outputDir,platforms,buildCordova);
-        try{
-            projectBuilder.createApps(manifest, outputDir, platforms, buildCordova, function (err) {
+        console.log('Building the project...',manifest,outputDir,platforms,buildCordova);
+        projectBuilder.createApps(manifest, outputDir, platforms, buildCordova, function (err) {
 
-                if(err){
-                    return reject(err);
-                }
+            if(err){
+                console.log('Create Projects Errors!!!',err);
+                return reject(err);
+            }
 
-                return resolve();
-            });
-        }catch(e){
-            reject(e);
-        }
+            return resolve();
+        });
     });
 }
 
 function createZip(output,manifest){
     return Q.Promise(function(resolve,reject){
+        console.log('Creating zip archive...');
         var archive = archiver('zip'),
         zip = fs.createWriteStream(path.join(output,manifest.content.short_name+'.zip'));
 
@@ -112,6 +126,7 @@ function createZip(output,manifest){
 
 function createContainer(blobService, manifest){
     return Q.Promise(function(resolve,reject){
+        console.log('Creating storage container...');
         blobService.createContainerIfNotExists(manifest.id, {publicAccessLevel: 'blob'}, function(err) {
             if(err){ return reject(err); }
             return resolve();
@@ -121,8 +136,10 @@ function createContainer(blobService, manifest){
 
 function uploadZip(blobService, manifest, outputDir){
     return Q.Promise(function(resolve,reject){
+        console.log('Uploading zip...');
         blobService.createBlockBlobFromLocalFile(manifest.id, manifest.content.short_name, path.join(outputDir,manifest.content.short_name+'.zip'), function(err){
             if(err){ return reject(err); }
+            console.log('Deleting output directory...');
             rimraf(outputDir,{ maxBusyTries: 20 },function(err){
                 if(err){ return reject(err); }
                 return resolve();
@@ -225,7 +242,11 @@ module.exports = function(client){
                     output = path.join(outputDir,manifest.id),
                     blobService = azure.createBlobService(config.azure.account_name,config.azure.access_key);
 
-                createProjects(manifest,output,platforms,false)
+                normalizeStartUrl(manifest)
+                    .then(function(normManifest){
+                        manifest = normManifest;
+                        return createProjects(manifest,output,platforms,false);
+                    })
                     .then(function(){ return createZip(output,manifest); })
                     .then(function(){ return createContainer(blobService, manifest); })
                     .then(function(){ return uploadZip(blobService,manifest,output); })
