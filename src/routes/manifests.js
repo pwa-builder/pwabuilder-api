@@ -88,8 +88,9 @@ function normalizeStartUrl(manifest){
 
 function createProjects(manifest, outputDir, platforms, buildCordova){
     return Q.Promise(function(resolve, reject){
-        console.log('Building the project...',manifest,outputDir,platforms,buildCordova);
-        projectBuilder.createApps(manifest, outputDir, platforms, buildCordova, function (err) {
+        var cleanManifest = _.omit(manifest,'id');
+        console.log('Building the project...',cleanManifest,outputDir,platforms,buildCordova);
+        projectBuilder.createApps(cleanManifest, outputDir, platforms, buildCordova, function (err) {
 
             if(err){
                 console.log('Create Projects Errors!!!',err);
