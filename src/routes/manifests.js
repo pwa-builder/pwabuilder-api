@@ -23,7 +23,7 @@ global.logLevel = 'debug';
 log.setLevel(global.logLevel);
 
 function createManifest(manifestInfo,client,res){
-    var manifest = _.assign(manifestInfo,{id: uuid.v4()});
+    var manifest = _.assign(manifestInfo,{ id: uuid.v4().slice(0,8) });
     client.set(manifest.id,JSON.stringify(manifest));
 
     res.json(manifest);
