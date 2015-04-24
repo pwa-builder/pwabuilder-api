@@ -76,7 +76,7 @@ Storage.prototype.getUrlForZip = function(manifest){
         AccessPolicy: {
             Permissions: azure.BlobUtilities.SharedAccessPermissions.READ,
             Start: new Date(),
-            Expiry: azure.date.minutesFromNow(60)
+            Expiry: azure.date.daysFromNow(7)
         }
     };
 
