@@ -1,7 +1,7 @@
 'use strict';
 /* global req:true */
 
-require('../util');
+require('./util');
 
 describe('images route',function(){
     describe('getting meta for an image',function(){

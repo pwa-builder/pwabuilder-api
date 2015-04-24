@@ -10,7 +10,7 @@ var express = require('express'),
     images = require('./routes/images');
 
 var Manifold = {
-    init: function(redisClient){
+    init: function(redisClient, azure, manifold){
         var app = express();
 
         // view engine setup
@@ -33,7 +33,7 @@ var Manifold = {
             next();
         });
 
-        app.use('/manifests', manifests(redisClient));
+        app.use('/manifests', manifests(redisClient,azure,manifold));
         app.use('/images',images());
 
         // catch 404 and forward to error handler
