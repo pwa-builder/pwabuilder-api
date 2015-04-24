@@ -71,7 +71,7 @@ Storage.prototype.removeDir = function(outputDir){
 
 Storage.prototype.getUrlForZip = function(manifest){
     var container = manifest.id,
-    blob = manifest.content.short_name,
+    blob = manifest.content.short_name + '.zip',
     accessPolicy = {
         AccessPolicy: {
             Permissions: azure.BlobUtilities.SharedAccessPermissions.READ,
