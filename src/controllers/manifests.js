@@ -37,7 +37,7 @@ exports.create = function(client, storage, manifold){
                         res.json(manifest);
                     })
                     .fail(function(err){
-                        next(err);
+                        return next(err);
                     });
             }else{
                 next(new Error('No url or manifest provided'));
