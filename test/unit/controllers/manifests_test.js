@@ -56,7 +56,7 @@ describe('manifests controller',function(){
                         resolve(manifest);
                     });
                 },
-                createProjects: function(){
+                createProject: function(){
                     return Q.Promise(function(resolve){
                         resolve();
                     });

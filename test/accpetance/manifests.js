@@ -231,7 +231,6 @@ describe('manifests',function(){
                 var fakeManifold = function(){
                     return {
                         normalize: function(){
-                            console.log('Fake normalize called');
                             return Q.Promise(function(resolve){
                                 resolve(_.assign(manifest,{ content: { start_url: 'http://www.bamideas.com' }}));
                             });
@@ -240,7 +239,6 @@ describe('manifests',function(){
                 };
 
                 sinon.stub(azure,'createBlobService').returns(fakeBlobService);
-                console.log('Manifold',Manifold);
                 sinon.stub(Manifold,'create',fakeManifold);
             });
 
@@ -250,12 +248,7 @@ describe('manifests',function(){
             });
 
             it('should create a zip archive of the projects');
-            it('should return true if the archive was created',function(done){
-                req.post('/manifests/'+manifestId+'/build')
-                    .expect(200)
-                    .expect({archive: true})
-                    .end(done);
-            });
+            it('should return true if the archive was created');
             it('should upload the archive to azure storage');
 
             afterEach(function(){
