@@ -7,7 +7,7 @@ dependencies:
         - npm install grunt-cli -g
 test:
     override:
-      - grunt
+      - grunt ci
 deployment:
     staging:
         branch: 1.0.0
