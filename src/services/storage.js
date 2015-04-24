@@ -51,7 +51,7 @@ Storage.prototype.uploadZip = function(manifest, outputDir){
 
     return Q.Promise(function(resolve,reject){
         console.log('Uploading zip...');
-        self.blobService.createBlockBlobFromLocalFile(manifest.id, manifest.content.short_name, path.join(outputDir,manifest.content.short_name+'.zip'), function(err){
+        self.blobService.createBlockBlobFromLocalFile(manifest.id, manifest.content.short_name + '.zip', path.join(outputDir,manifest.content.short_name+'.zip'),{ contentType: 'application/zip' }, function(err){
             if(err){ return reject(err); }
             return resolve();
         });
