@@ -72,6 +72,7 @@ exports.create = function(client, storage, manifold){
                     .then(function(){ return storage.createZip(output,manifest); })
                     .then(function(){ return storage.createContainer(manifest); })
                     .then(function(){ return storage.uploadZip(manifest,output); })
+                    .then(function(){ return storage.removeDir(output); })
                     .then(function(){ return storage.getUrlForZip(manifest); })
                     .then(function(url){ res.json({archive: url}); })
                     .fail(function(error){

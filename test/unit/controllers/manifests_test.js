@@ -48,6 +48,11 @@ describe('manifests controller',function(){
                         resolve('http://storage.azure.net/site.zip');
                     });
                 },
+                removeDir: function(){
+                    return Q.Promise(function(resolve){
+                        resolve();
+                    });
+                },
             };
 
             fakeManifoldLib = {
