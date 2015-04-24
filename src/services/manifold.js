@@ -14,8 +14,6 @@ function Manifold(manifoldLib){
 Manifold.prototype.createManifestFromUrl = function(url,client){
     var self = this;
 
-    console.log('Manifold',self.lib);
-
     return Q.Promise(function(resolve,reject){
         self.lib.manifestTools.getManifestFromSite(url, function(err, manifestInfo) {
             if (err) { return reject(err); }

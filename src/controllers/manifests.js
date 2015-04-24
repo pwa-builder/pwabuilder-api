@@ -67,7 +67,6 @@ exports.create = function(client, storage, manifold){
                 manifold.normalize(manifest)
                     .then(function(normManifest){
                         manifest = normManifest;
-                        console.log('Normalized Manifest',manifest);
                         return manifold.createProject(manifest,output,platforms,false);
                     })
                     .then(function(){ return storage.createZip(output,manifest); })
