@@ -31,12 +31,15 @@
     "chai": "^2.2.0",
     "fakeredis": "^0.3.1",
     "grunt": "^0.4.5",
+    "grunt-contrib-copy": "^0.8.0",
     "grunt-contrib-jshint": "^0.11.1",
     "grunt-contrib-qunit": "^0.7.0",
     "grunt-contrib-watch": "^0.6.1",
     "grunt-mocha-test": "^0.12.7",
     "istanbul": "^0.3.13",
     "mocha": "^2.2.4",
+    "mocha-junit-reporter": "^1.1.0",
+    "proxyquire": "^1.4.0",
     "sinon": "^1.14.1",
     "supertest": "^0.15.0"
   }
