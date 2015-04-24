@@ -15,6 +15,7 @@ Storage.prototype.createZip = function(output, manifest){
     return Q.Promise(function(resolve,reject){
         console.log('Creating zip archive...');
         var archive = archiver('zip'),
+
         zip = fs.createWriteStream(path.join(output,manifest.content.short_name+'.zip'));
 
         zip.on('close',function(){
@@ -30,7 +31,7 @@ Storage.prototype.createZip = function(output, manifest){
 
         archive.pipe(zip);
 
-        archive.directory(path.join(output,manifest.content.short_name),'projects').finalize();
+        archive.directory(path.join(output,manifest.content.short_name),'projects',{ mode: '0755' }).finalize();
     });
 };
 
