@@ -53,6 +53,9 @@ describe('manifests controller',function(){
                         resolve();
                     });
                 },
+                setPermissions: function(){
+                    return;
+                }
             };
 
             fakeManifoldLib = {
