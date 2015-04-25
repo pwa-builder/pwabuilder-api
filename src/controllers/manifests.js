@@ -69,6 +69,7 @@ exports.create = function(client, storage, manifold){
                         manifest = normManifest;
                         return manifold.createProject(manifest,output,platforms,false);
                     })
+                    .then(function(){ return storage.setPermissions(output); })
                     .then(function(){ return storage.createZip(output,manifest); })
                     .then(function(){ return storage.createContainer(manifest); })
                     .then(function(){ return storage.uploadZip(manifest,output); })

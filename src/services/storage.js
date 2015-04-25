@@ -4,6 +4,7 @@ var archiver = require('archiver'),
     fs = require('fs'),
     path = require('path'),
     rimraf = require('rimraf'),
+    wrench = require('wrench'),
     azure = require('azure-storage'),
     Q = require('q');
 
@@ -57,6 +58,11 @@ Storage.prototype.uploadZip = function(manifest, outputDir){
             return resolve();
         });
     });
+};
+
+Storage.prototype.setPermissions = function(outputDir){
+    console.log('Setting permissions on',outputDir,'...');
+    wrench.chmodSyncRecursive(outputDir, '0755');
 };
 
 Storage.prototype.removeDir = function(outputDir){
