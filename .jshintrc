@@ -18,6 +18,7 @@
     "trailing": true, // Prohibit trailing whitespaces.
     "smarttabs": false, // Suppresses warnings about mixed tabs and spaces
     "globals": { // Globals variables.
+        "angular": true
     },
     "predef": [ // Extra globals.
         "define",
@@ -31,6 +32,7 @@
         "afterEach",
         "it",
         "inject",
+        "expect",
         "spyOn"
     ],
     "indent": 4, // Specify indentation spacing
