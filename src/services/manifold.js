@@ -108,45 +108,71 @@ Manifold.prototype.createProject = function(manifest,outputDir,platforms,buildCo
 };
 
 Manifold.prototype.assignValidationErrors = function(errors,manifest){
-    var error = { errors: {}};
+    var data = { errors: []};
 
-    _.each(errors,function(s){
-        if(error.errors[s.member]){
-            error.errors[s.member].push(s.description);
+    _.each(errors,function(e){
+        if(_.any(data.errors,'member',e.member)){
+            var error = _.find(data.errors,{ memeber: e.member });
+            error.issues.push({ description: e.description, platform: e.platform, code: e.code });
         }else{
-            error.errors[s.member] = [s.description];
+            data.errors.push({
+                member: e.member,
+                issues: [{
+                    description: e.description,
+                    platform: e.platform,
+                    code: e.code
+                }]
+            });
         }
     });
 
-    manifest = _.assign(manifest,error);
+    manifest = _.assign(manifest,data);
 };
 
 Manifold.prototype.assignSuggestions = function(suggestions,manifest){
-    var suggestion = { suggestions: {}};
+    var data = { suggestions: []};
 
     _.each(suggestions,function(s){
-        if(suggestion.suggestions[s.member]){
-            suggestion.suggestions[s.member].push(s.description);
+        if(_.any(data.suggestions,'member',s.member)){
+            var suggestion = _.find(data.suggestions,'member',s.member);
+            suggestion.issues = suggestion.issues || [];
+            suggestion.issues.push({ description: s.description, platform: s.platform, code: s.code });
         }else{
-            suggestion.suggestions[s.member] = [s.description];
+            data.suggestions.push({
+                member: s.member,
+                issues: [{
+                    description: s.description,
+                    platform: s.platform,
+                    code: s.code
+                }]
+            });
         }
     });
 
-    manifest = _.assign(manifest,suggestion);
+    manifest = _.assign(manifest,data);
 };
 
 Manifold.prototype.assignWarnings = function(warnings,manifest){
-    var warning = { warnings: {}};
+    var data = { warnings: []};
 
     _.each(warnings,function(w){
-        if(warning.warnings[w.member]){
-            warning.warnings[w.member].push(w.description);
+        if(_.any(data.warnings,'member',w.member)){
+            var warning = _.find(data.warnings,'member',w.member);
+            warning.issues = warning.issues || [];
+            warning.issues.push({ description: w.description, platform: w.platform, code: w.code });
         }else{
-            warning.warnings[w.member] = [w.description];
+            data.warnings.push({
+                member: w.member,
+                issues: [{
+                    description: w.description,
+                    platform: w.platform,
+                    code: w.code
+                }]
+            });
         }
     });
 
-    manifest = _.assign(manifest,warning);
+    manifest = _.assign(manifest,data);
 };
 
 exports.create = function(manifoldLib){
