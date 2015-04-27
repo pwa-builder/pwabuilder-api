@@ -8,6 +8,7 @@
 
 var Manifold = require('../src/app'),
     redis = require('redis'),
+    azure = require('azure-storage'),
     config = require('../src/config');
 
 var redisOptions = {};
@@ -16,9 +17,9 @@ if(config.redis.password){
     redisOptions.auth_pass = config.redis.password;
 }
 
-console.log('Connecting to Redis:',config.redis,redisOptions);
+console.log('Connecting to Redis...');
 
-var app = Manifold.init(redis.createClient(config.redis.port,config.redis.host,redisOptions)),
+var app = Manifold.init(redis.createClient(config.redis.port,config.redis.host,redisOptions), azure.createBlobService(config.azure.account_name,config.azure.access_key),require('manifoldjs')),
     debug = require('debug')('manifold-api:server'),
     http = require('http');
 
