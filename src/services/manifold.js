@@ -50,7 +50,7 @@ Manifold.prototype.updateManifest = function(manifestId,updates,client) {
             if(!reply) return reject(new Error('Manifest not found'));
 
             var manifest = JSON.parse(reply);
-            manifest.content = _.assign(manifest.content,updates);
+            manifest.content = updates;
 
             self.lib.manifestTools.validateManifest(manifest, platforms, function(err,results){
                 if(err){ return reject(err); }
