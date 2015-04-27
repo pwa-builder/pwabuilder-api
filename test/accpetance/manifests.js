@@ -142,6 +142,17 @@ describe('manifests',function(){
                     .end(done);
             });
 
+            it('should remove any fields that no longer exist',function(done){
+                var name = 'Bar Interwebs Associates, Inc.';
+
+                req.put('/manifests/'+manifestId)
+                    .send({name: name, start_url: 'www.fwellc.com'})
+                    .expect(function(res){
+                        expect(res.body.content.short_name).to.equal(undefined);
+                    })
+                    .end(done);
+            });
+
             it('should save the manifest to redis',function(done){
                 sinon.spy(client,'set');
 
