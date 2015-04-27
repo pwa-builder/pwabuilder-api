@@ -161,7 +161,16 @@ describe('manifests',function(){
                 req.put('/manifests/'+manifestId)
                     .send({ name: 'Suggestions' })
                     .expect(function(res){
-                        expect(res.body.suggestions.icons[0]).to.equal('a 48x48 icon should be provided for the extensions management page (chrome://extensions)');
+                        expect(res.body.suggestions[0].issues[0].description).to.equal('a 48x48 icon should be provided for the extensions management page (chrome://extensions)');
+                    })
+                    .end(done);
+            });
+
+            it('should include any warnings returned from the validator',function(done){
+                req.put('/manifests/'+manifestId)
+                    .send({ name: 'Warnings' })
+                    .expect(function(res){
+                        expect(res.body.warnings[0].issues[0].description).to.equal('launcher icons of the following sizes are required: 48x48, 72x72, 96x96, 144x144, 192x192, 512x512');
                     })
                     .end(done);
             });
@@ -193,7 +202,7 @@ describe('manifests',function(){
                 req.put('/manifests/'+manifestId)
                     .send({ name: 'Errors' })
                     .expect(function(res){
-                        expect(res.body.errors.start_url[0]).to.equal('The start URL for the target web site is required');
+                        expect(res.body.errors[0].issues[0].description).to.equal('The start URL for the target web site is required');
                     })
                     .end(done);
             });
