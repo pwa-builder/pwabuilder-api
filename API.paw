@@ -5,7 +5,7 @@
     <databaseInfo>
         <version>134481920</version>
         <UUID>6EA1A6BB-BF2A-4FBF-8AD5-2C0504CFBBE6</UUID>
-        <nextObjectID>127</nextObjectID>
+        <nextObjectID>129</nextObjectID>
         <metadata>
             <plist version="1.0">
                 <dict>
@@ -69,7 +69,7 @@
         <attribute name="redirectauthorization" type="bool">0</attribute>
         <attribute name="method" type="string">POST</attribute>
         <attribute name="followredirects" type="bool">0</attribute>
-        <attribute name="body" type="string">[{"data":{"json":"{\\"siteUrl\\":\\"http:\\\\\\/\\\\\\/www.bamideas.com\\"}"},"identifier":"com.luckymarmot.JSONDynamicValue"}]</attribute>
+        <attribute name="body" type="string">[{"data":{"json":"{\\"siteUrl\\":\\"asf\\"}"},"identifier":"com.luckymarmot.JSONDynamicValue"}]</attribute>
         <attribute name="order" type="int64">0</attribute>
         <attribute name="name" type="string">Create Manifest</attribute>
         <relationship name="parent" type="0/1" destination="LMREQUESTTREEITEM" idrefs="z120"></relationship>
@@ -114,7 +114,7 @@
         <attribute name="redirectauthorization" type="bool">0</attribute>
         <attribute name="method" type="string">GET</attribute>
         <attribute name="followredirects" type="bool">0</attribute>
-        <attribute name="order" type="int64">3</attribute>
+        <attribute name="order" type="int64">4</attribute>
         <attribute name="name" type="string">Get Existing Manifest</attribute>
         <relationship name="parent" type="0/1" destination="LMREQUESTTREEITEM" idrefs="z120"></relationship>
         <relationship name="children" type="0/0" destination="LMREQUESTTREEITEM"></relationship>
@@ -130,7 +130,7 @@
         <attribute name="method" type="string">PUT</attribute>
         <attribute name="followredirects" type="bool">0</attribute>
         <attribute name="body" type="string">["{\\n  \\"name\\": \\"This Here Web\\",\\n  \\"short_name\\": \\"THW\\",\\n  \\"start_url\\": \\"http:\\/\\/www.foo.com\\"\\n}"]</attribute>
-        <attribute name="order" type="int64">1</attribute>
+        <attribute name="order" type="int64">2</attribute>
         <attribute name="name" type="string">Update Manifest</attribute>
         <relationship name="parent" type="0/1" destination="LMREQUESTTREEITEM" idrefs="z120"></relationship>
         <relationship name="children" type="0/0" destination="LMREQUESTTREEITEM"></relationship>
@@ -175,7 +175,7 @@
         <attribute name="redirectauthorization" type="bool">0</attribute>
         <attribute name="method" type="string">POST</attribute>
         <attribute name="followredirects" type="bool">0</attribute>
-        <attribute name="order" type="int64">5</attribute>
+        <attribute name="order" type="int64">6</attribute>
         <attribute name="name" type="string">Build project</attribute>
         <relationship name="parent" type="0/1" destination="LMREQUESTTREEITEM" idrefs="z120"></relationship>
         <relationship name="children" type="0/0" destination="LMREQUESTTREEITEM"></relationship>
@@ -227,7 +227,7 @@
         <attribute name="order" type="int64">0</attribute>
         <attribute name="name" type="string">manifests</attribute>
         <relationship name="parent" type="0/1" destination="LMREQUESTTREEITEM"></relationship>
-        <relationship name="children" type="0/0" destination="LMREQUESTTREEITEM" idrefs="z126 z112 z108 z107 z102 z124"></relationship>
+        <relationship name="children" type="0/0" destination="LMREQUESTTREEITEM" idrefs="z107 z124 z126 z108 z129 z102 z112"></relationship>
         <relationship name="bodyparameters" type="0/0" destination="LMKEYVALUE"></relationship>
         <relationship name="headers" type="0/0" destination="LMKEYVALUE"></relationship>
         <relationship name="urlparameters" type="0/0" destination="LMKEYVALUE"></relationship>
@@ -277,7 +277,7 @@
         <attribute name="redirectauthorization" type="bool">0</attribute>
         <attribute name="method" type="string">GET</attribute>
         <attribute name="followredirects" type="bool">0</attribute>
-        <attribute name="order" type="int64">4</attribute>
+        <attribute name="order" type="int64">5</attribute>
         <attribute name="name" type="string">Get Existing Manifest Duplicate</attribute>
         <relationship name="parent" type="0/1" destination="LMREQUESTTREEITEM" idrefs="z120"></relationship>
         <relationship name="children" type="0/0" destination="LMREQUESTTREEITEM"></relationship>
@@ -303,7 +303,7 @@
         <attribute name="method" type="string">PUT</attribute>
         <attribute name="followredirects" type="bool">0</attribute>
         <attribute name="body" type="string">[{"data":{"json":"{\\"name\\":\\"This Here Web\\",\\"start_url\\":\\"http:\\\\\\/\\\\\\/www.foo.com\\"}"},"identifier":"com.luckymarmot.JSONDynamicValue"}]</attribute>
-        <attribute name="order" type="int64">2</attribute>
+        <attribute name="order" type="int64">3</attribute>
         <attribute name="name" type="string">Remove Field</attribute>
         <relationship name="parent" type="0/1" destination="LMREQUESTTREEITEM" idrefs="z120"></relationship>
         <relationship name="children" type="0/0" destination="LMREQUESTTREEITEM"></relationship>
@@ -318,5 +318,31 @@
         <relationship name="groupforheaders" type="0/1" destination="LMREQUESTGROUP"></relationship>
         <relationship name="groupforurlparameters" type="0/1" destination="LMREQUESTGROUP"></relationship>
         <relationship name="request" type="0/1" destination="LMREQUEST" idrefs="z126"></relationship>
+    </object>
+    <object type="LMKEYVALUE" id="z128">
+        <attribute name="value" type="string"></attribute>
+        <attribute name="order" type="int64">0</attribute>
+        <attribute name="name" type="string"></attribute>
+        <attribute name="enabled" type="bool">1</attribute>
+        <relationship name="groupforbodyparameters" type="0/1" destination="LMREQUESTGROUP"></relationship>
+        <relationship name="groupforheaders" type="0/1" destination="LMREQUESTGROUP"></relationship>
+        <relationship name="groupforurlparameters" type="0/1" destination="LMREQUESTGROUP"></relationship>
+        <relationship name="request" type="0/1" destination="LMREQUEST" idrefs="z129"></relationship>
+    </object>
+    <object type="LMREQUEST" id="z129">
+        <attribute name="uuid" type="string">538B249B-1D04-4337-8A1A-545071CC9157</attribute>
+        <attribute name="url" type="string">["http:\\/\\/",{"data":{"environmentVariable":"86D75205-6B00-4E18-8580-CB1094D18F62"},"identifier":"com.luckymarmot.EnvironmentVariableDynamicValue"},":",{"data":{"environmentVariable":"BA35653F-EDE5-4DE4-A95E-5CFBB6D6A388"},"identifier":"com.luckymarmot.EnvironmentVariableDynamicValue"},"\\/manifests\\/"]</attribute>
+        <attribute name="storecookies" type="bool">1</attribute>
+        <attribute name="sendcookies" type="bool">1</attribute>
+        <attribute name="redirectmethod" type="bool">0</attribute>
+        <attribute name="redirectauthorization" type="bool">0</attribute>
+        <attribute name="method" type="string">POST</attribute>
+        <attribute name="followredirects" type="bool">0</attribute>
+        <attribute name="body" type="string">[{"data":{"keyValues":[["file","[{\\"data\\":{\\"bookmarkData\\":\\"Ym9vazgDAAAAAAQQMAAAADcvPT0SdcxkYZgqShXrcQWh5DqodOVxaQI0MZ4hPK0GNAIAAAQAAAADAwAAABgAKAUAAAABAQAAVXNlcnMAAAAPAAAAAQEAAHJ5YW5iaWxsaW5nc2xleQADAAAAAQEAAERldgAMAAAAAQEAAG1hbmlmb2xkLWFwaQQAAAABAQAAdGVzdAgAAAABAQAAZml4dHVyZXMNAAAAAQEAAG1hbmlmZXN0Lmpzb24AAAAcAAAAAQYAABAAAAAgAAAAOAAAAEQAAABYAAAAZAAAAHQAAAAIAAAABAMAANYQAgAAAAAACAAAAAQDAADt\\\\\\/AQAAAAAAAgAAAAEAwAA+2oFAAAAAAAIAAAABAMAAGxCnQUAAAAACAAAAAQDAAAnSbQFAAAAAAgAAAAEAwAAKEm0BQAAAAAIAAAABAMAAMYw1QUAAAAAHAAAAAEGAACwAAAAwAAAANAAAADgAAAA8AAAAAABAAAQAQAACAAAAAAEAABBuu8llAAAABgAAAABAgAAAQAAAAAAAAAPAAAAAAAAAAAAAAAAAAAACAAAAAQDAAAFAAAAAAAAAAQAAAADAwAA9QEAAAgAAAABCQAAZmlsZTovLy8MAAAAAQEAAE1hY2ludG9zaCBIRAgAAAAEAwAAAADsrK0AAAAIAAAAAAQAAEG3FP0+AAAAJAAAAAEBAAAzNjlDMjg2RC0wMzE3LTMxNDUtOUExRi02RTc2NEM0RUUxREEYAAAAAQIAAIEAAAABAAgA7xcAAAEACAAAAAAAAAAAAAEAAAABAQAALwAAAAAAAAABBQAAzAAAAP7\\\\\\/\\\\\\/\\\\\\/8BAAAAAAAAABAAAAAEEAAAjAAAAAAAAAAFEAAAIAEAAAAAAAAQEAAAVAEAAAAAAABAEAAARAEAAAAAAAACIAAAIAIAAAAAAAAFIAAAkAEAAAAAAAAQIAAAoAEAAAAAAAARIAAA1AEAAAAAAAASIAAAtAEAAAAAAAATIAAAxAEAAAAAAAAgIAAAAAIAAAAAAAAwIAAALAIAAAAAAAABwAAAdAEAAAAAAAARwAAAIAAAAAAAAAASwAAAhAEAAAAAAAAQ0AAABAAAAAAAAAA=\\"},\\"identifier\\":\\"com.luckymarmot.FileContentDynamicValue\\"}]",true]]},"identifier":"com.luckymarmot.BodyMultipartFormDataDynamicValue"}]</attribute>
+        <attribute name="order" type="int64">1</attribute>
+        <attribute name="name" type="string">Upload Manifest</attribute>
+        <relationship name="parent" type="0/1" destination="LMREQUESTTREEITEM" idrefs="z120"></relationship>
+        <relationship name="children" type="0/0" destination="LMREQUESTTREEITEM"></relationship>
+        <relationship name="headers" type="0/0" destination="LMKEYVALUE" idrefs="z128"></relationship>
     </object>
 </database>

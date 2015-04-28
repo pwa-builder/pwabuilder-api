@@ -16,12 +16,26 @@ Manifold.prototype.createManifestFromUrl = function(url,client){
 
     return Q.Promise(function(resolve,reject){
         self.lib.manifestTools.getManifestFromSite(url, function(err, manifestInfo) {
-            if (err) { return reject(err); }
+            if (err) {
+                if(err.message !== 'Failed to retrieve manifest from site.'){
+                    return reject(err);
+                }else{
+                    manifestInfo = {
+                        content: {
+                        },
+                        format: 'w3c'
+                    };
+                }
+            }
 
             var manifest = _.assign(manifestInfo,{ id: uuid.v4().slice(0,8) });
-            client.set(manifest.id,JSON.stringify(manifest));
 
-            return resolve(manifest);
+            self.validateManifest(manifest)
+                .then(function(manifest){
+                    client.set(manifest.id,JSON.stringify(manifest));
+                    return resolve(manifest);
+                })
+                .fail(reject);
         });
     });
 };
@@ -34,7 +48,30 @@ Manifold.prototype.createManifestFromFile = function(file,client){
             if (err) { return reject(err); }
 
             var manifest = _.assign(manifestInfo,{ id: uuid.v4().slice(0,8) });
-            client.set(manifest.id,JSON.stringify(manifest));
+            self.validateManifest(manifest)
+                .then(function(manifest){
+                    client.set(manifest.id,JSON.stringify(manifest));
+                    return resolve(manifest);
+                })
+                .fail(reject);
+        });
+    });
+};
+
+Manifold.prototype.validateManifest = function(manifest){
+    var self = this;
+
+    return Q.Promise(function(resolve,reject){
+        self.lib.manifestTools.validateManifest(manifest, platforms, function(err,results){
+            if(err){ return reject(err); }
+
+            var errors = _.filter(results,{level: 'error'}),
+            suggestions = _.filter(results,{level: 'suggestion'}),
+            warnings = _.filter(results,{level: 'warning'});
+
+            self.assignValidationErrors(errors,manifest);
+            self.assignSuggestions(suggestions,manifest);
+            self.assignWarnings(warnings,manifest);
 
             return resolve(manifest);
         });
@@ -52,21 +89,12 @@ Manifold.prototype.updateManifest = function(manifestId,updates,client) {
             var manifest = JSON.parse(reply);
             manifest.content = updates;
 
-            self.lib.manifestTools.validateManifest(manifest, platforms, function(err,results){
-                if(err){ return reject(err); }
+            return self.validateManifest(manifest)
+                .then(function(manifest){
+                    client.set(manifest.id,JSON.stringify(manifest));
 
-                var errors = _.filter(results,{level: 'error'}),
-                suggestions = _.filter(results,{level: 'suggestion'}),
-                warnings = _.filter(results,{level: 'warning'});
-
-                self.assignValidationErrors(errors,manifest);
-                self.assignSuggestions(suggestions,manifest);
-                self.assignWarnings(warnings,manifest);
-
-                client.set(manifest.id,JSON.stringify(manifest));
-
-                resolve(manifest);
-            });
+                    resolve(manifest);
+                });
         });
     });
 };

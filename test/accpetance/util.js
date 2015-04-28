@@ -15,11 +15,15 @@ var fakeManifoldJS = {
         getManifestFromSite: function(url,cb){
             if(url === 'http://www.bamideasz.com'){
                 cb(new Error('Failed to retrieve manifest from site.'),null);
+            }else if(url ==='http://www.existing.com'){
+                manifestFixture.content.short_name = 'Existing';
+                cb(null,manifestFixture);
             }else{
                 cb(null,manifestFixture);
             }
         },
         getManifestFromFile: function(filepath,cb){
+            manifestFixture.content.short_name = 'File';
             cb(null,manifestFixture);
         },
         validateManifest: function(manifest,platforms,cb){

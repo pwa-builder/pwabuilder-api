@@ -50,7 +50,7 @@ describe('manifests',function(){
                     .send({ siteUrl: 'http://www.bamideas.com' })
                     .expect(function(res){
                         var result = res.body;
-                        expect(result.content.start_url).to.equal('http://www.bamideas.com');
+                        expect(result.content.start_url).to.equal('http://www.bamideas.com/');
                     })
                     .end(done);
             });
@@ -83,10 +83,10 @@ describe('manifests',function(){
         describe('with a site that has a manifest',function(){
             it('should return a json file',function(done){
                 req.post('/manifests')
-                    .send({ siteUrl: 'http://meteorite.azurewebsites.net' })
+                    .send({ siteUrl: 'http://www.existing.com' })
                     .expect(function(res){
                         var result = res.body;
-                        expect(result.content.name).to.equal('Web Application Template');
+                        expect(result.content.short_name).to.equal('Existing');
                     })
                     .end(done);
             });
@@ -98,17 +98,17 @@ describe('manifests',function(){
                     .attach('file','test/fixtures/manifest.json')
                     .expect(function(res){
                         var result = res.body;
-                        expect(result.content.short_name).to.equal('WwwBamideasCom');
+                        expect(result.content.short_name).to.equal('File');
                     })
                     .end(done);
             });
         });
 
         describe('with a site that does not exist',function(){
-            it('should return a 422',function(done){
+            it('should return a 200 with errors',function(done){
                 req.post('/manifests')
                     .send({siteUrl: 'http://www.bamideasz.com'})
-                    .expect(422)
+                    .expect(200)
                     .end(done);
             });
         });
