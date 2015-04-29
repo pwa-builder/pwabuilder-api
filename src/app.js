@@ -24,12 +24,24 @@ var Manifold = {
         app.use(cookieParser());
         app.use(express.static(path.join(__dirname, 'public')));
 
+        var allowedHost = {
+            'http://localhost:4200': true,
+            'http://www.manifoldjs.com': true,
+            'http://manifoldjs.com':true,
+            'http://manifold-site-staging':true,
+            'http://manifold-site-prod':true
+        };
+
         app.use(function (req, res, next) {
-            var clientUrl = process.env.CLIENT_URL || 'http://localhost:4200';
-            res.setHeader('Access-Control-Allow-Origin', clientUrl);
-            res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-            res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
-            res.setHeader('Access-Control-Allow-Credentials', true);
+            var origin = req.get('origin');
+
+            if(allowedHost[origin]){
+                res.setHeader('Access-Control-Allow-Origin', origin);
+                res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+                res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+                res.setHeader('Access-Control-Allow-Credentials', true);
+            }
+
             next();
         });
 
