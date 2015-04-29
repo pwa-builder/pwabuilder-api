@@ -5,7 +5,7 @@
     <databaseInfo>
         <version>134481920</version>
         <UUID>6EA1A6BB-BF2A-4FBF-8AD5-2C0504CFBBE6</UUID>
-        <nextObjectID>129</nextObjectID>
+        <nextObjectID>132</nextObjectID>
         <metadata>
             <plist version="1.0">
                 <dict>
@@ -95,7 +95,7 @@
         <attribute name="uuid" type="string">76551EDA-F7FB-4BDE-857E-69DABDDD789A</attribute>
         <attribute name="order" type="int64">0</attribute>
         <attribute name="name" type="string">Default Domain</attribute>
-        <relationship name="environments" type="0/0" destination="LMENVIRONMENT" idrefs="z114 z106"></relationship>
+        <relationship name="environments" type="0/0" destination="LMENVIRONMENT" idrefs="z130 z114 z106"></relationship>
         <relationship name="variables" type="0/0" destination="LMENVIRONMENTVARIABLE" idrefs="z117 z116"></relationship>
     </object>
     <object type="LMENVIRONMENT" id="z106">
@@ -129,7 +129,7 @@
         <attribute name="redirectauthorization" type="bool">0</attribute>
         <attribute name="method" type="string">PUT</attribute>
         <attribute name="followredirects" type="bool">0</attribute>
-        <attribute name="body" type="string">["{\\n  \\"name\\": \\"This Here Web\\",\\n  \\"short_name\\": \\"THW\\",\\n  \\"start_url\\": \\"http:\\/\\/www.foo.com\\"\\n}"]</attribute>
+        <attribute name="body" type="string">[{"data":{"json":"{\\"name\\":\\"This Here Web\\",\\"short_name\\":\\"THW\\",\\"start_url\\":\\"http:\\/\\/www.foo.com\\"}"},"identifier":"com.luckymarmot.JSONDynamicValue"}]</attribute>
         <attribute name="order" type="int64">2</attribute>
         <attribute name="name" type="string">Update Manifest</attribute>
         <relationship name="parent" type="0/1" destination="LMREQUESTTREEITEM" idrefs="z120"></relationship>
@@ -203,14 +203,14 @@
         <attribute name="order" type="int64">0</attribute>
         <attribute name="name" type="string">HOST</attribute>
         <relationship name="domain" type="0/1" destination="LMENVIRONMENTDOMAIN" idrefs="z105"></relationship>
-        <relationship name="values" type="0/0" destination="LMENVIRONMENTVARIABLEVALUE" idrefs="z113 z115"></relationship>
+        <relationship name="values" type="0/0" destination="LMENVIRONMENTVARIABLEVALUE" idrefs="z115 z113 z132"></relationship>
     </object>
     <object type="LMENVIRONMENTVARIABLE" id="z117">
         <attribute name="uuid" type="string">BA35653F-EDE5-4DE4-A95E-5CFBB6D6A388</attribute>
         <attribute name="order" type="int64">1</attribute>
         <attribute name="name" type="string">PORT</attribute>
         <relationship name="domain" type="0/1" destination="LMENVIRONMENTDOMAIN" idrefs="z105"></relationship>
-        <relationship name="values" type="0/0" destination="LMENVIRONMENTVARIABLEVALUE" idrefs="z118 z119"></relationship>
+        <relationship name="values" type="0/0" destination="LMENVIRONMENTVARIABLEVALUE" idrefs="z118 z119 z131"></relationship>
     </object>
     <object type="LMENVIRONMENTVARIABLEVALUE" id="z118">
         <attribute name="value" type="string">80</attribute>
@@ -344,5 +344,22 @@
         <relationship name="parent" type="0/1" destination="LMREQUESTTREEITEM" idrefs="z120"></relationship>
         <relationship name="children" type="0/0" destination="LMREQUESTTREEITEM"></relationship>
         <relationship name="headers" type="0/0" destination="LMKEYVALUE" idrefs="z128"></relationship>
+    </object>
+    <object type="LMENVIRONMENT" id="z130">
+        <attribute name="uuid" type="string">C2234934-0BCB-48D2-A223-8663EAC01CE7</attribute>
+        <attribute name="order" type="int64">2</attribute>
+        <attribute name="name" type="string">Production</attribute>
+        <relationship name="domain" type="0/1" destination="LMENVIRONMENTDOMAIN" idrefs="z105"></relationship>
+        <relationship name="variablesvalues" type="0/0" destination="LMENVIRONMENTVARIABLEVALUE" idrefs="z131 z132"></relationship>
+    </object>
+    <object type="LMENVIRONMENTVARIABLEVALUE" id="z131">
+        <attribute name="value" type="string">80</attribute>
+        <relationship name="environment" type="1/1" destination="LMENVIRONMENT" idrefs="z130"></relationship>
+        <relationship name="variable" type="1/1" destination="LMENVIRONMENTVARIABLE" idrefs="z117"></relationship>
+    </object>
+    <object type="LMENVIRONMENTVARIABLEVALUE" id="z132">
+        <attribute name="value" type="string">manifold-api-prod.azurewebsites.net</attribute>
+        <relationship name="environment" type="1/1" destination="LMENVIRONMENT" idrefs="z130"></relationship>
+        <relationship name="variable" type="1/1" destination="LMENVIRONMENTVARIABLE" idrefs="z116"></relationship>
     </object>
 </database>
