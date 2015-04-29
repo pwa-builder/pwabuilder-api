@@ -1,35 +1,21 @@
 'use strict';
+/* global req:true */
+/* global client:true */
+
+require('./util');
 
 var chai = require('chai'),
     expect = chai.expect,
-    request = require('supertest'),
-    redis = require('redis'),
-    fakeredis = require('fakeredis'),
     sinon = require('sinon'),
-    uuid = require('node-uuid'),
-    rimraf = require('rimraf'),
-    path = require('path'),
-    manifold = require('../../src/app');
+    azure = require('azure-storage'),
+    Manifold = require('../../src/services/manifold'),
+    Q = require('q'),
+    _ = require('lodash'),
+    uuid = require('node-uuid');
 
 describe('manifests',function(){
-    var client;
-
-    before(function(){
-        sinon.stub(redis,'createClient',fakeredis.createClient);
-        client = redis.createClient();
-    });
-
-    after(function(){
-        redis.createClient.restore();
-    });
-
     describe('show route',function(){
-        var req, manifestId;
-
-        before(function(){
-            var app = manifold.init(client);
-            req = request(app);
-        });
+        var manifestId;
 
         beforeEach(function(){
             manifestId = uuid.v4();
@@ -40,10 +26,6 @@ describe('manifests',function(){
                     short_name: 'Foo'
                 }
             }));
-        });
-
-        afterEach(function(done){
-            client.flushdb(done);
         });
 
         it('should find the manifest',function(done){
@@ -62,24 +44,13 @@ describe('manifests',function(){
     });
 
     describe('create route',function(){
-        var req;
-
-        before(function(){
-            var app = manifold.init(client);
-            req = request(app);
-        });
-
-        afterEach(function(done){
-            client.flushdb(done);
-        });
-
         describe('with a site with no manifest',function(){
             it('should return a json file with the start_url',function(done){
                 req.post('/manifests')
                     .send({ siteUrl: 'http://www.bamideas.com' })
                     .expect(function(res){
                         var result = res.body;
-                        expect(result.content.start_url).to.equal('http://www.bamideas.com');
+                        expect(result.content.start_url).to.equal('http://www.bamideas.com/');
                     })
                     .end(done);
             });
@@ -112,10 +83,10 @@ describe('manifests',function(){
         describe('with a site that has a manifest',function(){
             it('should return a json file',function(done){
                 req.post('/manifests')
-                    .send({ siteUrl: 'http://meteorite.azurewebsites.net' })
+                    .send({ siteUrl: 'http://www.existing.com' })
                     .expect(function(res){
                         var result = res.body;
-                        expect(result.content.name).to.equal('Web Application Template');
+                        expect(result.content.short_name).to.equal('Existing');
                     })
                     .end(done);
             });
@@ -127,34 +98,23 @@ describe('manifests',function(){
                     .attach('file','test/fixtures/manifest.json')
                     .expect(function(res){
                         var result = res.body;
-                        expect(result.content.short_name).to.equal('THW');
+                        expect(result.content.short_name).to.equal('File');
                     })
                     .end(done);
             });
         });
 
         describe('with a site that does not exist',function(){
-            it('should return a 422',function(done){
+            it('should return a 200 with errors',function(done){
                 req.post('/manifests')
                     .send({siteUrl: 'http://www.bamideasz.com'})
-                    .expect(422)
+                    .expect(200)
                     .end(done);
             });
         });
     });
 
     describe('update route',function(){
-        var req;
-
-        before(function(){
-            var app = manifold.init(client);
-            req = request(app);
-        });
-
-        afterEach(function(done){
-            client.flushdb(done);
-        });
-
         describe('with an existing manifest',function(){
             var manifestId;
 
@@ -182,6 +142,17 @@ describe('manifests',function(){
                     .end(done);
             });
 
+            it('should remove any fields that no longer exist',function(done){
+                var name = 'Bar Interwebs Associates, Inc.';
+
+                req.put('/manifests/'+manifestId)
+                    .send({name: name, start_url: 'www.fwellc.com'})
+                    .expect(function(res){
+                        expect(res.body.content.short_name).to.equal(undefined);
+                    })
+                    .end(done);
+            });
+
             it('should save the manifest to redis',function(done){
                 sinon.spy(client,'set');
 
@@ -199,9 +170,18 @@ describe('manifests',function(){
 
             it('should include any suggestions returned from the validator',function(done){
                 req.put('/manifests/'+manifestId)
-                    .send({ name: 'Bar' })
+                    .send({ name: 'Suggestions' })
                     .expect(function(res){
-                        expect(res.body.suggestions.hap_urlAccess[0]).to.equal('It is recommended to specify a set of access rules that represent the navigation scope of the application');
+                        expect(res.body.suggestions[0].issues[0].description).to.equal('a 48x48 icon should be provided for the extensions management page (chrome://extensions)');
+                    })
+                    .end(done);
+            });
+
+            it('should include any warnings returned from the validator',function(done){
+                req.put('/manifests/'+manifestId)
+                    .send({ name: 'Warnings' })
+                    .expect(function(res){
+                        expect(res.body.warnings[0].issues[0].description).to.equal('launcher icons of the following sizes are required: 48x48, 72x72, 96x96, 144x144, 192x192, 512x512');
                     })
                     .end(done);
             });
@@ -216,24 +196,24 @@ describe('manifests',function(){
                     id: manifestId,
                     format: 'w3c',
                     content: {
-                        name: 'Foo Web Enterprises, LLC.',
+                        name: 'Errors',
                         short_name: 'Foo',
                     }
                 }));
             });
 
-            it('should return a 422',function(done){
+            it('should return a 200',function(done){
                 req.put('/manifests/'+manifestId)
                     .send({ name: 'Bar' })
-                    .expect(422)
+                    .expect(200)
                     .end(done);
             });
 
-            it('should return an errors response',function(done){
+            it('should return errors in the response',function(done){
                 req.put('/manifests/'+manifestId)
-                    .send({ name: 'Bar' })
+                    .send({ name: 'Errors' })
                     .expect(function(res){
-                        expect(res.body.errors.start_url[0]).to.equal('The start URL for the target web site is required');
+                        expect(res.body.errors[0].issues[0].description).to.equal('The start URL for the target web site is required');
                     })
                     .end(done);
             });
@@ -248,53 +228,57 @@ describe('manifests',function(){
         });
     });
 
-    // Commented out because it breaks and dies
-    //
-    //describe('build route',function(){
-        //var req;
+    describe('build route',function(){
+        describe('with a valid manifest',function(){
+            var manifestId;
 
-        //before(function(){
-            //var app = manifold.init(client);
-            //req = request(app);
-        //});
+            beforeEach(function(){
+                manifestId = uuid.v4();
+                var manifest = {
+                    id: manifestId,
+                    format: 'w3c',
+                    content: {
+                        name: 'Foo Web Enterprises, LLC.',
+                        short_name: 'Foo',
+                        start_url: 'www.bamideas.com'
+                    }
+                };
 
-        //afterEach(function(done){
-            //client.flushdb(done);
-        //});
+                client.set(manifestId,JSON.stringify(manifest));
 
-        //describe('with a valid manifest',function(){
-            //var manifestId;
+                var fakeBlobService = sinon.stub();
 
-            //beforeEach(function(){
-                //manifestId = uuid.v4();
-                //client.set(manifestId,JSON.stringify({
-                    //id: manifestId,
-                    //format: 'w3c',
-                    //content: {
-                        //name: 'Foo Web Enterprises, LLC.',
-                        //short_name: 'Foo',
-                        //start_url: 'www.bamideas.com'
-                    //}
-                //}));
-            //});
+                var fakeManifold = function(){
+                    return {
+                        normalize: function(){
+                            return Q.Promise(function(resolve){
+                                resolve(_.assign(manifest,{ content: { start_url: 'http://www.bamideas.com' }}));
+                            });
+                        }
+                    };
+                };
 
-            //it('should create a zip archive of the projects');
-            //it('should return true if the archive was created',function(done){
-                //req.post('/manifests/'+manifestId+'/build')
-                    //.expect(200)
-                    //.expect({archive: true})
-                    //.end(done);
-            //});
-            //it('should upload the archive to azure storage');
+                sinon.stub(azure,'createBlobService').returns(fakeBlobService);
+                sinon.stub(Manifold,'create',fakeManifold);
+            });
 
-            //afterEach(function(){
-                ////rimraf(path.join(__dirname,'..','..','tmp',manifestId),done);
-            //});
-        //});
+            afterEach(function(){
+                azure.createBlobService.restore();
+                Manifold.create.restore();
+            });
 
-        //describe('with an invalid manifest',function(){
-            //it('should return validation errors');
-            //it('should return a 422');
-        //});
-    //});
+            it('should create a zip archive of the projects');
+            it('should return true if the archive was created');
+            it('should upload the archive to azure storage');
+
+            afterEach(function(){
+                //rimraf(path.join(__dirname,'..','..','tmp',manifestId),done);
+            });
+        });
+
+        describe('with an invalid manifest',function(){
+            it('should return validation errors');
+            it('should return a 422');
+        });
+    });
 });

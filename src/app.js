@@ -6,10 +6,11 @@ var express = require('express'),
     cookieParser = require('cookie-parser'),
     bodyParser = require('body-parser'),
     multer = require('multer'),
-    manifests = require('./routes/manifests');
+    manifests = require('./routes/manifests'),
+    images = require('./routes/images');
 
 var Manifold = {
-    init: function(redisClient){
+    init: function(redisClient, azure, manifold){
         var app = express();
 
         // view engine setup
@@ -23,15 +24,29 @@ var Manifold = {
         app.use(cookieParser());
         app.use(express.static(path.join(__dirname, 'public')));
 
-        app.use('/manifests', manifests(redisClient));
+        var allowedHost = {
+            'http://localhost:4200': true,
+            'http://www.manifoldjs.com': true,
+            'http://manifoldjs.com':true,
+            'http://manifold-site-staging.azurewebsites.net':true,
+            'http://manifold-site-prod.azurewebsites.net':true
+        };
 
         app.use(function (req, res, next) {
-            res.setHeader('Access-Control-Allow-Origin', 'http://localhost:4200');
-            res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-            res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
-            res.setHeader('Access-Control-Allow-Credentials', true);
+            var origin = req.get('origin');
+
+            if(allowedHost[origin]){
+                res.setHeader('Access-Control-Allow-Origin', origin);
+                res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+                res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+                res.setHeader('Access-Control-Allow-Credentials', true);
+            }
+
             next();
         });
+
+        app.use('/manifests', manifests(redisClient,azure,manifold));
+        app.use('/images',images());
 
         // catch 404 and forward to error handler
         app.use(function(req, res, next) {

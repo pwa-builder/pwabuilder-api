@@ -1,0 +1,19 @@
+machine:
+    node:
+        version: 0.12.2
+dependencies:
+    override:
+        - npm install
+        - npm install grunt-cli -g
+test:
+    override:
+      - grunt ci
+deployment:
+    staging:
+        branch: 1.0.0
+        commands:
+            - ./build/push-staging.sh
+    production:
+        branch: master
+        commands:
+            - ./build/push-prod.sh

@@ -1,12 +1,29 @@
+'use strict';
+
 module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-mocha-test');
     grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.loadNpmTasks('grunt-contrib-copy');
 
     grunt.initConfig({
+        copy: {
+            ci: {
+                files: [
+                    { expand: true, src: 'test-results.xml', dest: process.env.CIRCLE_TEST_REPORTS+'/mocha/' }
+                ]
+            }
+        },
         mochaTest: {
             test: {
                 options: {
                     reporter: 'spec',
+                    clearRequireCache: true
+                },
+                src: ['test/**/*.js']
+            },
+            ci: {
+                options: {
+                    reporter: 'mocha-junit-reporter',
                     clearRequireCache: true
                 },
                 src: ['test/**/*.js']
@@ -34,5 +51,7 @@ module.exports = function(grunt) {
         }
     });
 
-    grunt.registerTask('default', 'mochaTest');
+    grunt.registerTask('default', 'mochaTest:test');
+    grunt.registerTask('test',['mochaTest:test','watch']);
+    grunt.registerTask('ci',['mochaTest:ci','copy:ci']);
 };
