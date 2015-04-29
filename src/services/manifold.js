@@ -14,6 +14,10 @@ function Manifold(manifoldLib){
 Manifold.prototype.createManifestFromUrl = function(url,client){
     var self = this;
 
+    if(url.indexOf('http') === -1){
+        url = 'http://'+url;
+    }
+
     return Q.Promise(function(resolve,reject){
         self.lib.manifestTools.getManifestFromSite(url, function(err, manifestInfo) {
             if (err) {
