@@ -1,8 +1,8 @@
 'use strict';
 
-var path = require('path'),
+var path      = require('path'),
     outputDir = path.join(__dirname, '../../tmp'),
-    config = require(path.join(__dirname,'../config')),
+    config    = require(path.join(__dirname,'../config')),
     platforms = config.platforms;
 
 exports.create = function(client, storage, manifold){
