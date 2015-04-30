@@ -18,11 +18,6 @@ var Manifold = {
         app.set('view engine', 'jade');
 
         app.use(logger('dev'));
-        app.use(bodyParser.json());
-        app.use(bodyParser.urlencoded({ extended: false }));
-        app.use(multer({ dest: '../tmp/'}));
-        app.use(cookieParser());
-        app.use(express.static(path.join(__dirname, 'public')));
 
         var allowedHost = {
             'http://localhost:4200': true,
@@ -44,6 +39,13 @@ var Manifold = {
 
             next();
         });
+
+        app.use(bodyParser.json());
+        app.use(bodyParser.urlencoded({ extended: false }));
+        app.use(multer({ dest: '../tmp/'}));
+        app.use(cookieParser());
+        app.use(express.static(path.join(__dirname, 'public')));
+
 
         app.use('/manifests', manifests(redisClient,azure,manifold));
         app.use('/images',images());
