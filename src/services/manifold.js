@@ -144,7 +144,8 @@ Manifold.prototype.assignValidationErrors = function(errors,manifest){
 
     _.each(errors,function(e){
         if(_.any(data.errors,'member',e.member)){
-            var error = _.find(data.errors,{ memeber: e.member });
+            var error = _.find(data.errors,'member',e.member);
+            error.issues = error.issues || [];
             error.issues.push({ description: e.description, platform: e.platform, code: e.code });
         }else{
             data.errors.push({

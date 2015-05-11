@@ -1,13 +1,15 @@
 'use strict';
 
-var express = require('express'),
-    path = require('path'),
-    logger = require('morgan'),
+var express      = require('express'),
+    path         = require('path'),
+    logger       = require('morgan'),
     cookieParser = require('cookie-parser'),
-    bodyParser = require('body-parser'),
-    multer = require('multer'),
-    manifests = require('./routes/manifests'),
-    images = require('./routes/images');
+    bodyParser   = require('body-parser'),
+    multer       = require('multer'),
+    manifests    = require('./routes/manifests'),
+    images       = require('./routes/images'),
+    raygun       = require('raygun'),
+    raygunClient = new raygun.Client().init({ apiKey: 'PrRN4HizgQVI2xeXBxdSzw==' });
 
 var Manifold = {
     init: function(redisClient, azure, manifold){
@@ -19,6 +21,7 @@ var Manifold = {
 
         app.use(logger('dev'));
 
+        // CORS configuration
         var allowedHost = {
             'http://localhost:4200': true,
             'http://www.manifoldjs.com': true,
@@ -73,6 +76,7 @@ var Manifold = {
 
         // production error handler
         // no stacktraces leaked to user
+        app.use(raygunClient.expressHandler);
         app.use(function(err, req, res) {
             res.status(err.status || 500);
             res.render('error', {
