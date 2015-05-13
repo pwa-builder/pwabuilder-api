@@ -59,7 +59,7 @@ exports.create = function(client, storage, manifold){
     build: function(req,res){
       client.get(req.params.id,function(err,reply){
         if(err){
-          return res.status(500).send('There was a problem loading the project, please try building it again.');
+          return res.json(500,{ error: 'There was a problem loading the project, please try building it again.' });
         }
         if(!reply) return res.status(404).send('NOT FOUND');
 
@@ -79,7 +79,7 @@ exports.create = function(client, storage, manifold){
           .then(function(){ return storage.getUrlForZip(manifest); })
           .then(function(url){ res.json({archive: url}); })
           .fail(function(error){
-            return res.status(500).send(error.message);
+            return res.json(500, { error: error.message });
           });
       });
     }
