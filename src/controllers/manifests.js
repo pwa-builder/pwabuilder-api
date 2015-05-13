@@ -5,7 +5,7 @@ var path    = require('path'),
   config    = require(path.join(__dirname,'../config')),
   platforms = config.platforms;
 
-exports.create = function(client, storage, manifold){
+exports.create = function(client, storage, manifold, raygun){
   return {
     show: function(req,res,next){
       client.get(req.params.id,function(err,reply){
@@ -59,6 +59,7 @@ exports.create = function(client, storage, manifold){
     build: function(req,res){
       client.get(req.params.id,function(err,reply){
         if(err){
+          raygun.send(err);
           return res.json(500,{ error: 'There was a problem loading the project, please try building it again.' });
         }
         if(!reply) return res.status(404).send('NOT FOUND');
@@ -78,8 +79,9 @@ exports.create = function(client, storage, manifold){
           .then(function(){ return storage.removeDir(output); })
           .then(function(){ return storage.getUrlForZip(manifest); })
           .then(function(url){ res.json({archive: url}); })
-          .fail(function(error){
-            return res.json(500, { error: error.message });
+          .fail(function(err){
+            raygun.send(err);
+            return res.json(500, { error: err.message });
           });
       });
     }
