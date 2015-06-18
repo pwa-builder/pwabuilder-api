@@ -70,7 +70,7 @@ exports.create = function(client, storage, manifold, raygun){
         manifold.normalize(manifest)
           .then(function(normManifest){
             manifest = normManifest;
-            return manifold.createProject(manifest,output,platforms,false);
+            return manifold.createProject(manifest,output,platforms);
           })
           .then(function(){ return storage.setPermissions(output); })
           .then(function(){ return storage.createZip(output,manifest); })
