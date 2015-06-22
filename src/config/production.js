@@ -9,5 +9,5 @@ module.exports = {
         'account_name': process.env.STORAGE_ACCOUNTNAME,
         'access_key':process.env.STORAGE_ACCESSKEY
     },
-    platforms: ['windows10','windows81', 'android', 'ios', 'chrome', 'firefox','web']
+    platforms: ['windows10','windows', 'android', 'ios', 'chrome', 'firefox','web']
 };

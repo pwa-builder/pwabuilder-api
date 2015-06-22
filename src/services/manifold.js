@@ -121,14 +121,19 @@ Manifold.prototype.normalize = function(manifest){
   });
 };
 
-Manifold.prototype.createProject = function(manifest,outputDir,platforms,buildCordova){
+Manifold.prototype.createProject = function(manifest,outputDir,platforms){
   var self = this;
 
   return Q.Promise(function(resolve, reject){
     var cleanManifest = _.omit(manifest,'id');
-    console.log('Building the project...',cleanManifest,outputDir,platforms,buildCordova);
+    console.log('Building the project...',cleanManifest,outputDir,platforms);
     try{
-      self.lib.projectBuilder.createApps(cleanManifest, outputDir, platforms, buildCordova, function (err) {
+      var options = {
+        'crosswalk' : false,
+        'build'     : false
+      };
+
+      self.lib.projectBuilder.createApps(cleanManifest, outputDir, platforms, options, function (err) {
 
         if(err){
           console.log('Create Projects Errors!!!',err);
