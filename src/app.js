@@ -22,23 +22,28 @@ var Manifold = {
     app.use(logger('dev'));
 
     // CORS configuration
-    var allowedHost = {
-      'http://localhost:4200': true,
-      'http://www.manifoldjs.com': true,
-      'http://manifoldjs.com':true,
-      'http://manifold-site-staging.azurewebsites.net':true,
-      'http://manifold-site-prod.azurewebsites.net':true
-    };
+    // var allowedHost = {
+    //   'http://localhost:4200': true,
+    //   'http://www.manifoldjs.com': true,
+    //   'http://manifoldjs.com':true,
+    //   'http://manifold-site-staging.azurewebsites.net':true,
+    //   'http://manifold-site-prod.azurewebsites.net':true
+    // };
 
     app.use(function (req, res, next) {
-      var origin = req.get('origin');
+      // var origin = req.get('origin');
 
-      if(allowedHost[origin]){
-        res.setHeader('Access-Control-Allow-Origin', origin);
-        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-        res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
-        res.setHeader('Access-Control-Allow-Credentials', true);
-      }
+      // if(allowedHost[origin]){
+      //   res.setHeader('Access-Control-Allow-Origin', origin);
+      //   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+      //   res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+      //   res.setHeader('Access-Control-Allow-Credentials', true);
+      // }
+
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+      res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+      res.setHeader('Access-Control-Allow-Credentials', true);
 
       next();
     });
