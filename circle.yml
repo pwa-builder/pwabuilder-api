@@ -9,10 +9,10 @@ test:
     override:
       - grunt ci
 deployment:
-    staging:
+    preproduction:
         branch: 1.0.4
         commands:
-            - ./build/push-staging.sh
+            - ./build/push-pre.sh
     production:
         branch: master
         commands:

@@ -26,7 +26,7 @@ var Manifold = {
     //   'http://localhost:4200': true,
     //   'http://www.manifoldjs.com': true,
     //   'http://manifoldjs.com':true,
-    //   'http://manifold-site-staging.azurewebsites.net':true,
+    //   'http://manifold-site-pre.azurewebsites.net':true,
     //   'http://manifold-site-prod.azurewebsites.net':true
     // };
 

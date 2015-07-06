@@ -189,12 +189,12 @@
     <object type="LMENVIRONMENT" id="z114">
         <attribute name="uuid" type="string">AA08E06E-0068-461B-8902-9757BFAF43BB</attribute>
         <attribute name="order" type="int64">1</attribute>
-        <attribute name="name" type="string">Staging</attribute>
+        <attribute name="name" type="string">Preproduction</attribute>
         <relationship name="domain" type="0/1" destination="LMENVIRONMENTDOMAIN" idrefs="z105"></relationship>
         <relationship name="variablesvalues" type="0/0" destination="LMENVIRONMENTVARIABLEVALUE" idrefs="z118 z115"></relationship>
     </object>
     <object type="LMENVIRONMENTVARIABLEVALUE" id="z115">
-        <attribute name="value" type="string">manifold-api-staging.azurewebsites.net</attribute>
+        <attribute name="value" type="string">manifold-api-pre.azurewebsites.net</attribute>
         <relationship name="environment" type="1/1" destination="LMENVIRONMENT" idrefs="z114"></relationship>
         <relationship name="variable" type="1/1" destination="LMENVIRONMENTVARIABLE" idrefs="z116"></relationship>
     </object>
