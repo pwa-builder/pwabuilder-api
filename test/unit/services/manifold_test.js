@@ -76,7 +76,7 @@ describe('manifold service',function(){
 
             fakeManifoldLib.projectBuilder = {
                 createApps: function(manifest, outputDir, buildCordova, platforms, cb){
-                    expect(manifest).to.deep.equal({content: { start_url: 'bamideas.com' }});
+                    expect(manifest).to.deep.equal({content: { start_url: 'bamideas.com' }, generatedFrom: 'Website Wizard' });
                     cb(null);
                 }
             };
