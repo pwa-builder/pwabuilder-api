@@ -126,6 +126,7 @@ Manifold.prototype.createProject = function(manifest,outputDir,platforms){
 
   return Q.Promise(function(resolve, reject){
     var cleanManifest = _.omit(manifest,'id');
+    cleanManifest = _.assign(cleanManifest,{ generatedFrom: 'Website Wizard' });
     console.log('Building the project...',cleanManifest,outputDir,platforms);
     try{
       var options = {

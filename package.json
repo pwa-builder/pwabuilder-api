@@ -19,7 +19,7 @@
     "jade": "~1.9.2",
     "lodash": "^3.6.0",
     "loglevel": "^1.2.0",
-    "manifoldjs": "0.3.3",
+    "manifoldjs": "0.4.0",
     "morgan": "~1.5.1",
     "multer": "^0.1.8",
     "node-uuid": "^1.4.3",
