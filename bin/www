@@ -89,6 +89,15 @@ function onListening() {
 }
 
 /**
+ * Configure server timeout.
+ *
+ * Generating an app with ManifoldJS sometimes takes considerable time, especially during the 
+ * first request following a cold start. This causes the default socket timeout on the connection 
+ * to be exceeded and the server returning a 500 - Internal Error.
+ */
+server.timeout = 180000;
+
+/**
  * Listen on provided port, on all network interfaces.
  */
 server.listen(port);
