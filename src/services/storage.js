@@ -8,6 +8,46 @@ var archiver = require('archiver'),
     azure = require('azure-storage'),
     Q = require('q');
 
+// The sanitizeName function was "borrowed" from ManifoldJS to fix an issue where package generation fails
+// while generating a .zip archive if the app folder name differs from the short_name because it has been 
+// sanitized. Copying this function is a temporary fix. Ideally, ManifoldJS should be updated to expose this
+// function publicly.
+
+// This function sanitizes the name to only allow the following: ([A-Za-z][A-Za-z0-9]*)(\.[A-Za-z][A-Za-z0-9]*)*
+function sanitizeName(name) {
+  var sanitizedName = name;
+  
+  // Remove all invalid characters
+  sanitizedName = sanitizedName.replace(/[^A-Za-z0-9\.]/g, '');
+  
+  var currentLength;
+  do {
+    currentLength = sanitizedName.length;
+    
+    // If the name starts with a number, remove the number 
+    sanitizedName = sanitizedName.replace(/^[0-9]/, '');
+    
+    // If the name starts with a dot, remove the dot
+    sanitizedName = sanitizedName.replace(/^\./, '');
+    
+    // If there is a number right after a dot, remove the number
+    sanitizedName = sanitizedName.replace(/\.[0-9]/g, '.');
+    
+    // If there are two consecutive dots, remove one dot
+    sanitizedName = sanitizedName.replace(/\.\./g, '.');
+    
+    // if the name ends with a dot, remove the dot
+    sanitizedName = sanitizedName.replace(/\.$/, '');
+  } 
+  while (currentLength > sanitizedName.length);
+  
+  if (sanitizedName.length === 0) {
+    sanitizedName = 'MyManifoldJSApp';
+  }
+  
+  return sanitizedName;
+}
+
 function Storage(blobService){
     this.blobService = blobService;
 }
@@ -32,7 +72,8 @@ Storage.prototype.createZip = function(output, manifest){
 
         archive.pipe(zip);
 
-        archive.directory(path.join(output,manifest.content.short_name),'projects',{ mode: '0755' }).finalize();
+        var folderName = path.join(output, sanitizeName(manifest.content.short_name));
+        archive.directory(folderName, 'projects', { mode: '0755' }).finalize();
     });
 };
 
