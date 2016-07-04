@@ -9,6 +9,8 @@ var uuid = require('node-uuid'),
 
 function Manifold(manifoldLib){
   this.lib = manifoldLib;
+  var platformsConfig = path.resolve(__dirname, '..', '..', 'platforms.json');
+  this.lib.platformTools.configurePlatforms(platformsConfig);
 }
 
 Manifold.prototype.createManifestFromUrl = function(url,client){
