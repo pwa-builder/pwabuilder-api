@@ -1,0 +1,30 @@
+{
+    "chrome": {
+        "packageName": "xanifoldjs-chrome",
+        "source": "xanifoldjs-chrome"
+    },
+    "firefox": {
+        "packageName": "xanifoldjs-firefox",
+        "source": "xanifoldjs-firefox"
+    },
+    "windows10": {
+        "packageName": "xanifoldjs-windows10",
+        "source": "xanifoldjs-windows10"
+    },
+    "android": {
+        "packageName": "xanifoldjs-cordova",
+        "source": "xanifoldjs-cordova"
+    },
+    "ios": {
+        "packageName": "xanifoldjs-cordova",
+        "source": "xanifoldjs-cordova"
+    },
+    "windows": {
+        "packageName": "xanifoldjs-cordova",
+        "source": "xanifoldjs-cordova"
+    },
+    "web": {
+        "packageName": "xanifoldjs-web",
+        "source": "xanifoldjs-web"
+    }
+}
