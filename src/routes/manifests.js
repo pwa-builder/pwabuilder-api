@@ -2,13 +2,9 @@
 
 var express = require('express'),
     router = express.Router(),
-    log = require('loglevel'),
     Manifold = require('../services/manifold'),
     Storage = require('../services/storage'),
     ManifestsController = require('../controllers/manifests');
-
-global.logLevel = 'debug';
-log.setLevel(global.logLevel);
 
 module.exports = function(client,azure,manifoldjs){
     var manifold = Manifold.create(manifoldjs),
