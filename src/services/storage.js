@@ -6,7 +6,10 @@ var archiver = require('archiver'),
     rimraf = require('rimraf'),
     wrench = require('wrench'),
     azure = require('azure-storage'),
-    Q = require('q');
+    Q = require('q'),
+    manifoldJsLib = require('manifoldjs-lib');
+
+var utils = manifoldJsLib.utils;
 
 function Storage(blobService){
     this.blobService = blobService;
@@ -32,7 +35,8 @@ Storage.prototype.createZip = function(output, manifest){
 
         archive.pipe(zip);
 
-        archive.directory(path.join(output,manifest.content.short_name),'projects',{ mode: '0755' }).finalize();
+        var folderName = path.join(output, utils.sanitizeName(manifest.content.short_name));
+        archive.directory(folderName, 'projects', { mode: '0755' }).finalize();
     });
 };
 

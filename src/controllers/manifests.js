@@ -1,7 +1,7 @@
 'use strict';
 
 var path    = require('path'),
-  outputDir = path.join(__dirname, '../../tmp'),
+  outputDir = process.env.TMP,
   config    = require(path.join(__dirname,'../config')),
   platforms = config.platforms;
 

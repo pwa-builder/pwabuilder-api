@@ -19,7 +19,7 @@ if(config.redis.password){
 
 console.log('Connecting to Redis...');
 
-var app = Manifold.init(redis.createClient(config.redis.port,config.redis.host,redisOptions), azure.createBlobService(config.azure.account_name,config.azure.access_key),require('manifoldjs')),
+var app = Manifold.init(redis.createClient(config.redis.port,config.redis.host,redisOptions), azure.createBlobService(config.azure.account_name,config.azure.access_key),require('manifoldjs-lib')),
     debug = require('debug')('manifold-api:server'),
     http = require('http');
 
@@ -95,7 +95,7 @@ function onListening() {
  * first request following a cold start. This causes the default socket timeout on the connection 
  * to be exceeded and the server returning a 500 - Internal Error.
  */
-server.timeout = 180000;
+server.timeout = 300000;
 
 /**
  * Listen on provided port, on all network interfaces.
