@@ -59,7 +59,7 @@ exports.create = function(client, storage, manifold, raygun){
     build: function(req,res){
       client.get(req.params.id,function(err,reply){
         if(err){
-          raygun.send(err);
+          //raygun.send(err);
           return res.json(500,{ error: 'There was a problem loading the project, please try building it again.' });
         }
         if(!reply) return res.status(404).send('NOT FOUND');
@@ -81,7 +81,7 @@ exports.create = function(client, storage, manifold, raygun){
           .then(function(){ return storage.getUrlForZip(manifest); })
           .then(function(url){ res.json({archive: url}); })
           .fail(function(err){
-            raygun.send(err);
+            //raygun.send(err);
             return res.json(500, { error: err.message });
           });
       });
