@@ -1,7 +1,7 @@
 'use strict';
 
 var path    = require('path'),
-  outputDir = process.env.TMP,
+  outputDir = path.join(__dirname, '../../tmp'),
   config    = require(path.join(__dirname,'../config')),
   platforms = config.platforms;
 
@@ -67,10 +67,11 @@ exports.create = function(client, storage, manifold, raygun){
         var manifest = JSON.parse(reply),
           output = path.join(outputDir,manifest.id);
 
-        manifold.normalize(manifest)
+        storage.removeDir(output)
+          .then(function(){ return manifold.normalize(manifest); })
           .then(function(normManifest){
-            manifest = normManifest;
-            return manifold.createProject(manifest,output,platforms);
+              manifest = normManifest; 
+              return manifold.createProject(manifest,output,platforms);
           })
           .then(function(){ return storage.setPermissions(output); })
           .then(function(){ return storage.createZip(output,manifest); })
