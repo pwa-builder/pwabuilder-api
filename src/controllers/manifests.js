@@ -2,8 +2,7 @@
 
 var path    = require('path'),
   outputDir = path.join(__dirname, '../../tmp'),
-  config    = require(path.join(__dirname,'../config')),
-  platforms = config.platforms;
+  config    = require(path.join(__dirname,'../config'));
 
 exports.create = function(client, storage, manifold, raygun){
   return {
@@ -63,6 +62,14 @@ exports.create = function(client, storage, manifold, raygun){
           return res.json(500,{ error: 'There was a problem loading the project, please try building it again.' });
         }
         if(!reply) return res.status(404).send('NOT FOUND');
+
+        var platforms = req.body.platforms;
+        if (!platforms) {
+          // No platforms were selected by the user. Using default configured platforms.
+          platforms = config.platforms;
+        }
+
+        console.log('Platforms.', platforms);
 
         var manifest = JSON.parse(reply),
           output = path.join(outputDir,manifest.id);
