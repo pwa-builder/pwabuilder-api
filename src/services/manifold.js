@@ -136,10 +136,32 @@ Manifold.prototype.createProject = function(manifest,outputDir,platforms){
         'build'     : false
       };
 
-      self.lib.projectBuilder.createApps(cleanManifest, outputDir, platforms, options, function (err) {
+      self.lib.projectBuilder.createApps(cleanManifest, outputDir, platforms, options, function (err, projectDir) {
 
         if(err){
           console.log('Create Projects Errors!!!',err);
+          return reject(err);
+        }
+
+        return resolve(projectDir);
+      });
+    }catch(e){
+      return reject(e);
+    }
+  });
+};
+
+Manifold.prototype.packageProject = function(platforms,outputDir,options){
+  var self = this;
+
+  return Q.Promise(function(resolve, reject){
+    console.log('Packaging the project...',outputDir,platforms);
+    try{
+
+      self.lib.projectBuilder.packageApps(platforms, outputDir, options, function (err) {
+
+        if(err){
+          console.log('Package Project Errors!!!',err);
           return reject(err);
         }
 
@@ -150,6 +172,7 @@ Manifold.prototype.createProject = function(manifest,outputDir,platforms){
     }
   });
 };
+
 
 Manifold.prototype.assignValidationErrors = function(errors,manifest){
   var data = { errors: []};

@@ -92,6 +92,52 @@ exports.create = function(client, storage, manifold, raygun){
             return res.json(500, { error: err.message });
           });
       });
+    },
+    package: function(req,res){
+      client.get(req.params.id,function(err,reply){
+        if(err){
+          //raygun.send(err);
+          return res.json(500,{ error: 'There was a problem packaging the project, please try packaging it again.' });
+        }
+        if(!reply) return res.status(404).send('NOT FOUND');
+
+        var platform = req.body.platform;
+        var packageOptions = req.body.options;
+
+        if (!platform) {
+          // No platforms were selected by the user. Using default configured platforms.
+          return res.json(400,{ error: 'No platform has been provided' });
+        }
+
+        var platforms = [ platform ];
+
+        console.log('Platform.', platform);
+
+        var manifest = JSON.parse(reply),
+          output = path.join(outputDir,manifest.id);
+
+        storage.removeDir(output)
+          .then(function(){ return manifold.normalize(manifest); })
+          .then(function(normManifest){
+              manifest = normManifest; 
+              return manifold.createProject(manifest,output,platforms);
+          })
+          .then(function(projectDir){
+              console.log(projectDir);
+              return manifold.packageProject(platforms, projectDir, packageOptions);
+          })
+          // .then(function(){ return storage.setPermissions(output); })
+          // .then(function(){ return storage.createZip(output,manifest); })
+          // .then(function(){ return storage.createContainer(manifest); })
+          // .then(function(){ return storage.uploadZip(manifest,output); })
+          // .then(function(){ return storage.removeDir(output); })
+          .then(function(){ return storage.getUrlForZip(manifest); })
+          .then(function(url){ res.json({archive: url}); })
+          .fail(function(err){
+            //raygun.send(err);
+            return res.json(500, { error: err.message });
+          });
+      });
     }
   };
 };
