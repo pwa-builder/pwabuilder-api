@@ -4,6 +4,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-mocha-test');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-copy');
+    grunt.loadNpmTasks('grunt-sync');
 
     grunt.initConfig({
         copy: {
@@ -29,7 +30,6 @@ module.exports = function(grunt) {
                 src: ['test/**/*.js']
             },
         },
-
         watch: {
             js: {
                 options: {
@@ -37,6 +37,34 @@ module.exports = function(grunt) {
                 },
                 files: ['src/**/*.js','test/**/*.js'],
                 tasks: ['default']
+            },
+            windows10: {
+                files: ['../manifoldjs-windows10/lib/*.js'],
+                tasks: ['sync:windows10']
+            },
+            lib: {
+                files: ['../manifoldjs-lib/lib/*.js', '../manifoldjs-lib/lib/manifestTools/*.js'],
+                tasks: ['sync:lib']
+            }
+        },
+        sync: {
+            windows10: {
+                files: [{
+                    src: ['../manifoldjs-windows10/lib/*.js'],
+                    dest: 'node_modules/manifoldjs-windows10'  
+                }],
+                verbose: true,
+                failOnError: true,
+                updateAndDelete: false
+              },
+            lib: {
+                files: [{
+                    src: ['../manifoldjs-lib/lib/*.js','../manifoldjs-lib/lib/manifestTools/*.js'],
+                    dest: 'node_modules/manifoldjs-lib'  
+                }],
+                verbose: true,
+                failOnError: true,
+                updateAndDelete: false
             }
         }
     });
@@ -54,4 +82,5 @@ module.exports = function(grunt) {
     grunt.registerTask('default', 'mochaTest:test');
     grunt.registerTask('test',['mochaTest:test','watch']);
     grunt.registerTask('ci',['mochaTest:ci','copy:ci']);
+    grunt.registerTask('development', ['watch']);
 };
