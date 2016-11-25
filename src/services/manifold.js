@@ -158,14 +158,14 @@ Manifold.prototype.packageProject = function(platforms,outputDir,options){
     console.log('Packaging the project...',outputDir,platforms);
     try{
 
-      self.lib.projectBuilder.packageApps(platforms, outputDir, options, function (err) {
+      self.lib.projectBuilder.packageApps(platforms, outputDir, options, function (err, packagePath) {
 
         if(err){
           console.log('Package Project Errors!!!',err);
           return reject(err);
         }
 
-        return resolve();
+        return resolve(packagePath);
       });
     }catch(e){
       return reject(e);

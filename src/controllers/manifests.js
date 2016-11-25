@@ -116,7 +116,7 @@ exports.create = function(client, storage, manifold, raygun){
         var manifest = JSON.parse(reply),
           output = path.join(outputDir,manifest.id);
 
-        storage.removeDir(output)
+        var result = storage.removeDir(output)
           .then(function(){ return manifold.normalize(manifest); })
           .then(function(normManifest){
               manifest = normManifest; 
@@ -125,18 +125,31 @@ exports.create = function(client, storage, manifold, raygun){
           .then(function(projectDir){
               console.log(projectDir);
               return manifold.packageProject(platforms, projectDir, packageOptions);
-          })
-          // .then(function(){ return storage.setPermissions(output); })
-          // .then(function(){ return storage.createZip(output,manifest); })
-          // .then(function(){ return storage.createContainer(manifest); })
-          // .then(function(){ return storage.uploadZip(manifest,output); })
-          // .then(function(){ return storage.removeDir(output); })
-          .then(function(){ return storage.getUrlForZip(manifest); })
-          .then(function(url){ res.json({archive: url}); })
-          .fail(function(err){
-            //raygun.send(err);
-            return res.json(500, { error: err.message });
           });
+
+          if (packageOptions.DotWeb) {
+            var dotWebPath;
+            result
+             .then(function(packagePath){ 
+                dotWebPath = packagePath; 
+                return storage.createContainer(manifest); 
+              })
+             .then(function(){ return storage.uploadFile(manifest,dotWebPath); })
+             .then(function(){ return storage.removeDir(output); })
+             .then(function(){ return storage.getUrlForFile(manifest, '.web'); })
+             .then(function(url){ res.json({archive: url}); })
+             .fail(function(err){
+               return res.json(500, { error: err.message });
+            });
+          }
+          else {
+            result
+            .then(function(){ return storage.removeDir(output); })
+            .then(function(){ res.json(null); })
+            .fail(function(err){
+              return res.json(500, { error: err.message });
+            });
+          }
       });
     }
   };

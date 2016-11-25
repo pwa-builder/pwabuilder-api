@@ -64,6 +64,18 @@ Storage.prototype.uploadZip = function(manifest, outputDir){
     });
 };
 
+Storage.prototype.uploadFile = function(manifest, filePath){
+    var self = this;
+
+    return Q.Promise(function(resolve,reject){
+        console.log('Uploading zip...');
+        self.blobService.createBlockBlobFromLocalFile(manifest.id, manifest.content.short_name + '.web', filePath, { contentType: 'application/zip' }, function(err){
+            if(err){ return reject(err); }
+            return resolve();
+        });
+    });
+};
+
 Storage.prototype.setPermissions = function(outputDir){
     console.log('Setting permissions on',outputDir,'...');
     wrench.chmodSyncRecursive(outputDir, '0755');
@@ -80,9 +92,9 @@ Storage.prototype.removeDir = function(outputDir){
     });
 };
 
-Storage.prototype.getUrlForZip = function(manifest){
+Storage.prototype.getUrlForFile = function(manifest, extension){
     var container = manifest.id,
-    blob = manifest.content.short_name + '.zip',
+    blob = manifest.content.short_name + extension,
     accessPolicy = {
         AccessPolicy: {
             Permissions: azure.BlobUtilities.SharedAccessPermissions.READ,
@@ -93,6 +105,10 @@ Storage.prototype.getUrlForZip = function(manifest){
 
     var sasToken = this.blobService.generateSharedAccessSignature(container, blob, accessPolicy);
     return this.blobService.getUrl(container,blob,sasToken,true);
+};
+
+Storage.prototype.getUrlForZip = function(manifest){
+   return this.getUrlForFile(manifest, '.zip');
 };
 
 exports.create = function(blobService){
