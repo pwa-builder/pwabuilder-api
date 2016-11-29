@@ -69,11 +69,18 @@ exports.create = function(client, storage, manifold, raygun){
           platforms = config.platforms;
         }
 
-        console.log('Platforms.', platforms);
-
+        console.log('Platforms: ', platforms);
+        
         var manifest = JSON.parse(reply),
-          output = path.join(outputDir,manifest.id);
+          output = path.join(outputDir,manifest.id),
+          dirSuffix = req.body.dirSuffix;
 
+        if (dirSuffix) {
+          output += "-" + dirSuffix;
+        }
+
+        console.log("Output: ", output);
+      
         storage.removeDir(output)
           .then(function(){ return manifold.normalize(manifest); })
           .then(function(normManifest){
@@ -83,9 +90,9 @@ exports.create = function(client, storage, manifold, raygun){
           .then(function(){ return storage.setPermissions(output); })
           .then(function(){ return storage.createZip(output,manifest); })
           .then(function(){ return storage.createContainer(manifest); })
-          .then(function(){ return storage.uploadZip(manifest,output); })
+          .then(function(){ return storage.uploadZip(manifest,output, dirSuffix); })
           .then(function(){ return storage.removeDir(output); })
-          .then(function(){ return storage.getUrlForZip(manifest); })
+          .then(function(){ return storage.getUrlForZip(manifest, dirSuffix); })
           .then(function(url){ res.json({archive: url}); })
           .fail(function(err){
             //raygun.send(err);
@@ -111,10 +118,17 @@ exports.create = function(client, storage, manifold, raygun){
 
         var platforms = [ platform ];
 
-        console.log('Platform.', platform);
+        console.log('Platform: ', platform);
 
         var manifest = JSON.parse(reply),
-          output = path.join(outputDir,manifest.id);
+          output = path.join(outputDir,manifest.id),
+          dirSuffix = req.body.dirSuffix;
+
+        if (dirSuffix) {
+          output += "-" + dirSuffix;
+        }
+
+        console.log("Output: ", output);
 
         var result = storage.removeDir(output)
           .then(function(){ return manifold.normalize(manifest); })

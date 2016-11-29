@@ -52,19 +52,19 @@ Storage.prototype.createContainer = function(manifest){
     });
 };
 
-Storage.prototype.uploadZip = function(manifest, outputDir){
+Storage.prototype.uploadZip = function(manifest, outputDir, suffix){
     var extension = '.zip';
-    return this.uploadFile(manifest, path.join(outputDir,manifest.content.short_name + extension), extension);
+    return this.uploadFile(manifest, path.join(outputDir,manifest.content.short_name + extension), extension, "-" + suffix);
 };
 
-Storage.prototype.uploadFile = function(manifest, filePath, extension){
-    var self = this;
-
-    var contentType = (extension == ".zip") ? 'application/zip' : 'application/octet-stream';
+Storage.prototype.uploadFile = function(manifest, filePath, extension, suffix){
+    var self = this,
+        suffix = suffix ? suffix : '',
+        contentType = (extension == ".zip") ? 'application/zip' : 'application/octet-stream';
 
     return Q.Promise(function(resolve,reject){
-        console.log('Uploading' + extension + '...');
-        self.blobService.createBlockBlobFromLocalFile(manifest.id, manifest.content.short_name + extension, filePath, { contentType: contentType }, function(err){
+        console.log('Uploading ' + extension + '...');
+        self.blobService.createBlockBlobFromLocalFile(manifest.id, manifest.content.short_name + suffix + extension, filePath, { contentType: contentType }, function(err){
             if(err){ return reject(err); }
             return resolve();
         });
@@ -87,9 +87,10 @@ Storage.prototype.removeDir = function(outputDir){
     });
 };
 
-Storage.prototype.getUrlForFile = function(manifest, extension){
+Storage.prototype.getUrlForFile = function(manifest, extension, suffix){
     var container = manifest.id,
-    blob = manifest.content.short_name + extension,
+    suffix = suffix ? suffix : '',
+    blob = manifest.content.short_name + suffix + extension,
     accessPolicy = {
         AccessPolicy: {
             Permissions: azure.BlobUtilities.SharedAccessPermissions.READ,
@@ -102,8 +103,8 @@ Storage.prototype.getUrlForFile = function(manifest, extension){
     return this.blobService.getUrl(container,blob,sasToken,true);
 };
 
-Storage.prototype.getUrlForZip = function(manifest){
-   return this.getUrlForFile(manifest, '.zip');
+Storage.prototype.getUrlForZip = function(manifest, suffix){
+   return this.getUrlForFile(manifest, '.zip', "-" + suffix);
 };
 
 exports.create = function(blobService){
