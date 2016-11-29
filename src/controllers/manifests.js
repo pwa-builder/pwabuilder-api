@@ -123,18 +123,20 @@ exports.create = function(client, storage, manifold, raygun){
               return manifold.createProject(manifest,output,platforms);
           })
           .then(function(projectDir){
-              console.log(projectDir);
               return manifold.packageProject(platforms, projectDir, packageOptions);
           });
 
           if (packageOptions.DotWeb) {
             var dotWebPath;
             result
-             .then(function(packagePath){ 
-                dotWebPath = packagePath; 
+             .then(function(packagePaths){
+                if (packagePaths.length > 1) {
+                  return res.json(400,{ error: 'Multiple packages created. Expected just one.' });
+                }
+                dotWebPath = packagePaths[0]; 
                 return storage.createContainer(manifest); 
               })
-             .then(function(){ return storage.uploadFile(manifest,dotWebPath); })
+             .then(function(){ return storage.uploadFile(manifest,dotWebPath, '.web'); })
              .then(function(){ return storage.removeDir(output); })
              .then(function(){ return storage.getUrlForFile(manifest, '.web'); })
              .then(function(url){ res.json({archive: url}); })

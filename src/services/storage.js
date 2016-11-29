@@ -53,23 +53,18 @@ Storage.prototype.createContainer = function(manifest){
 };
 
 Storage.prototype.uploadZip = function(manifest, outputDir){
-    var self = this;
-
-    return Q.Promise(function(resolve,reject){
-        console.log('Uploading zip...');
-        self.blobService.createBlockBlobFromLocalFile(manifest.id, manifest.content.short_name + '.zip', path.join(outputDir,manifest.content.short_name+'.zip'),{ contentType: 'application/zip' }, function(err){
-            if(err){ return reject(err); }
-            return resolve();
-        });
-    });
+    var extension = '.zip';
+    return this.uploadFile(manifest, path.join(outputDir,manifest.content.short_name + extension), extension);
 };
 
-Storage.prototype.uploadFile = function(manifest, filePath){
+Storage.prototype.uploadFile = function(manifest, filePath, extension){
     var self = this;
 
+    var contentType = (extension == ".zip") ? 'application/zip' : 'application/octet-stream';
+
     return Q.Promise(function(resolve,reject){
-        console.log('Uploading zip...');
-        self.blobService.createBlockBlobFromLocalFile(manifest.id, manifest.content.short_name + '.web', filePath, { contentType: 'application/zip' }, function(err){
+        console.log('Uploading' + extension + '...');
+        self.blobService.createBlockBlobFromLocalFile(manifest.id, manifest.content.short_name + extension, filePath, { contentType: contentType }, function(err){
             if(err){ return reject(err); }
             return resolve();
         });
