@@ -90,11 +90,15 @@ Storage.prototype.removeDir = function(outputDir){
 Storage.prototype.getUrlForFile = function(manifest, extension, suffix){
     var container = manifest.id,
     suffix = suffix ? suffix : '',
-    blob = manifest.content.short_name + suffix + extension,
-    accessPolicy = {
+    blob = manifest.content.short_name + suffix + extension;
+
+    var startDate = new Date();
+    startDate.setMinutes(startDate.getMinutes() - 15);
+
+    var accessPolicy = {
         AccessPolicy: {
             Permissions: azure.BlobUtilities.SharedAccessPermissions.READ,
-            Start: new Date(),
+            Start: startDate,
             Expiry: azure.date.daysFromNow(7)
         }
     };
