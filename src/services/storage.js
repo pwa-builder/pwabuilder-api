@@ -59,7 +59,7 @@ Storage.prototype.uploadZip = function(manifest, outputDir, suffix){
 
 Storage.prototype.uploadFile = function(manifest, filePath, extension, suffix){
     var self = this,
-        suffix = suffix ? suffix : '',
+        suffix = suffix || '',
         contentType = (extension == ".zip") ? 'application/zip' : 'application/octet-stream';
 
     return Q.Promise(function(resolve,reject){
@@ -89,7 +89,7 @@ Storage.prototype.removeDir = function(outputDir){
 
 Storage.prototype.getUrlForFile = function(manifest, extension, suffix){
     var container = manifest.id,
-    suffix = suffix ? suffix : '',
+    suffix = suffix || '',
     blob = manifest.content.short_name + suffix + extension;
 
     var startDate = new Date();
