@@ -83,4 +83,5 @@ module.exports = function(grunt) {
     grunt.registerTask('test',['mochaTest:test','watch']);
     grunt.registerTask('ci',['mochaTest:ci','copy:ci']);
     grunt.registerTask('development', ['watch']);
+    grunt.registerTask('forceSync', ['sync']);
 };
