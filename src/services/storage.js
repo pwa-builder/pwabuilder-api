@@ -103,7 +103,11 @@ Storage.prototype.getUrlForFile = function(manifest, extension, suffix){
         }
     };
 
-    var sasToken = this.blobService.generateSharedAccessSignature(container, blob, accessPolicy);
+    var headers = {
+        contentDisposition: 'attachment; filename=' + blob
+    };
+
+    var sasToken = this.blobService.generateSharedAccessSignature(container, blob, accessPolicy, headers);
     return this.blobService.getUrl(container,blob,sasToken,true);
 };
 
