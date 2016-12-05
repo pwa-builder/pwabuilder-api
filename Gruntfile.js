@@ -42,6 +42,10 @@ module.exports = function(grunt) {
                 files: ['../manifoldjs-windows10/lib/*.js'],
                 tasks: ['sync:windows10']
             },
+            cordova: {
+                files: ['../manifoldjs-cordova/**/*.js'],
+                tasks: ['sync:cordova']
+            },
             lib: {
                 files: ['../manifoldjs-lib/lib/*.js', '../manifoldjs-lib/lib/manifestTools/*.js'],
                 tasks: ['sync:lib']
@@ -57,6 +61,15 @@ module.exports = function(grunt) {
                 failOnError: true,
                 updateAndDelete: false
               },
+            cordova: {
+                files: [{
+                    src: ['../manifoldjs-cordova/**/*.js'],
+                    dest: 'node_modules/manifoldjs-cordova'  
+                }],
+                verbose: true,
+                failOnError: true,
+                updateAndDelete: false
+            },
             lib: {
                 files: [{
                     src: ['../manifoldjs-lib/lib/*.js','../manifoldjs-lib/lib/manifestTools/*.js'],
