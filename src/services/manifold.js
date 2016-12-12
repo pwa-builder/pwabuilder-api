@@ -177,7 +177,7 @@ Manifold.prototype.getServiceWorkers = function(id) {
   var self = this;
   
   return Q.Promise(function (resolve, reject) {    
-    self.lib.serviceWorker.getDownloadURL(id, function (err, resultURL) {
+    self.lib.serviceWorkerTools.getAssetsFolders(id, function (err, resultURL) {
       return resolve(resultURL);
     });
   });
