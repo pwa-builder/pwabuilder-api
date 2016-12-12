@@ -126,6 +126,36 @@ Storage.prototype.getUrlForZip = function(containerName, fileName, suffix){
    return this.getUrlForFile(containerName, fileName, '.zip', "-" + suffix);
 };
 
+Storage.prototype.createZipFromDirs = function(folders, folderName, fileName) {
+    return Q.Promise(function(resolve,reject){
+        console.log('Creating zip archive...');
+        var resultFilePath = path.join(folderName, fileName+'.zip');
+        var archive = archiver('zip'),
+
+        zip = fs.createWriteStream(resultFilePath);
+
+        zip.on('close',function(){
+            console.log(archive.pointer() + ' total bytes');
+            console.log('archiver has been finalized and the output file descriptor has closed.');
+
+            resolve();
+        });
+
+        archive.on('error',function(err){
+            reject(err);
+        });
+
+        archive.pipe(zip);
+
+        folders.forEach(function(sourceFolder) {
+            archive.directory(sourceFolder, path.basename(sourceFolder));
+        });
+
+        archive.finalize();
+        return resolve(resultFilePath);
+    });
+};
+
 exports.create = function(blobService){
     return new Storage(blobService);
 };

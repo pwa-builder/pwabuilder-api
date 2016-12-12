@@ -23,7 +23,7 @@ exports.create = function(manifold, storage){
                     folderName = path.join(outputDir, storageContainer);
                     return storage.createDirectory(folderName); 
                 })
-                .then(function() { return createZipFromDirs(folders, folderName, storageContainer); })
+                .then(function() { return storage.createZipFromDirs(folders, folderName, storageContainer); })
                 .then(function(fileResult) {
                     tempFilePath = fileResult;
                     return storage.createContainer(storageContainer); 
@@ -143,34 +143,4 @@ exports.create = function(manifold, storage){
             });
         });
     }
-
-    function createZipFromDirs(folders, folderName, fileName) {
-        return Q.Promise(function(resolve,reject){
-            console.log('Creating zip archive...');
-            var resultFilePath = path.join(folderName, fileName+'.zip');
-            var archive = archiver('zip'),
-
-            zip = fs.createWriteStream(resultFilePath);
-
-            zip.on('close',function(){
-                console.log(archive.pointer() + ' total bytes');
-                console.log('archiver has been finalized and the output file descriptor has closed.');
-
-                resolve();
-            });
-
-            archive.on('error',function(err){
-                reject(err);
-            });
-
-            archive.pipe(zip);
-
-            folders.forEach(function(sourceFolder) {
-                archive.directory(sourceFolder, path.basename(sourceFolder));
-            });
-
-            archive.finalize();
-            return resolve(resultFilePath);
-        });
-    };
 };
