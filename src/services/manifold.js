@@ -173,6 +173,15 @@ Manifold.prototype.packageProject = function(platforms,outputDir,options){
   });
 };
 
+Manifold.prototype.getServiceWorkers = function(id) {
+  var self = this;
+  
+  return Q.Promise(function (resolve, reject) {    
+    self.lib.serviceWorker.getDownloadURL(id, function (err, resultURL) {
+      return resolve(resultURL);
+    });
+  });
+};
 
 Manifold.prototype.assignValidationErrors = function(errors,manifest){
   var data = { errors: []};

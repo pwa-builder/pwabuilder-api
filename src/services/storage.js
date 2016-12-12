@@ -15,12 +15,12 @@ function Storage(blobService){
     this.blobService = blobService;
 }
 
-Storage.prototype.createZip = function(output, manifest){
+Storage.prototype.createZip = function(output, fileName){
     return Q.Promise(function(resolve,reject){
         console.log('Creating zip archive...');
         var archive = archiver('zip'),
 
-        zip = fs.createWriteStream(path.join(output,manifest.content.short_name+'.zip'));
+        zip = fs.createWriteStream(path.join(output,fileName+'.zip'));
 
         zip.on('close',function(){
             console.log(archive.pointer() + ' total bytes');
@@ -35,36 +35,35 @@ Storage.prototype.createZip = function(output, manifest){
 
         archive.pipe(zip);
 
-        var folderName = path.join(output, utils.sanitizeName(manifest.content.short_name));
+        var folderName = path.join(output, utils.sanitizeName(fileName));
         archive.directory(folderName, 'projects', { mode: '0755' }).finalize();
     });
 };
 
-Storage.prototype.createContainer = function(manifest){
+Storage.prototype.createContainer = function(containerName){
     var self = this;
-
     return Q.Promise(function(resolve,reject){
         console.log('Creating storage container...');
-        self.blobService.createContainerIfNotExists(manifest.id, {publicAccessLevel: 'blob'}, function(err) {
+        self.blobService.createContainerIfNotExists(containerName, {publicAccessLevel: 'blob'}, function(err) {
             if(err){ return reject(err); }
             return resolve();
         });
     });
 };
 
-Storage.prototype.uploadZip = function(manifest, outputDir, suffix){
+Storage.prototype.uploadZip = function(containerName, fileName, outputDir, suffix, blobName){
     var extension = '.zip';
-    return this.uploadFile(manifest, path.join(outputDir,manifest.content.short_name + extension), extension, "-" + suffix);
+    var _blobName = blobName || fileName;
+    return this.uploadFile(containerName, _blobName, path.join(outputDir, fileName + extension), extension, "-" + suffix);
 };
 
-Storage.prototype.uploadFile = function(manifest, filePath, extension, suffix){
+Storage.prototype.uploadFile = function(containerName, fileName, filePath, extension, suffix){
     var self = this,
         suffix = suffix || '',
         contentType = (extension == ".zip") ? 'application/zip' : 'application/octet-stream';
-
     return Q.Promise(function(resolve,reject){
         console.log('Uploading ' + extension + '...');
-        self.blobService.createBlockBlobFromLocalFile(manifest.id, manifest.content.short_name + suffix + extension, filePath, { contentType: contentType }, function(err){
+        self.blobService.createBlockBlobFromLocalFile(containerName, fileName + suffix + extension, filePath, { contentType: contentType }, function(err){
             if(err){ return reject(err); }
             return resolve();
         });
@@ -75,6 +74,19 @@ Storage.prototype.setPermissions = function(outputDir){
     console.log('Setting permissions on',outputDir,'...');
     wrench.chmodSyncRecursive(outputDir, '0755');
 };
+
+Storage.prototype.createDirectory = function(folderName) {
+    return Q.Promise(function(resolve,reject){
+        fs.mkdir(folderName, function (err) {
+            if (err) {
+                console.error(err);
+                reject(err);
+            }
+            console.log("Directory " + folderName + " created successfully!");
+            resolve();
+        });
+    });
+}
 
 Storage.prototype.removeDir = function(outputDir){
     console.log('Deleting output directory...');
@@ -87,10 +99,9 @@ Storage.prototype.removeDir = function(outputDir){
     });
 };
 
-Storage.prototype.getUrlForFile = function(manifest, extension, suffix){
-    var container = manifest.id,
-    suffix = suffix || '',
-    blob = manifest.content.short_name + suffix + extension;
+Storage.prototype.getUrlForFile = function(containerName, fileName, extension, suffix){
+    var container = suffix = suffix || '',
+    blob = fileName + suffix + extension;
 
     var startDate = new Date();
     startDate.setMinutes(startDate.getMinutes() - 15);
@@ -107,12 +118,12 @@ Storage.prototype.getUrlForFile = function(manifest, extension, suffix){
         contentDisposition: 'attachment; filename=' + blob
     };
 
-    var sasToken = this.blobService.generateSharedAccessSignature(container, blob, accessPolicy, headers);
-    return this.blobService.getUrl(container,blob,sasToken,true);
+    var sasToken = this.blobService.generateSharedAccessSignature(containerName, blob, accessPolicy, headers);
+    return this.blobService.getUrl(containerName,blob,sasToken,true);
 };
 
-Storage.prototype.getUrlForZip = function(manifest, suffix){
-   return this.getUrlForFile(manifest, '.zip', "-" + suffix);
+Storage.prototype.getUrlForZip = function(containerName, fileName, suffix){
+   return this.getUrlForFile(containerName, fileName, '.zip', "-" + suffix);
 };
 
 exports.create = function(blobService){

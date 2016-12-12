@@ -88,11 +88,11 @@ exports.create = function(client, storage, manifold, raygun){
               return manifold.createProject(manifest,output,platforms);
           })
           .then(function(){ return storage.setPermissions(output); })
-          .then(function(){ return storage.createZip(output,manifest); })
-          .then(function(){ return storage.createContainer(manifest); })
-          .then(function(){ return storage.uploadZip(manifest,output, dirSuffix); })
+          .then(function(){ return storage.createZip(output, manifest.content.short_name); })
+          .then(function(){ return storage.createContainer(manifest.id); })
+          .then(function(){ return storage.uploadZip(manifest.id, manifest.content.short_name, output, dirSuffix); })
           .then(function(){ return storage.removeDir(output); })
-          .then(function(){ return storage.getUrlForZip(manifest, dirSuffix); })
+          .then(function(){ return storage.getUrlForZip(manifest.id, manifest.content.short_name, dirSuffix); })
           .then(function(url){ res.json({archive: url}); })
           .fail(function(err){
             //raygun.send(err);
@@ -150,9 +150,9 @@ exports.create = function(client, storage, manifold, raygun){
                 dotWebPath = packagePaths[0]; 
                 return storage.createContainer(manifest); 
               })
-             .then(function(){ return storage.uploadFile(manifest,dotWebPath, '.web'); })
+             .then(function(){ return storage.uploadFile(manifest.id, manifest.content.short_name, dotWebPath, '.web'); })
              .then(function(){ return storage.removeDir(output); })
-             .then(function(){ return storage.getUrlForFile(manifest, '.web'); })
+             .then(function(){ return storage.getUrlForFile(manifest.id, manifest.content.short_name, '.web'); })
              .then(function(url){ res.json({archive: url}); })
              .fail(function(err){
                return res.json(500, { error: err.message });

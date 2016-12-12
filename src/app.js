@@ -8,6 +8,7 @@ var express      = require('express'),
   multer       = require('multer'),
   manifests    = require('./routes/manifests'),
   images       = require('./routes/images'),
+  serviceworkers= require('./routes/serviceworkers'),
   raygun       = require('raygun'),
   raygunClient = new raygun.Client().init({ apiKey: 'PrRN4HizgQVI2xeXBxdSzw==' });
 
@@ -59,6 +60,7 @@ var Manifold = {
 
     app.use('/manifests', manifests(redisClient,azure,manifold,raygunClient));
     app.use('/images',images());
+    app.use('/serviceworkers', serviceworkers(manifold, azure));
 
     // catch 404 and forward to error handler
     app.use(function(req, res, next) {
