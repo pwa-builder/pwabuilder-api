@@ -12,6 +12,7 @@ module.exports = function(client,azure,manifoldjs){
 
     return router
         .get('/:id',controller.show)
+        .get('/:id/download', controller.download)
         .post('/',controller.create)
         .put('/:id',controller.update)
         .post('/:id/build',controller.build)

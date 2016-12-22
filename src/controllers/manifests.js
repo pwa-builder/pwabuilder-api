@@ -2,7 +2,8 @@
 
 var path    = require('path'),
   outputDir = process.env.TMP,
-  config    = require(path.join(__dirname,'../config'));
+  config    = require(path.join(__dirname,'../config')),
+  util      = require('util');
 
 exports.create = function(client, storage, manifold, raygun){
   return {
@@ -13,6 +14,18 @@ exports.create = function(client, storage, manifold, raygun){
 
         var manifest = JSON.parse(reply);
         res.json(manifest);
+      });
+    },
+    download: function(req, res, next) {
+      client.get(req.params.id,function(err,reply){
+        if(err) return next(err);
+        if(!reply) return res.status(404).send('NOT FOUND');
+
+        var manifest = JSON.parse(reply).content;
+        var jsonFormatted = util.inspect(manifest, {depth: null, colors: false});
+
+        res.set({"Content-Disposition":"attachment; filename=\"manifest.json\""});
+        res.send(jsonFormatted);
       });
     },
     create: function(req,res,next){
