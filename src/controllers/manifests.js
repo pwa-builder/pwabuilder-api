@@ -16,18 +16,6 @@ exports.create = function(client, storage, manifold, raygun){
         res.json(manifest);
       });
     },
-    download: function(req, res, next) {
-      client.get(req.params.id,function(err,reply){
-        if(err) return next(err);
-        if(!reply) return res.status(404).send('NOT FOUND');
-
-        var manifest = JSON.parse(reply).content;
-        var jsonFormatted = util.inspect(manifest, {depth: null, colors: false});
-
-        res.set({"Content-Disposition":"attachment; filename=\"manifest.json\""});
-        res.send(jsonFormatted);
-      });
-    },
     create: function(req,res,next){
       if(req.body.siteUrl){
         manifold.createManifestFromUrl(req.body.siteUrl,client)
