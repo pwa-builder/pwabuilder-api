@@ -81,7 +81,8 @@ exports.create = function(client, storage, manifold, raygun){
         }
 
         console.log("Output: ", output);
-      
+        console.log("ManifestInfo: " + manifest);
+
         storage.removeDir(output)
           .then(function(){ return manifold.normalize(manifest); })
           .then(function(normManifest){
@@ -167,6 +168,51 @@ exports.create = function(client, storage, manifold, raygun){
               return res.json(500, { error: err.message });
             });
           }
+      });
+    },
+    generateMissingImages: function(req, res) {
+      client.get(req.params.id,function(err,reply){
+        if(err){
+          //raygun.send(err);
+          return res.json(500,{ error: 'There was a problem loading the manifest, please try it again.' });
+        }
+        if(!reply) return res.status(404).send('NOT FOUND');
+
+        var manifestInfo = JSON.parse(reply);
+        manifestInfo.content.icons = manifestInfo.content.icons.filter(function (icon) {
+          return !icon.generated;
+        });
+        console.log(manifestInfo.content.icons);
+        
+        var persistedIcons = JSON.parse(JSON.stringify(manifestInfo.content.icons));
+
+        manifold.generateImagesForManifest(req.files.file, manifestInfo, client)
+          .then(function (manifest) {
+            if (manifest.icons.length !== persistedIcons.length) { 
+              manifest.icons.map(function (icon) {
+                var exists = false;
+                persistedIcons.forEach(function(_icon) {
+                  if (_icon.src === icon.src && 
+                      _icon.sizes === icon.sizes) {
+                        exists = true;
+                      }
+                }, this);
+
+                if (!exists) {
+                  icon.generated = true;
+                }
+              });
+            }
+            return manifest;
+          })
+          .then(function(manifest) {
+            return manifold.updateManifest(req.params.id, manifest, client);
+          }).then(function () {
+            var image = req.files.file;
+            return manifold.updateAssets(req.params.id, image, client);
+          }).then(function(manifestInfo){
+            res.json(manifestInfo);
+          });
       });
     }
   };
