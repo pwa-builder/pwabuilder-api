@@ -1,7 +1,7 @@
 'use strict';
 
 var archiver = require('archiver'),
-    guid = require('guid'),
+    uuid = require('node-uuid'),
     path = require('path'),
     Q = require('q'),
     fs = require('fs'),
@@ -19,7 +19,7 @@ exports.create = function(manifold, storage){
             manifold.getServiceWorkers(req.query.ids)
                 .then(function(resultFolders) { 
                     folders = resultFolders;
-                    storageContainer = guid.raw();
+                    storageContainer = uuid.v4();
                     folderName = path.join(outputDir, storageContainer);
                     return storage.createDirectory(folderName); 
                 })
