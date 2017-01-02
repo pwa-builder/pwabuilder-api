@@ -5,8 +5,7 @@ var uuid = require('node-uuid'),
   _ = require('lodash'),
   path = require('path'),
   config = require(path.join(__dirname,'../config')),
-  platforms = config.platforms,
-  fs = require('fs');
+  platforms = config.platforms;
 
 function Manifold(manifoldLib){
   this.lib = manifoldLib;
@@ -85,7 +84,7 @@ Manifold.prototype.validateManifest = function(manifest){
   });
 };
 
-Manifold.prototype.updateManifest = function(manifestId,updates,client) {
+Manifold.prototype.updateManifest = function(client,manifestId,updates,assets) {
   var self = this;
 
   return Q.Promise(function(resolve,reject){
@@ -95,6 +94,14 @@ Manifold.prototype.updateManifest = function(manifestId,updates,client) {
 
       var manifest = JSON.parse(reply);
       manifest.content = updates;
+
+      if (assets) {
+        manifest.assets = assets;
+      } else {
+        if ((updates.icons || []).filter(function(icon) { return icon.generated; }).length === 0) {
+          delete manifest.assets;
+        }
+      }
 
       return self.validateManifest(manifest)
       .then(function(manifest){
@@ -265,41 +272,14 @@ Manifold.prototype.generateImagesForManifest = function(image, manifestInfo, cli
   var self = this;
 
   return Q.Promise(function(resolve, reject) {
-    getFileContent(image.path, function(err, fileContent) {
-      self.lib.manifestTools.generateImagesForManifest(fileContent, manifestInfo.content, null, function(err, resultManifestInfo) {
+    self.lib.manifestTools.generateImagesForManifest(image, manifestInfo.content, null, function(err, resultManifestInfo) {
+      if (err) {
+        return reject(err);
+      } else {
         return resolve(resultManifestInfo);
-      });
+      }
     });
   });
-}
-
-Manifold.prototype.updateAssets = function(manifestId,image,client) {
-  var self = this;
-
-  return Q.Promise(function(resolve,reject){
-    client.get(manifestId,function(err,reply){
-      if(err) return reject(err);
-      if(!reply) return reject(new Error('Manifest not found'));
-
-      var manifestInfo = JSON.parse(reply);
-      getFileContent(image.path, function(err, fileContent) {
-        var assets = [{fileName: image.originalname, data: fileContent.toString('hex') }];
-        manifestInfo.assets = assets;
-        
-        return self.validateManifest(manifestInfo)
-          .then(function(manifestInfo){
-            client.set(manifestInfo.id,JSON.stringify(manifestInfo));
-
-            resolve(manifestInfo);
-          });
-      });
-    });
-  });
-};
-
-function getFileContent(filePath, callback) {
-  return Q.nfcall(fs.readFile, filePath)
-  .nodeify(callback);
 }
 
 exports.create = function(manifoldLib){

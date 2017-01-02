@@ -3,7 +3,9 @@
 var path    = require('path'),
   outputDir = process.env.TMP,
   config    = require(path.join(__dirname,'../config')),
-  util      = require('util');
+  util      = require('util'),
+  Q         = require('q'),
+  fs        = require('fs');
 
 exports.create = function(client, storage, manifold, raygun){
   return {
@@ -44,7 +46,7 @@ exports.create = function(client, storage, manifold, raygun){
       }
     },
     update: function(req,res,next){
-      manifold.updateManifest(req.params.id,req.body,client)
+      manifold.updateManifest(client,req.params.id,req.body)
       .then(function(manifest){
         res.json(manifest);
       })
@@ -182,37 +184,37 @@ exports.create = function(client, storage, manifold, raygun){
         manifestInfo.content.icons = manifestInfo.content.icons.filter(function (icon) {
           return !icon.generated;
         });
-        console.log(manifestInfo.content.icons);
-        
+
         var persistedIcons = JSON.parse(JSON.stringify(manifestInfo.content.icons));
 
-        manifold.generateImagesForManifest(req.files.file, manifestInfo, client)
-          .then(function (manifest) {
-            if (manifest.icons.length !== persistedIcons.length) { 
-              manifest.icons.map(function (icon) {
-                var exists = false;
-                persistedIcons.forEach(function(_icon) {
-                  if (_icon.src === icon.src && 
-                      _icon.sizes === icon.sizes) {
-                        exists = true;
-                      }
-                }, this);
+        var imageFile = req.files.file;
+        Q.nfcall(fs.readFile, imageFile.path).then(function (imageContents) {
+          manifold.generateImagesForManifest(imageContents, manifestInfo, client)
+            .then(function (manifest) {
+              if (manifest.icons.length !== persistedIcons.length) { 
+                manifest.icons.map(function (icon) {
+                  var exists = false;
+                  persistedIcons.forEach(function(_icon) {
+                    if (_icon.src === icon.src && 
+                        _icon.sizes === icon.sizes) {
+                          exists = true;
+                        }
+                  }, this);
 
-                if (!exists) {
-                  icon.generated = true;
-                }
-              });
-            }
-            return manifest;
-          })
-          .then(function(manifest) {
-            return manifold.updateManifest(req.params.id, manifest, client);
-          }).then(function () {
-            var image = req.files.file;
-            return manifold.updateAssets(req.params.id, image, client);
-          }).then(function(manifestInfo){
-            res.json(manifestInfo);
-          });
+                  if (!exists) {
+                    icon.generated = true;
+                  }
+                });
+              }
+              return manifest;
+            })
+            .then(function(manifest) {
+              var assets = [{fileName: imageFile.originalname, data: imageContents.toString('hex')}];
+              return manifold.updateManifest(client,req.params.id,manifest,assets);
+            }).then(function (manifestInfo) {
+              res.json(manifestInfo);
+            });
+        });
       });
     }
   };
