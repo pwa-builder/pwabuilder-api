@@ -214,6 +214,8 @@ exports.create = function(client, storage, manifold, raygun){
             }).then(function (manifestInfo) {
               res.json(manifestInfo);
             });
+        }).finally(function () {
+          fs.unlink(imageFile.path)
         });
       });
     }

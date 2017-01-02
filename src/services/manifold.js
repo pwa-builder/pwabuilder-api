@@ -67,6 +67,13 @@ Manifold.prototype.createManifestFromFile = function(file,client){
 Manifold.prototype.validateManifest = function(manifest){
   var self = this;
 
+  // remove propertis in the manifest to track generated icons 
+  var cleanIcons = manifest.content.icons.map(function (icon) {
+    return _.omit(icon, 'generated', 'fileName');
+  });
+  var originalIcons = manifest.content.icons;
+  manifest.content.icons = cleanIcons;
+
   return Q.Promise(function(resolve,reject){
     self.lib.manifestTools.validateManifest(manifest, platforms, function(err,results){
       if(err){ return reject(err); }
@@ -78,6 +85,9 @@ Manifold.prototype.validateManifest = function(manifest){
       self.assignValidationErrors(errors,manifest);
       self.assignSuggestions(suggestions,manifest);
       self.assignWarnings(warnings,manifest);
+
+      // restored original icons
+      manifest.content.icons = originalIcons;
 
       return resolve(manifest);
     });
