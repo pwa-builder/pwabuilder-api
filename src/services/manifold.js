@@ -67,6 +67,13 @@ Manifold.prototype.createManifestFromFile = function(file,client){
 Manifold.prototype.validateManifest = function(manifest){
   var self = this;
 
+  // remove propertis in the manifest to track generated icons 
+  var cleanIcons = manifest.content.icons.map(function (icon) {
+    return _.omit(icon, 'generated', 'fileName');
+  });
+  var originalIcons = manifest.content.icons;
+  manifest.content.icons = cleanIcons;
+
   return Q.Promise(function(resolve,reject){
     self.lib.manifestTools.validateManifest(manifest, platforms, function(err,results){
       if(err){ return reject(err); }
@@ -79,12 +86,15 @@ Manifold.prototype.validateManifest = function(manifest){
       self.assignSuggestions(suggestions,manifest);
       self.assignWarnings(warnings,manifest);
 
+      // restored original icons
+      manifest.content.icons = originalIcons;
+
       return resolve(manifest);
     });
   });
 };
 
-Manifold.prototype.updateManifest = function(manifestId,updates,client) {
+Manifold.prototype.updateManifest = function(client,manifestId,updates,assets) {
   var self = this;
 
   return Q.Promise(function(resolve,reject){
@@ -94,6 +104,14 @@ Manifold.prototype.updateManifest = function(manifestId,updates,client) {
 
       var manifest = JSON.parse(reply);
       manifest.content = updates;
+
+      if (assets) {
+        manifest.assets = assets;
+      } else {
+        if ((updates.icons || []).filter(function(icon) { return icon.generated; }).length === 0) {
+          delete manifest.assets;
+        }
+      }
 
       return self.validateManifest(manifest)
       .then(function(manifest){
@@ -131,9 +149,17 @@ Manifold.prototype.createProject = function(manifest,outputDir,platforms){
     cleanManifest = _.assign(cleanManifest,{ generatedFrom: 'Website Wizard' });
     console.log('Building the project...',cleanManifest,outputDir,platforms);
     try{
+      if (!manifest.assets) {
+        manifest.assets = [];
+      }
+      manifest.assets.map(function (asset) {
+        asset.data = new Buffer(asset.data, 'hex');
+      });
+
       var options = {
         'crosswalk' : false,
-        'build'     : false
+        'build'     : false,
+        'assets'    : manifest.assets
       };
 
       self.lib.projectBuilder.createApps(cleanManifest, outputDir, platforms, options, function (err, projectDir) {
@@ -251,6 +277,20 @@ Manifold.prototype.assignWarnings = function(warnings,manifest){
 
   manifest = _.assign(manifest,data);
 };
+
+Manifold.prototype.generateImagesForManifest = function(image, manifestInfo, client) {
+  var self = this;
+
+  return Q.Promise(function(resolve, reject) {
+    self.lib.manifestTools.generateImagesForManifest(image, manifestInfo.content, null, function(err, resultManifestInfo) {
+      if (err) {
+        return reject(err);
+      } else {
+        return resolve(resultManifestInfo);
+      }
+    });
+  });
+}
 
 exports.create = function(manifoldLib){
   return new Manifold(manifoldLib);

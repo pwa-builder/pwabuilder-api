@@ -3,7 +3,9 @@
 var path    = require('path'),
   outputDir = process.env.TMP,
   config    = require(path.join(__dirname,'../config')),
-  util      = require('util');
+  util      = require('util'),
+  Q         = require('q'),
+  fs        = require('fs');
 
 exports.create = function(client, storage, manifold, raygun){
   return {
@@ -44,7 +46,7 @@ exports.create = function(client, storage, manifold, raygun){
       }
     },
     update: function(req,res,next){
-      manifold.updateManifest(req.params.id,req.body,client)
+      manifold.updateManifest(client,req.params.id,req.body)
       .then(function(manifest){
         res.json(manifest);
       })
@@ -81,7 +83,8 @@ exports.create = function(client, storage, manifold, raygun){
         }
 
         console.log("Output: ", output);
-      
+        console.log("ManifestInfo: " + manifest);
+
         storage.removeDir(output)
           .then(function(){ return manifold.normalize(manifest); })
           .then(function(normManifest){
@@ -167,6 +170,53 @@ exports.create = function(client, storage, manifold, raygun){
               return res.json(500, { error: err.message });
             });
           }
+      });
+    },
+    generateMissingImages: function(req, res) {
+      client.get(req.params.id,function(err,reply){
+        if(err){
+          //raygun.send(err);
+          return res.json(500,{ error: 'There was a problem loading the manifest, please try it again.' });
+        }
+        if(!reply) return res.status(404).send('NOT FOUND');
+
+        var manifestInfo = JSON.parse(reply);
+        manifestInfo.content.icons = manifestInfo.content.icons.filter(function (icon) {
+          return !icon.generated;
+        });
+
+        var persistedIcons = JSON.parse(JSON.stringify(manifestInfo.content.icons));
+
+        var imageFile = req.files.file;
+        Q.nfcall(fs.readFile, imageFile.path).then(function (imageContents) {
+          manifold.generateImagesForManifest(imageContents, manifestInfo, client)
+            .then(function (manifest) {
+              if (manifest.icons.length !== persistedIcons.length) { 
+                manifest.icons.map(function (icon) {
+                  var exists = false;
+                  persistedIcons.forEach(function(_icon) {
+                    if (_icon.src === icon.src && 
+                        _icon.sizes === icon.sizes) {
+                          exists = true;
+                        }
+                  }, this);
+
+                  if (!exists) {
+                    icon.generated = true;
+                  }
+                });
+              }
+              return manifest;
+            })
+            .then(function(manifest) {
+              var assets = [{fileName: imageFile.originalname, data: imageContents.toString('hex')}];
+              return manifold.updateManifest(client,req.params.id,manifest,assets);
+            }).then(function (manifestInfo) {
+              res.json(manifestInfo);
+            });
+        }).finally(function () {
+          fs.unlink(imageFile.path)
+        });
       });
     }
   };

@@ -15,6 +15,7 @@ module.exports = function(client,azure,manifoldjs){
         .post('/',controller.create)
         .put('/:id',controller.update)
         .post('/:id/build',controller.build)
-        .post('/:id/package', controller.package);
+        .post('/:id/package', controller.package)
+        .post('/:id/generatemissingimages', controller.generateMissingImages);
 };
 
