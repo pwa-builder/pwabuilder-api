@@ -1,12 +1,4 @@
 {
-    "chrome": {
-        "packageName": "xanifoldjs-chrome",
-        "source": "xanifoldjs-chrome"
-    },
-    "firefox": {
-        "packageName": "xanifoldjs-firefox",
-        "source": "xanifoldjs-firefox"
-    },
     "windows10": {
         "packageName": "xanifoldjs-windows10",
         "source": "xanifoldjs-windows10"
