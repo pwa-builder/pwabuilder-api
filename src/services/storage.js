@@ -7,7 +7,7 @@ var archiver = require('archiver'),
     wrench = require('wrench'),
     azure = require('azure-storage'),
     Q = require('q'),
-    manifoldJsLib = require('manifoldjs-lib');
+    manifoldJsLib = require('xanifoldjs-lib');
 
 var utils = manifoldJsLib.utils;
 
