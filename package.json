@@ -19,7 +19,7 @@
     "jade": "~1.9.2",
     "lodash": "^3.6.0",
     "loglevel": "^1.2.0",
-    "xanifoldjs-lib": "^1.1.0",
+    "xanifoldjs-lib": "^1.1.2",
     "xanifoldjs-cordova": "^0.1.10",
     "xanifoldjs-web": "^0.2.0",
     "xanifoldjs-windows10": "^0.2.0",
