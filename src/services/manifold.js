@@ -21,7 +21,8 @@ Manifold.prototype.createManifestFromUrl = function(url,client){
   }
 
   return Q.Promise(function(resolve,reject){
-    self.lib.manifestTools.getManifestFromSite(url, function(err, manifestInfo) {
+
+    var callback = function(err, manifestInfo) {
       if (err) {
         if(err.message !== 'Failed to retrieve manifest from site.'){
           return reject(err);
@@ -42,7 +43,20 @@ Manifold.prototype.createManifestFromUrl = function(url,client){
         return resolve(manifest);
       })
       .fail(reject);
-    });
+    }
+
+    var resolveStartUrl =  function (err, manifestInfo) {
+    if (err) {
+      return callback(err, manifestInfo);
+    }
+
+    if (manifestInfo.format === self.lib.constants.BASE_MANIFEST_FORMAT) {
+      return self.lib.manifestTools.validateAndNormalizeStartUrl(url, manifestInfo, callback);
+    } else {
+      return callback(undefined, manifestInfo);
+    }
+  }
+    self.lib.manifestTools.getManifestFromSite(url, undefined, resolveStartUrl);
   });
 };
 
