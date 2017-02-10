@@ -22,7 +22,7 @@
     "xanifoldjs-lib": "^1.1.2",
     "xanifoldjs-cordova": "^0.1.10",
     "xanifoldjs-web": "^0.2.0",
-    "xanifoldjs-windows10": "^0.2.1",
+    "xanifoldjs-windows10": "^0.3.0",
     "morgan": "~1.5.1",
     "multer": "^0.1.8",
     "node-uuid": "^1.4.3",
