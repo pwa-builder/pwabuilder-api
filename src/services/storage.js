@@ -7,9 +7,9 @@ var archiver = require('archiver'),
     wrench = require('wrench'),
     azure = require('azure-storage'),
     Q = require('q'),
-    manifoldJsLib = require('xanifoldjs-lib');
+    pwabuilderLib = require('pwabuilder-lib');
 
-var utils = manifoldJsLib.utils;
+var utils = pwabuilderLib.utils;
 
 function Storage(blobService){
     this.blobService = blobService;

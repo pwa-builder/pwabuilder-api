@@ -4,12 +4,12 @@ var chai = require('chai'),
     expect = chai.expect,
     sinon = require('sinon'),
     path = require('path'),
-    Manifold = require('../../../src/services/manifold'),
+    PWABuilder = require('../../../src/services/pwabuilder'),
     uuid = require('node-uuid');
 
-describe('manifold service',function(){
-    var manifold,
-        fakeManifoldLib = {},
+describe('pwabuilder service',function(){
+    var pwabuilder,
+        fakePWABuilderLib = {},
         fakeClient = {};
 
     describe('updateManifest',function(){
@@ -29,15 +29,15 @@ describe('manifold service',function(){
                 set: setSpy
             };
 
-            fakeManifoldLib.manifestTools = {
+            fakePWABuilderLib.manifestTools = {
                 validateManifest: function(manifest,platforms,cb){
                     cb(null,null);
                 }
             };
 
-            manifold = Manifold.create(fakeManifoldLib);
+            pwabuilder = PWABuilder.create(fakePWABuilderLib);
 
-            manifold.updateManifest(manifestId,{ name: 'Foo'},fakeClient)
+            pwabuilder.updateManifest(manifestId,{ name: 'Foo'},fakeClient)
                 .then(function(manifest){
                     expect(manifest.content.name).to.equal('Foo');
                     expect(setSpy.calledOnce).to.equal(true);
@@ -51,15 +51,15 @@ describe('manifold service',function(){
 
     describe('normalize',function(){
         it('should normalize a url',function(done){
-            fakeManifoldLib.manifestTools = {
+            fakePWABuilderLib.manifestTools = {
                 validateAndNormalizeStartUrl: function(url,manifest,cb){
                     cb(null,{ content: { start_url: 'http://www.bamideas.com' }});
                 }
             };
 
-            manifold = Manifold.create(fakeManifoldLib);
+            pwabuilder = PWABuilder.create(fakePWABuilderLib);
 
-            manifold.normalize({ content: { start_url: 'bamideas.com' }})
+            pwabuilder.normalize({ content: { start_url: 'bamideas.com' }})
                 .then(function(manifest){
                     expect(manifest.content.start_url).to.equal('http://www.bamideas.com');
                     done();
@@ -74,16 +74,16 @@ describe('manifold service',function(){
         it('should create the project',function(done){
             var testOutputDir = path.join('..','..','tmp');
 
-            fakeManifoldLib.projectBuilder = {
+            fakePWABuilderLib.projectBuilder = {
                 createApps: function(manifest, outputDir, buildCordova, platforms, cb){
                     expect(manifest).to.deep.equal({content: { start_url: 'bamideas.com' }, generatedFrom: 'Website Wizard' });
                     cb(null);
                 }
             };
 
-            manifold = Manifold.create(fakeManifoldLib);
+            pwabuilder = PWABuilder.create(fakePWABuilderLib);
 
-            manifold.createProject({ id: '1234', content: { start_url: 'bamideas.com' }}, testOutputDir,false)
+            pwabuilder.createProject({ id: '1234', content: { start_url: 'bamideas.com' }}, testOutputDir,false)
                 .then(function(){
                     done();
                 })

@@ -39,23 +39,23 @@ module.exports = function(grunt) {
                 tasks: ['default']
             },
             windows10: {
-                files: ['../manifoldjs-windows10/lib/*.js'],
+                files: ['../pwabuilder-windows10/lib/*.js'],
                 tasks: ['sync:windows10']
             },
             cordova: {
-                files: ['../manifoldjs-cordova/**/*.js'],
+                files: ['../pwabuilder-cordova/**/*.js'],
                 tasks: ['sync:cordova']
             },
             lib: {
-                files: ['../manifoldjs-lib/lib/*.js', '../manifoldjs-lib/lib/manifestTools/*.js'],
+                files: ['../pwabuilder-lib/lib/*.js', '../pwabuilder-lib/lib/manifestTools/*.js'],
                 tasks: ['sync:lib']
             }
         },
         sync: {
             windows10: {
                 files: [{
-                    src: ['../manifoldjs-windows10/lib/*.js'],
-                    dest: 'node_modules/manifoldjs-windows10'  
+                    src: ['../pwabuilder-windows10/lib/*.js'],
+                    dest: 'node_modules/pwabuilder-windows10'
                 }],
                 verbose: true,
                 failOnError: true,
@@ -63,8 +63,8 @@ module.exports = function(grunt) {
               },
             cordova: {
                 files: [{
-                    src: ['../manifoldjs-cordova/**/*.js'],
-                    dest: 'node_modules/manifoldjs-cordova'  
+                    src: ['../pwabuilder-cordova/**/*.js'],
+                    dest: 'node_modules/pwabuilder-cordova'
                 }],
                 verbose: true,
                 failOnError: true,
@@ -72,8 +72,8 @@ module.exports = function(grunt) {
             },
             lib: {
                 files: [{
-                    src: ['../manifoldjs-lib/lib/*.js','../manifoldjs-lib/lib/manifestTools/*.js'],
-                    dest: 'node_modules/manifoldjs-lib'  
+                    src: ['../pwabuilder-lib/lib/*.js','../pwabuilder-lib/lib/manifestTools/*.js'],
+                    dest: 'node_modules/pwabuilder-lib'
                 }],
                 verbose: true,
                 failOnError: true,

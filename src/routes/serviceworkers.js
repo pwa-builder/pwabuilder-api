@@ -2,13 +2,13 @@
 
 var express = require('express'),
     router = express.Router(),
-    Manifold = require('../services/manifold'),
+    PWABuilder = require('../services/pwabuilder'),
     Storage = require('../services/storage'),
     ServiceWorkerController = require('../controllers/serviceWorker');
 
-module.exports = function(manifoldjs, azure){
-    var manifold = Manifold.create(manifoldjs),
-        controller = ServiceWorkerController.create(manifold, Storage.create(azure));
+module.exports = function(pwabuilderLib, azure){
+    var pwabuilder = PWABuilder.create(pwabuilderLib),
+        controller = ServiceWorkerController.create(pwabuilder, Storage.create(azure));
 
     return router
         .get('/',controller.getServiceWorkerLocation)

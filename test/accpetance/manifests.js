@@ -8,7 +8,7 @@ var chai = require('chai'),
     expect = chai.expect,
     sinon = require('sinon'),
     azure = require('azure-storage'),
-    Manifold = require('../../src/services/manifold'),
+    PWABuilder = require('../../src/services/pwabuilder'),
     Q = require('q'),
     _ = require('lodash'),
     uuid = require('node-uuid');
@@ -248,7 +248,7 @@ describe('manifests',function(){
 
                 var fakeBlobService = sinon.stub();
 
-                var fakeManifold = function(){
+                var fakePWABuilder = function(){
                     return {
                         normalize: function(){
                             return Q.Promise(function(resolve){
@@ -259,12 +259,12 @@ describe('manifests',function(){
                 };
 
                 sinon.stub(azure,'createBlobService').returns(fakeBlobService);
-                sinon.stub(Manifold,'create',fakeManifold);
+                sinon.stub(PWABuilder,'create',fakePWABuilder);
             });
 
             afterEach(function(){
                 azure.createBlobService.restore();
-                Manifold.create.restore();
+                PWABuilder.create.restore();
             });
 
             it('should create a zip archive of the projects');

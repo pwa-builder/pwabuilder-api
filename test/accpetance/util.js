@@ -1,6 +1,6 @@
 'use strict';
 
-var manifold = require('../../src/app'),
+var pwabuilder = require('../../src/app'),
     request = require('supertest'),
     fakeredis = require('fakeredis'),
     redis = require('redis'),
@@ -10,7 +10,7 @@ var manifold = require('../../src/app'),
 global.req = {};
 global.client = {};
 
-var fakeManifoldJS = {
+var fakePWABuilder = {
     manifestTools: {
         getManifestFromSite: function(url,cb){
             if(url === 'http://www.bamideasz.com'){
@@ -77,7 +77,7 @@ before(function(){
     sinon.stub(redis,'createClient',fakeredis.createClient);
 
     global.client = redis.createClient();
-    var app = manifold.init(global.client,fakeAzure,fakeManifoldJS);
+    var app = pwabuilder.init(global.client,fakeAzure,fakePWABuilder);
     global.req = request(app);
 });
 

@@ -7,7 +7,7 @@ var path    = require('path'),
   Q         = require('q'),
   fs        = require('fs');
 
-exports.create = function(client, storage, manifold, raygun){
+exports.create = function(client, storage, pwabuilder, raygun){
   return {
     show: function(req,res,next){
       client.get(req.params.id,function(err,reply){
@@ -20,7 +20,7 @@ exports.create = function(client, storage, manifold, raygun){
     },
     create: function(req,res,next){
       if(req.body.siteUrl){
-        manifold.createManifestFromUrl(req.body.siteUrl,client)
+        pwabuilder.createManifestFromUrl(req.body.siteUrl,client)
         .then(function(manifest){
           res.json(manifest);
         })
@@ -34,7 +34,7 @@ exports.create = function(client, storage, manifold, raygun){
         });
       }else if(req.files.file){
         var file = req.files.file;
-        manifold.createManifestFromFile(file,client)
+        pwabuilder.createManifestFromFile(file,client)
         .then(function(manifest){
           res.json(manifest);
         })
@@ -46,7 +46,7 @@ exports.create = function(client, storage, manifold, raygun){
       }
     },
     update: function(req,res,next){
-      manifold.updateManifest(client,req.params.id,req.body)
+      pwabuilder.updateManifest(client,req.params.id,req.body)
       .then(function(manifest){
         res.json(manifest);
       })
@@ -73,7 +73,7 @@ exports.create = function(client, storage, manifold, raygun){
         }
 
         console.log('Platforms: ', platforms);
-        
+
         var manifest = JSON.parse(reply),
           output = path.join(outputDir,manifest.id),
           dirSuffix = req.body.dirSuffix;
@@ -86,10 +86,10 @@ exports.create = function(client, storage, manifold, raygun){
         console.log("ManifestInfo: " + manifest);
 
         storage.removeDir(output)
-          .then(function(){ return manifold.normalize(manifest); })
+          .then(function(){ return pwabuilder.normalize(manifest); })
           .then(function(normManifest){
-              manifest = normManifest; 
-              return manifold.createProject(manifest,output,platforms);
+              manifest = normManifest;
+              return pwabuilder.createProject(manifest,output,platforms);
           })
           .then(function(){ return storage.setPermissions(output); })
           .then(function(){ return storage.createZip(output, manifest.content.short_name); })
@@ -135,13 +135,13 @@ exports.create = function(client, storage, manifold, raygun){
         console.log("Output: ", output);
 
         var result = storage.removeDir(output)
-          .then(function(){ return manifold.normalize(manifest); })
+          .then(function(){ return pwabuilder.normalize(manifest); })
           .then(function(normManifest){
-              manifest = normManifest; 
-              return manifold.createProject(manifest,output,platforms);
+              manifest = normManifest;
+              return pwabuilder.createProject(manifest,output,platforms);
           })
           .then(function(projectDir){
-              return manifold.packageProject(platforms, projectDir, packageOptions);
+              return pwabuilder.packageProject(platforms, projectDir, packageOptions);
           });
 
           if (packageOptions.DotWeb) {
@@ -151,8 +151,8 @@ exports.create = function(client, storage, manifold, raygun){
                 if (packagePaths.length > 1) {
                   return res.json(400,{ error: 'Multiple packages created. Expected just one.' });
                 }
-                dotWebPath = packagePaths[0]; 
-                return storage.createContainer(manifest); 
+                dotWebPath = packagePaths[0];
+                return storage.createContainer(manifest);
               })
              .then(function(){ return storage.uploadFile(manifest.id, manifest.content.short_name, dotWebPath, '.web'); })
              .then(function(){ return storage.removeDir(output); })
@@ -189,13 +189,13 @@ exports.create = function(client, storage, manifold, raygun){
 
         var imageFile = req.files.file;
         Q.nfcall(fs.readFile, imageFile.path).then(function (imageContents) {
-          manifold.generateImagesForManifest(imageContents, manifestInfo, client)
+          pwabuilder.generateImagesForManifest(imageContents, manifestInfo, client)
             .then(function (manifest) {
-              if (manifest.icons.length !== persistedIcons.length) { 
+              if (manifest.icons.length !== persistedIcons.length) {
                 manifest.icons.map(function (icon) {
                   var exists = false;
                   persistedIcons.forEach(function(_icon) {
-                    if (_icon.src === icon.src && 
+                    if (_icon.src === icon.src &&
                         _icon.sizes === icon.sizes) {
                           exists = true;
                         }
@@ -210,7 +210,7 @@ exports.create = function(client, storage, manifold, raygun){
             })
             .then(function(manifest) {
               var assets = [{fileName: imageFile.originalname, data: imageContents.toString('hex')}];
-              return manifold.updateManifest(client,req.params.id,manifest,assets);
+              return pwabuilder.updateManifest(client,req.params.id,manifest,assets);
             }).then(function (manifestInfo) {
               res.json(manifestInfo);
             });

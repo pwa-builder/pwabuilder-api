@@ -7,31 +7,31 @@ var archiver = require('archiver'),
     fs = require('fs'),
     outputDir = process.env.TMP;
 
-exports.create = function(manifold, storage){
+exports.create = function(pwabuilder, storage){
     var folders,
         storageContainer,
         folderName,
         tempFilePath,
         blobName = 'serviceworker';
-    
+
     return {
         getServiceWorkerLocation: function (req,res,next) {
-            manifold.getServiceWorkers(req.query.ids)
-                .then(function(resultFolders) { 
+            pwabuilder.getServiceWorkers(req.query.ids)
+                .then(function(resultFolders) {
                     folders = resultFolders;
                     storageContainer = uuid.v4();
                     folderName = path.join(outputDir, storageContainer);
-                    return storage.createDirectory(folderName); 
+                    return storage.createDirectory(folderName);
                 })
                 .then(function() { return storage.createZipFromDirs(folders, folderName, storageContainer); })
                 .then(function(fileResult) {
                     tempFilePath = fileResult;
-                    return storage.createContainer(storageContainer); 
+                    return storage.createContainer(storageContainer);
                 })
                 .then(function() { return storage.uploadZip(storageContainer, path.basename(tempFilePath, '.zip'), folderName, 'sw', blobName); } )
                 .then(function() { return storage.getUrlForZip(storageContainer, blobName, 'sw' ) } )
-                .then(function(url) { 
-                    res.json( { archive: url } ); 
+                .then(function(url) {
+                    res.json( { archive: url } );
                 })
                 .fail(function(err){
                     //raygun.send(err);
@@ -39,8 +39,8 @@ exports.create = function(manifold, storage){
                 })
                 .fin(function() { return storage.removeDir(folderName); });
         },
-        getServiceWorkerCodePreview: function(req, res, next){           
-            manifold.getServiceWorkers(req.query.ids)
+        getServiceWorkerCodePreview: function(req, res, next){
+            pwabuilder.getServiceWorkers(req.query.ids)
                 .then(function(resultFolders) {
                     return getFilesFromFolders(resultFolders);
                 })
@@ -63,7 +63,7 @@ exports.create = function(manifold, storage){
                             if (result.state !== 'fulfilled') {
                                 log.error(result.reason.getMessage());
                                 return false;
-                            }                    
+                            }
                             return success;
                         }, true);
 
@@ -92,7 +92,7 @@ exports.create = function(manifold, storage){
 
                     return res.json({
                         webSite: webSiteFileContent,
-                        serviceWorker: serviceWorkerFileContent 
+                        serviceWorker: serviceWorkerFileContent
                     });
                 });
         }
@@ -111,18 +111,18 @@ exports.create = function(manifold, storage){
                     if (result.state !== 'fulfilled') {
                         log.error(result.reason.getMessage());
                         return false;
-                    }                    
+                    }
                     return success;
                 }, true);
-                
+
                 if (!result) {
                     return Q.reject(new Error('One or more files could not be generated successfully.'));
-                } else {                    
-                    var resultFiles = []; 
+                } else {
+                    var resultFiles = [];
                     results.map(function(result) {
                         result.value.map(function (resultItem) {
                             resultFiles.push(resultItem);
-                        });                        
+                        });
                     });
                     return Q.resolve(resultFiles);
                 }
@@ -132,7 +132,7 @@ exports.create = function(manifold, storage){
     function getFilteredFilesFromFolder(folder) {
         return Q.Promise(function (resolve, reject) {
             //Read folders
-            fs.readdir(folder, function (err, files){ 
+            fs.readdir(folder, function (err, files){
                 //Assume that files wich ends with register.js (registration of ServiceWorker) or -sw.js (Service Worker) only matterss.
                 var filteredFiles = files.filter(function (item) {
                     return item.lastIndexOf("register.js") != -1 || item.lastIndexOf("-sw.js") != -1;
