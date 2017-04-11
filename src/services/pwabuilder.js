@@ -24,15 +24,7 @@ PWABuilder.prototype.createManifestFromUrl = function(url,client){
 
     var callback = function(err, manifestInfo) {
       if (err) {
-        if(err.message !== 'Failed to retrieve manifest from site.'){
-          return reject(err);
-        }else{
-          manifestInfo = {
-            content: {
-            },
-            format: 'w3c'
-          };
-        }
+        return reject(err);
       }
 
       var manifest = _.assign(manifestInfo,{ id: uuid.v4().slice(0,8) });

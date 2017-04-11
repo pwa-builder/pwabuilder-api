@@ -25,12 +25,7 @@ exports.create = function(client, storage, pwabuilder, raygun){
           res.json(manifest);
         })
         .fail(function(err){
-          if(err.message === 'Failed to retrieve manifest from site.'){
-            return res.status(422).json({error: 'Failed to retrieve manifest from site.'});
-          }else{
-            return next(err);
-          }
-
+          return res.status(422).json({error: err.message});
         });
       }else if(req.files.file){
         var file = req.files.file;
