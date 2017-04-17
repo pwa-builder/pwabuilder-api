@@ -2,6 +2,7 @@
 
 var path    = require('path'),
   outputDir = process.env.TMP,
+  cheerio   = require('cheerio'),
   config    = require(path.join(__dirname,'../config')),
   util      = require('util'),
   Q         = require('q'),
@@ -134,6 +135,19 @@ exports.create = function(client, storage, pwabuilder, raygun){
           .then(function(normManifest){
               manifest = normManifest;
               return pwabuilder.createProject(manifest,output,platforms);
+          })
+          .then(function(projectDir) {
+            var paths            = [projectDir, 'PWA','Store packages','windows10','manifest','appxmanifest.xml'],
+                manifestFilename = path.join.apply(null, paths),
+                win10manifest    = fs.readFileSync(manifestFilename),
+                $                = cheerio.load(win10manifest, { xmlMode: true, decodeEntities: false });
+
+            $('Package Identity').attr('Publisher','CN=CD81B1A7-2407-491F-ACA2-03B1F7A0F020');
+            $('Package Properties PublisherDisplayName').text('Progressive Apps Indexer');
+
+            fs.writeFileSync(manifestFilename, $.xml());
+
+            return projectDir;
           })
           .then(function(projectDir){
               return pwabuilder.packageProject(platforms, projectDir, packageOptions);
