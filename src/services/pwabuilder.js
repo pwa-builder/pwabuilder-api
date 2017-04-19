@@ -7,13 +7,13 @@ var uuid = require('node-uuid'),
   config = require(path.join(__dirname,'../config')),
   platforms = config.platforms;
 
-function Manifold(manifoldLib){
-  this.lib = manifoldLib;
+function PWABuilder(pwabuilderLib){
+  this.lib = pwabuilderLib;
   var platformsConfig = path.resolve(__dirname, '..', '..', 'platforms.json');
   this.lib.platformTools.configurePlatforms(platformsConfig);
 }
 
-Manifold.prototype.createManifestFromUrl = function(url,client){
+PWABuilder.prototype.createManifestFromUrl = function(url,client){
   var self = this;
 
   if(url.indexOf('http') === -1){
@@ -21,17 +21,10 @@ Manifold.prototype.createManifestFromUrl = function(url,client){
   }
 
   return Q.Promise(function(resolve,reject){
-    self.lib.manifestTools.getManifestFromSite(url, function(err, manifestInfo) {
+
+    var callback = function(err, manifestInfo) {
       if (err) {
-        if(err.message !== 'Failed to retrieve manifest from site.'){
-          return reject(err);
-        }else{
-          manifestInfo = {
-            content: {
-            },
-            format: 'w3c'
-          };
-        }
+        return reject(err);
       }
 
       var manifest = _.assign(manifestInfo,{ id: uuid.v4().slice(0,8) });
@@ -42,11 +35,24 @@ Manifold.prototype.createManifestFromUrl = function(url,client){
         return resolve(manifest);
       })
       .fail(reject);
-    });
+    }
+
+    var resolveStartUrl =  function (err, manifestInfo) {
+    if (err) {
+      return callback(err, manifestInfo);
+    }
+
+    if (manifestInfo.format === self.lib.constants.BASE_MANIFEST_FORMAT) {
+      return self.lib.manifestTools.validateAndNormalizeStartUrl(url, manifestInfo, callback);
+    } else {
+      return callback(undefined, manifestInfo);
+    }
+  }
+    self.lib.manifestTools.getManifestFromSite(url, undefined, resolveStartUrl);
   });
 };
 
-Manifold.prototype.createManifestFromFile = function(file,client){
+PWABuilder.prototype.createManifestFromFile = function(file,client){
   var self = this;
 
   return Q.Promise(function(resolve,reject){
@@ -64,8 +70,15 @@ Manifold.prototype.createManifestFromFile = function(file,client){
   });
 };
 
-Manifold.prototype.validateManifest = function(manifest){
+PWABuilder.prototype.validateManifest = function(manifest){
   var self = this;
+
+  // remove properties in the manifest to track generated icons
+  var cleanIcons = (manifest.content.icons || []).map(function (icon) {
+    return _.omit(icon, 'generated', 'fileName');
+  });
+  var originalIcons = manifest.content.icons;
+  manifest.content.icons = cleanIcons;
 
   return Q.Promise(function(resolve,reject){
     self.lib.manifestTools.validateManifest(manifest, platforms, function(err,results){
@@ -79,12 +92,15 @@ Manifold.prototype.validateManifest = function(manifest){
       self.assignSuggestions(suggestions,manifest);
       self.assignWarnings(warnings,manifest);
 
+      // restore original icons
+      manifest.content.icons = originalIcons;
+
       return resolve(manifest);
     });
   });
 };
 
-Manifold.prototype.updateManifest = function(manifestId,updates,client) {
+PWABuilder.prototype.updateManifest = function(client,manifestId,updates,assets) {
   var self = this;
 
   return Q.Promise(function(resolve,reject){
@@ -94,6 +110,14 @@ Manifold.prototype.updateManifest = function(manifestId,updates,client) {
 
       var manifest = JSON.parse(reply);
       manifest.content = updates;
+
+      if (assets) {
+        manifest.assets = assets;
+      } else {
+        if ((updates.icons || []).filter(function(icon) { return icon.generated; }).length === 0) {
+          delete manifest.assets;
+        }
+      }
 
       return self.validateManifest(manifest)
       .then(function(manifest){
@@ -105,7 +129,7 @@ Manifold.prototype.updateManifest = function(manifestId,updates,client) {
   });
 };
 
-Manifold.prototype.normalize = function(manifest){
+PWABuilder.prototype.normalize = function(manifest){
   var self = this;
 
   return Q.Promise(function(resolve,reject){
@@ -123,7 +147,7 @@ Manifold.prototype.normalize = function(manifest){
   });
 };
 
-Manifold.prototype.createProject = function(manifest,outputDir,platforms){
+PWABuilder.prototype.createProject = function(manifest,outputDir,platforms){
   var self = this;
 
   return Q.Promise(function(resolve, reject){
@@ -131,19 +155,27 @@ Manifold.prototype.createProject = function(manifest,outputDir,platforms){
     cleanManifest = _.assign(cleanManifest,{ generatedFrom: 'Website Wizard' });
     console.log('Building the project...',cleanManifest,outputDir,platforms);
     try{
+      if (!manifest.assets) {
+        manifest.assets = [];
+      }
+      manifest.assets.map(function (asset) {
+        asset.data = new Buffer(asset.data, 'hex');
+      });
+
       var options = {
         'crosswalk' : false,
-        'build'     : false
+        'build'     : false,
+        'assets'    : manifest.assets
       };
 
-      self.lib.projectBuilder.createApps(cleanManifest, outputDir, platforms, options, function (err) {
+      self.lib.projectBuilder.createApps(cleanManifest, outputDir, platforms, options, function (err, projectDir) {
 
         if(err){
           console.log('Create Projects Errors!!!',err);
           return reject(err);
         }
 
-        return resolve();
+        return resolve(projectDir);
       });
     }catch(e){
       return reject(e);
@@ -151,7 +183,39 @@ Manifold.prototype.createProject = function(manifest,outputDir,platforms){
   });
 };
 
-Manifold.prototype.assignValidationErrors = function(errors,manifest){
+PWABuilder.prototype.packageProject = function(platforms,outputDir,options){
+  var self = this;
+
+  return Q.Promise(function(resolve, reject){
+    console.log('Packaging the project...',outputDir,platforms);
+    try{
+
+      self.lib.projectBuilder.packageApps(platforms, outputDir, options, function (err, packagePaths) {
+
+        if(err){
+          console.log('Package Project Errors!!!',err);
+          return reject(err);
+        }
+
+        return resolve(packagePaths);
+      });
+    }catch(e){
+      return reject(e);
+    }
+  });
+};
+
+PWABuilder.prototype.getServiceWorkers = function(id) {
+  var self = this;
+
+  return Q.Promise(function (resolve, reject) {
+    self.lib.serviceWorkerTools.getAssetsFolders(id, function (err, resultURL) {
+      return resolve(resultURL);
+    });
+  });
+};
+
+PWABuilder.prototype.assignValidationErrors = function(errors,manifest){
   var data = { errors: []};
 
   _.each(errors,function(e){
@@ -174,7 +238,7 @@ Manifold.prototype.assignValidationErrors = function(errors,manifest){
   manifest = _.assign(manifest,data);
 };
 
-Manifold.prototype.assignSuggestions = function(suggestions,manifest){
+PWABuilder.prototype.assignSuggestions = function(suggestions,manifest){
   var data = { suggestions: []};
 
   _.each(suggestions,function(s){
@@ -197,7 +261,7 @@ Manifold.prototype.assignSuggestions = function(suggestions,manifest){
   manifest = _.assign(manifest,data);
 };
 
-Manifold.prototype.assignWarnings = function(warnings,manifest){
+PWABuilder.prototype.assignWarnings = function(warnings,manifest){
   var data = { warnings: []};
 
   _.each(warnings,function(w){
@@ -220,6 +284,20 @@ Manifold.prototype.assignWarnings = function(warnings,manifest){
   manifest = _.assign(manifest,data);
 };
 
-exports.create = function(manifoldLib){
-  return new Manifold(manifoldLib);
+PWABuilder.prototype.generateImagesForManifest = function(image, manifestInfo, client) {
+  var self = this;
+
+  return Q.Promise(function(resolve, reject) {
+    self.lib.manifestTools.generateImagesForManifest(image, manifestInfo.content, null, function(err, resultManifestInfo) {
+      if (err) {
+        return reject(err);
+      } else {
+        return resolve(resultManifestInfo);
+      }
+    });
+  });
+}
+
+exports.create = function(pwabuilderLib){
+  return new PWABuilder(pwabuilderLib);
 };

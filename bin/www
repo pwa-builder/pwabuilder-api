@@ -6,7 +6,7 @@
  * Module dependencies.
  */
 
-var Manifold = require('../src/app'),
+var pwabuilder = require('../src/app'),
     redis = require('redis'),
     azure = require('azure-storage'),
     config = require('../src/config');
@@ -19,8 +19,8 @@ if(config.redis.password){
 
 console.log('Connecting to Redis...');
 
-var app = Manifold.init(redis.createClient(config.redis.port,config.redis.host,redisOptions), azure.createBlobService(config.azure.account_name,config.azure.access_key),require('manifoldjs-lib')),
-    debug = require('debug')('manifold-api:server'),
+var app = pwabuilder.init(redis.createClient(config.redis.port,config.redis.host,redisOptions), azure.createBlobService(config.azure.account_name,config.azure.access_key),require('pwabuilder-lib')),
+    debug = require('debug')('pwabuilder-api:server'),
     http = require('http');
 
 /**
@@ -91,8 +91,8 @@ function onListening() {
 /**
  * Configure server timeout.
  *
- * Generating an app with ManifoldJS sometimes takes considerable time, especially during the 
- * first request following a cold start. This causes the default socket timeout on the connection 
+ * Generating an app with PWA Builder sometimes takes considerable time, especially during the
+ * first request following a cold start. This causes the default socket timeout on the connection
  * to be exceeded and the server returning a 500 - Internal Error.
  */
 server.timeout = 300000;

@@ -7,7 +7,7 @@ var chai = require('chai'),
     manifestController = require('../../../src/controllers/manifests');
 
 describe('manifests controller',function(){
-    var fakeManifoldLib = {},
+    var fakePWABuilderLib = {},
         fakeClient = {},
         fakeStorage = {};
 
@@ -58,7 +58,7 @@ describe('manifests controller',function(){
                 }
             };
 
-            fakeManifoldLib = {
+            fakePWABuilderLib = {
                 normalize: function(manifest){
                     return Q.Promise(function(resolve){
                         resolve(manifest);
@@ -88,7 +88,7 @@ describe('manifests controller',function(){
                 done(err);
             };
 
-            var controller = manifestController.create(fakeClient,fakeStorage,fakeManifoldLib);
+            var controller = manifestController.create(fakeClient,fakeStorage,fakePWABuilderLib);
 
             controller.build(fakeReq,fakeRes,fakeNext);
         });

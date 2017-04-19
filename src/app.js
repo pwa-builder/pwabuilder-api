@@ -7,15 +7,15 @@ var express      = require('express'),
   bodyParser   = require('body-parser'),
   multer       = require('multer'),
   manifests    = require('./routes/manifests'),
-  images       = require('./routes/images'),
+  serviceworkers= require('./routes/serviceworkers'),
   raygun       = require('raygun'),
   raygunClient = new raygun.Client().init({ apiKey: 'PrRN4HizgQVI2xeXBxdSzw==' });
 
-var Manifold = {
-  init: function(redisClient, azure, manifold){
+var PWABuilder = {
+  init: function(redisClient, azure, pwabuilder){
     var app = express();
 
-    manifold.log.setLevel('debug');
+    pwabuilder.log.setLevel('debug');
 
     // view engine setup
     app.set('views', path.join(__dirname, 'views'));
@@ -57,8 +57,8 @@ var Manifold = {
     app.use(express.static(path.join(__dirname, 'public')));
 
 
-    app.use('/manifests', manifests(redisClient,azure,manifold,raygunClient));
-    app.use('/images',images());
+    app.use('/manifests', manifests(redisClient,azure,pwabuilder,raygunClient));
+    app.use('/serviceworkers', serviceworkers(pwabuilder, azure));
 
     // catch 404 and forward to error handler
     app.use(function(req, res, next) {
@@ -96,4 +96,4 @@ var Manifold = {
   }
 };
 
-module.exports = Manifold;
+module.exports = PWABuilder;
