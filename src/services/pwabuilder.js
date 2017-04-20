@@ -287,8 +287,12 @@ PWABuilder.prototype.assignWarnings = function(warnings,manifest){
 PWABuilder.prototype.generateImagesForManifest = function(image, manifestInfo, client) {
   var self = this;
 
+  var options = {
+    generationSvcUrl: config.generationSvcUrl
+  };
+
   return Q.Promise(function(resolve, reject) {
-    self.lib.manifestTools.generateImagesForManifest(image, manifestInfo.content, null, function(err, resultManifestInfo) {
+    self.lib.manifestTools.generateImagesForManifest(image, manifestInfo.content, options, function(err, resultManifestInfo) {
       if (err) {
         return reject(err);
       } else {
