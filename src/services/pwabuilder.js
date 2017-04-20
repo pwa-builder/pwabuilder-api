@@ -288,7 +288,7 @@ PWABuilder.prototype.generateImagesForManifest = function(image, manifestInfo, c
   var self = this;
 
   var options = {
-    generationSvcUrl: config.generationSvcUrl
+    generationSvcUrl: config.images.generationSvcUrl
   };
 
   return Q.Promise(function(resolve, reject) {
