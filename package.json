@@ -1,6 +1,6 @@
 {
   "name": "pwabuilder-api",
-  "version": "2.0.0-rc.0",
+  "version": "2.0.1-rc.0",
   "private": true,
   "engines": {
     "node": "0.12.0"
@@ -23,7 +23,7 @@
     "pwabuilder-lib": "^2.0.0-rc",
     "pwabuilder-cordova": "^2.0.0-rc",
     "pwabuilder-web": "^2.0.0-rc",
-    "pwabuilder-windows10": "^2.0.0-rc",
+    "pwabuilder-windows10": "^2.0.1-rc",
     "morgan": "~1.5.1",
     "multer": "^0.1.8",
     "node-uuid": "^1.4.3",
