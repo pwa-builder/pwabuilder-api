@@ -82,6 +82,7 @@ exports.create = function(client, storage, pwabuilder, raygun){
         console.log("ManifestInfo: " + manifest);
 
         storage.removeDir(output)
+          .then(function(){ return pwabuilder.cleanGeneratedIcons(manifest); })
           .then(function(){ return pwabuilder.normalize(manifest); })
           .then(function(normManifest){
               manifest = normManifest;
@@ -131,6 +132,7 @@ exports.create = function(client, storage, pwabuilder, raygun){
         console.log("Output: ", output);
 
         var result = storage.removeDir(output)
+          .then(function(){ return pwabuilder.cleanGeneratedIcons(manifest); })
           .then(function(){ return pwabuilder.normalize(manifest); })
           .then(function(normManifest){
               manifest = normManifest;
@@ -222,7 +224,10 @@ exports.create = function(client, storage, pwabuilder, raygun){
               return pwabuilder.updateManifest(client,req.params.id,manifest,assets);
             }).then(function (manifestInfo) {
               res.json(manifestInfo);
-            });
+            })
+            .catch(function(err){
+              log.error(err);
+            })
         }).finally(function () {
           fs.unlink(imageFile.path)
         });
