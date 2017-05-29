@@ -73,12 +73,8 @@ PWABuilder.prototype.createManifestFromFile = function(file,client){
 PWABuilder.prototype.validateManifest = function(manifest){
   var self = this;
 
-  // remove properties in the manifest to track generated icons
-  var cleanIcons = (manifest.content.icons || []).map(function (icon) {
-    return _.omit(icon, 'generated', 'fileName');
-  });
   var originalIcons = manifest.content.icons;
-  manifest.content.icons = cleanIcons;
+  manifest = self.cleanGeneratedIcons(manifest);
 
   return Q.Promise(function(resolve,reject){
     self.lib.manifestTools.validateManifest(manifest, platforms, function(err,results){
@@ -145,6 +141,17 @@ PWABuilder.prototype.normalize = function(manifest){
       resolve(manifest);
     });
   });
+};
+
+PWABuilder.prototype.cleanGeneratedIcons = function(manifest){
+  var self = this;
+
+// remove properties in the manifest to track generated icons
+  manifest.content.icons = (manifest.content.icons || []).map(function (icon) {
+    return _.omit(icon, 'generated', 'fileName');
+  });
+
+  return manifest;
 };
 
 PWABuilder.prototype.createProject = function(manifest,outputDir,platforms){
