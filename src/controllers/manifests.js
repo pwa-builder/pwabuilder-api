@@ -88,6 +88,17 @@ exports.create = function(client, storage, pwabuilder, raygun){
               manifest = normManifest;
               return pwabuilder.createProject(manifest,output,platforms);
           })
+          .then(function(projectDir){ 
+            if(req.query.ids){
+              // Copy service worker code into the output folder
+              return pwabuilder.getServiceWorkers(req.query.ids)
+                .then(function(resultFolders){
+                  resultFolders.forEach(function(folder){
+                    storage.copyDirectory(folder, projectDir);
+                  });
+                });
+              }
+          })
           .then(function(){ return storage.setPermissions(output); })
           .then(function(){ return storage.createZip(output, manifest.content.short_name); })
           .then(function(){ return storage.createContainer(manifest.id); })

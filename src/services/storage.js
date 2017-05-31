@@ -156,6 +156,10 @@ Storage.prototype.createZipFromDirs = function(folders, folderName, fileName) {
     });
 };
 
+Storage.prototype.copyDirectory= function(folder, outputFolder){
+    wrench.copyDirSyncRecursive(folder, path.join(outputFolder, path.basename(folder)), { forceDelete:true });
+};
+
 exports.create = function(blobService){
     return new Storage(blobService);
 };
