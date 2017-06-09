@@ -212,6 +212,21 @@ PWABuilder.prototype.packageProject = function(platforms,outputDir,options){
   });
 };
 
+PWABuilder.prototype.addServiceWorkersFromUrl = function(url, manifest){
+  var self = this;
+
+  if(url.indexOf('http') === -1){
+    url = 'http://'+url;
+  }
+
+  return Q.Promise(function(resolve,reject){
+    self.lib.serviceWorkerTools.getServiceWorkersFromUrl(url, function (err, serviceWorkers) {
+      manifest.siteServiceWorkers = serviceWorkers;
+      return resolve(manifest);
+    });
+  });
+};
+
 PWABuilder.prototype.getServiceWorkers = function(id) {
   var self = this;
 

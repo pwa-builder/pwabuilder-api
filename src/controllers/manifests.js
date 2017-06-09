@@ -23,6 +23,9 @@ exports.create = function(client, storage, pwabuilder, raygun){
       if(req.body.siteUrl){
         pwabuilder.createManifestFromUrl(req.body.siteUrl,client)
         .then(function(manifest){
+           return pwabuilder.addServiceWorkersFromUrl(req.body.siteUrl, manifest)
+        })
+        .then(function(manifest){
           res.json(manifest);
         })
         .fail(function(err){
