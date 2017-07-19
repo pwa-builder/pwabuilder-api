@@ -6,9 +6,12 @@ var path    = require('path'),
   config    = require(path.join(__dirname,'../config')),
   util      = require('util'),
   Q         = require('q'),
-  fs        = require('fs');
+  fs        = require('fs'),
+  pwa10     = require('pwabuilder-windows10');
 
 exports.create = function(client, storage, pwabuilder, raygun){
+  pwa10.Platform(); // Initialize PWA Windows 10 Builder Lib
+
   return {
     show: function(req,res,next){
       client.get(req.params.id,function(err,reply){
@@ -54,11 +57,12 @@ exports.create = function(client, storage, pwabuilder, raygun){
         next(err);
       });
     },
+    // Create zip for user to download
     build: function(req,res){
       client.get(req.params.id,function(err,reply){
         if(err){
           //raygun.send(err);
-          return res.json(500,{ error: 'There was a problem loading the project, please try building it again.' });
+          return res.status(500).json({ error: 'There was a problem loading the project, please try building it again.' });
         }
         if(!reply) return res.status(404).send('NOT FOUND');
 
@@ -108,15 +112,86 @@ exports.create = function(client, storage, pwabuilder, raygun){
           .then(function(url){ res.json({archive: url}); })
           .fail(function(err){
             //raygun.send(err);
-            return res.json(500, { error: err.message });
+            return res.status(500).json({ error: err.message });
           });
       });
     },
+    // Create an appx package for the user to download.
+    appx: function(req,res){
+      client.get(req.params.id,function(err,reply){
+        if(err){
+          //raygun.send(err);
+          return res.status(500).json({ error: 'There was a problem loading the project, please try building it again.' });
+        }
+        if(!reply) return res.status(404).send('NOT FOUND');
+
+        console.log('Building AppX...');
+
+        var manifest = JSON.parse(reply),
+          output = path.join(outputDir,manifest.id),
+          dirSuffix = req.body.dirSuffix;
+
+        if (dirSuffix) {
+          output += "-" + dirSuffix;
+        }
+
+        console.log("Output: ", output);
+        console.log("ManifestInfo: " + manifest);
+
+        storage.removeDir(output)
+          .then(function(){ return pwabuilder.normalize(manifest); })
+          .then(function(normManifest){
+              manifest = normManifest;
+              return pwabuilder.createProject(manifest,output, ['windows10']);
+          })
+          .then(function(projectDir) { 
+            console.log("Making Windows 10 Package");
+
+            projectDir += "\\PWA";
+
+            // TODO: Inject Data (Package/Publisher Identity, Publisher Display Name) into projectDir + "\\Store packages\\windows10\\manifest\\appxmanifest.xml"
+
+            return pwa10.package(projectDir, { DotWeb: false, AutoPublish: false, Sign: true }); 
+          })
+          .then(function(){ return storage.setPermissions(output); })
+          .then(function(){ return storage.createZip(output, manifest.content.short_name); })
+          .then(function(){ return storage.createContainer(manifest.id); })
+          .then(function(){ return storage.uploadZip(manifest.id, manifest.content.short_name, output, 'appx'); })
+          .then(function(){ return storage.removeDir(output); })
+          .then(function(){ return storage.getUrlForZip(manifest.id, manifest.content.short_name, 'appx'); })
+          .then(function(url){ res.json({archive: url}); })
+          .fail(function(err){
+            //raygun.send(err);
+            return res.status(500).json({ error: err.message });
+          });
+
+        /*storage.removeDir(output)
+          .then(function(){ return pwabuilder.normalize(manifest); })
+          .then(function(normManifest){
+              manifest = normManifest;
+              return pwabuilder.createProject(manifest,output,platforms);
+          })
+          .then(function(){ return storage.setPermissions(output); })
+          .then(function(){ return storage.createZip(output, manifest.content.short_name); })
+          .then(function(){ return storage.createContainer(manifest.id); })
+          .then(function(){ return storage.uploadZip(manifest.id, manifest.content.short_name, output, dirSuffix); })
+          .then(function(){ return storage.removeDir(output); })
+          .then(function(){ return storage.getUrlForZip(manifest.id, manifest.content.short_name, dirSuffix); })
+          .then(function(url){ res.json({archive: url}); })
+          .fail(function(err){
+            //raygun.send(err);
+            return res.json(500, { error: err.message });
+          });*/
+
+          //return res.status(500).json({ error: "Not Implemented" });
+      });
+    },
+    // Send to our DropBox
     package: function(req,res){
       client.get(req.params.id,function(err,reply){
         if(err){
           //raygun.send(err);
-          return res.json(500,{ error: 'There was a problem packaging the project, please try packaging it again.' });
+          return res.status(500).json({ error: 'There was a problem packaging the project, please try packaging it again.' });
         }
         if(!reply) return res.status(404).send('NOT FOUND');
 
@@ -125,7 +200,7 @@ exports.create = function(client, storage, pwabuilder, raygun){
 
         if (!platform) {
           // No platforms were selected by the user. Using default configured platforms.
-          return res.json(400,{ error: 'No platform has been provided' });
+          return res.status(400).json({ error: 'No platform has been provided' });
         }
 
         var platforms = [ platform ];
@@ -171,7 +246,7 @@ exports.create = function(client, storage, pwabuilder, raygun){
             result
              .then(function(packagePaths){
                 if (packagePaths.length > 1) {
-                  return res.json(400,{ error: 'Multiple packages created. Expected just one.' });
+                  return res.status(400).json({ error: 'Multiple packages created. Expected just one.' });
                 }
                 dotWebPath = packagePaths[0];
                 return storage.createContainer(manifest);
@@ -181,7 +256,7 @@ exports.create = function(client, storage, pwabuilder, raygun){
              .then(function(){ return storage.getUrlForFile(manifest.id, manifest.content.short_name, '.web'); })
              .then(function(url){ res.json({archive: url}); })
              .fail(function(err){
-               return res.json(500, { error: err.message });
+               return res.status(500).json({ error: err.message });
             });
           }
           else {
@@ -189,7 +264,7 @@ exports.create = function(client, storage, pwabuilder, raygun){
             .then(function(){ return storage.removeDir(output); })
             .then(function(){ res.json(null); })
             .fail(function(err){
-              return res.json(500, { error: err.message });
+              return res.status(500).json({ error: err.message });
             });
           }
       });
@@ -198,7 +273,7 @@ exports.create = function(client, storage, pwabuilder, raygun){
       client.get(req.params.id,function(err,reply){
         if(err){
           //raygun.send(err);
-          return res.json(500,{ error: 'There was a problem loading the manifest, please try it again.' });
+          return res.status(500).json({ error: 'There was a problem loading the manifest, please try it again.' });
         }
         if(!reply) return res.status(404).send('NOT FOUND');
 

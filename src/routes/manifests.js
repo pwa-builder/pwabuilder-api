@@ -14,6 +14,7 @@ module.exports = function(client,azure,pwabuilderLib){
         .get('/:id',controller.show)
         .post('/',controller.create)
         .put('/:id',controller.update)
+        .post('/:id/appx',controller.appx)
         .post('/:id/build',controller.build)
         .post('/:id/package', controller.package)
         .post('/:id/generatemissingimages', controller.generateMissingImages);
