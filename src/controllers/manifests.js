@@ -126,10 +126,11 @@ exports.create = function(client, storage, pwabuilder, raygun){
         if(!reply) return res.status(404).send('NOT FOUND');
 
         console.log('Building AppX...');
-
+        
         var manifest = JSON.parse(reply),
           output = path.join(outputDir,manifest.id),
           dirSuffix = req.body.dirSuffix;
+        var projectDirectory = output;
 
         if (dirSuffix) {
           output += "-" + dirSuffix;
@@ -148,10 +149,24 @@ exports.create = function(client, storage, pwabuilder, raygun){
             console.log("Making Windows 10 Package");
 
             projectDir += "\\PWA";
+            projectDirectory = projectDir;
 
-            // TODO: Inject Data (Package/Publisher Identity, Publisher Display Name) into projectDir + "\\Store packages\\windows10\\manifest\\appxmanifest.xml"
+            // Read our manifest template
+            return Q.nfcall(fs.readFile, projectDirectory + "\\Store packages\\windows10\\manifest\\appxmanifest.xml");
+          })
+          .then(function(data) {
+            // Inject Data (Package/Publisher Identity, Publisher Display Name) into projectDir + "\\Store packages\\windows10\\manifest\\appxmanifest.xml"
+            var str = data.toString();
 
-            return pwa10.package(projectDir, { DotWeb: false, AutoPublish: false, Sign: true }); 
+            str = str.replace("INSERT-YOUR-PACKAGE-PROPERTIES-PUBLISHERDISPLAYNAME-HERE", req.body.name);
+            str = str.replace("CN=INSERT-YOUR-PACKAGE-IDENTITY-PUBLISHER-HERE", req.body.publisher);
+            str = str.replace("INSERT-YOUR-PACKAGE-IDENTITY-NAME-HERE", req.body.package);
+            
+            return Q.nfcall(fs.writeFile, projectDirectory + "\\Store packages\\windows10\\manifest\\appxmanifest.xml", str);
+          })
+          .then(function(err) {
+            // Manifest file is now ready to be processed by packager
+            return pwa10.package(projectDirectory, { DotWeb: false, AutoPublish: false, Sign: false }); 
           })
           .then(function(){ return storage.setPermissions(output); })
           .then(function(){ return storage.createZip(output, manifest.content.short_name); })
