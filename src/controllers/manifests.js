@@ -6,7 +6,7 @@ var path    = require('path'),
   config    = require(path.join(__dirname,'../config')),
   util      = require('util'),
   Q         = require('q'),
-  fs        = require('fs'),
+  fs        = require('fs-extra'),
   pwa10     = require('pwabuilder-windows10');
 
 exports.create = function(client, storage, pwabuilder, raygun){
@@ -137,13 +137,14 @@ exports.create = function(client, storage, pwabuilder, raygun){
         }
 
         console.log("Output: ", output);
-        console.log("ManifestInfo: " + manifest);
+        console.log("ManifestInfo: ");
+        console.log(manifest);
 
         storage.removeDir(output)
           .then(function(){ return pwabuilder.normalize(manifest); })
           .then(function(normManifest){
               manifest = normManifest;
-              return pwabuilder.createProject(manifest,output, ['windows10']);
+              return pwabuilder.createProject(manifest, output, ['windows10']);
           })
           .then(function(projectDir) { 
             console.log("Making Windows 10 Package");
@@ -161,15 +162,36 @@ exports.create = function(client, storage, pwabuilder, raygun){
             str = str.replace("INSERT-YOUR-PACKAGE-PROPERTIES-PUBLISHERDISPLAYNAME-HERE", req.body.name);
             str = str.replace("CN=INSERT-YOUR-PACKAGE-IDENTITY-PUBLISHER-HERE", req.body.publisher);
             str = str.replace("INSERT-YOUR-PACKAGE-IDENTITY-NAME-HERE", req.body.package);
+            str = str.replace("1.0.0.0", req.body.version);
             
             return Q.nfcall(fs.writeFile, projectDirectory + "\\Store packages\\windows10\\manifest\\appxmanifest.xml", str);
+          })
+          .then(function(err) {
+            // Copy PowerShell Script to Aid in Running AppX Locally
+            return Q.nfcall(fs.readFile, "src\\controllers\\test_install.ps1");
+          })
+          .then(function(data) {
+            // Inject Data (Package Identity Name) into projectDir + "\\Store packages\\windows10\\test_install.ps1"
+            var str = data.toString();
+            
+            str = str.replace("INSERT-YOUR-PACKAGE-IDENTITY-NAME-HERE", req.body.package);
+            
+            return Q.nfcall(fs.writeFile, projectDirectory + "\\Store packages\\windows10\\test_install.ps1", str);
+          })
+          .then(function(err) {
+            // Copy Readme File into project directory
+            // TODO: Do we want to delete/modify/overwrite the Windows 10 Next Steps file with this one?
+            return Q.nfcall(fs.copy, "src\\controllers\\readme.md", projectDirectory + "\\Store packages\\windows10\\readme.md");
           })
           .then(function(err) {
             // Manifest file is now ready to be processed by packager
             return pwa10.package(projectDirectory, { DotWeb: false, AutoPublish: false, Sign: false }); 
           })
           .then(function(){ return storage.setPermissions(output); })
-          .then(function(){ return storage.createZip(output, manifest.content.short_name); })
+          // TODO: Grab inner sub-directory to zip (so will contain 'windows10' folder)?
+          .then(function(){ 
+            return storage.createZip(output, manifest.content.short_name); 
+          })
           .then(function(){ return storage.createContainer(manifest.id); })
           .then(function(){ return storage.uploadZip(manifest.id, manifest.content.short_name, output, 'appx'); })
           .then(function(){ return storage.removeDir(output); })
@@ -179,26 +201,6 @@ exports.create = function(client, storage, pwabuilder, raygun){
             //raygun.send(err);
             return res.status(500).json({ error: err.message });
           });
-
-        /*storage.removeDir(output)
-          .then(function(){ return pwabuilder.normalize(manifest); })
-          .then(function(normManifest){
-              manifest = normManifest;
-              return pwabuilder.createProject(manifest,output,platforms);
-          })
-          .then(function(){ return storage.setPermissions(output); })
-          .then(function(){ return storage.createZip(output, manifest.content.short_name); })
-          .then(function(){ return storage.createContainer(manifest.id); })
-          .then(function(){ return storage.uploadZip(manifest.id, manifest.content.short_name, output, dirSuffix); })
-          .then(function(){ return storage.removeDir(output); })
-          .then(function(){ return storage.getUrlForZip(manifest.id, manifest.content.short_name, dirSuffix); })
-          .then(function(url){ res.json({archive: url}); })
-          .fail(function(err){
-            //raygun.send(err);
-            return res.json(500, { error: err.message });
-          });*/
-
-          //return res.status(500).json({ error: "Not Implemented" });
       });
     },
     // Send to our DropBox
