@@ -179,8 +179,11 @@ exports.create = function(client, storage, pwabuilder, raygun){
             return Q.nfcall(fs.writeFile, projectDirectory + "\\Store packages\\windows10\\test_install.ps1", str);
           })
           .then(function(err) {
+            // Remove existing package readme so that we can call our new 'readme' whatever we want below.
+            return Q.nfcall(fs.remove, projectDirectory + "\\Store packages\\windows10\\Windows10-next-steps.md");
+          })
+          .then(function(err) {
             // Copy Readme File into project directory
-            // TODO: Do we want to delete/modify/overwrite the Windows 10 Next Steps file with this one?
             return Q.nfcall(fs.copy, "src\\controllers\\readme.md", projectDirectory + "\\Store packages\\windows10\\readme.md");
           })
           .then(function(err) {
@@ -188,7 +191,7 @@ exports.create = function(client, storage, pwabuilder, raygun){
             return pwa10.package(projectDirectory, { DotWeb: false, AutoPublish: false, Sign: false }); 
           })
           .then(function(){ return storage.setPermissions(output); })
-          // TODO: Grab inner sub-directory to zip (so will contain 'windows10' folder)?
+          // TODO: In the future, grab inner sub-directory to zip (so will contain 'windows10' folder)?
           .then(function(){ 
             return storage.createZip(output, manifest.content.short_name); 
           })
