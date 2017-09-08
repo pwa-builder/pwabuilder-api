@@ -168,7 +168,7 @@ exports.create = function(client, storage, pwabuilder, raygun){
           })
           .then(function(err) {
             // Copy PowerShell Script to Aid in Running AppX Locally
-            return Q.nfcall(fs.readFile, "src\\controllers\\test_install.ps1");
+            return Q.nfcall(fs.readFile, projectDirectory + "\\Store packages\\windows10\\test_install.ps1");
           })
           .then(function(data) {
             // Inject Data (Package Identity Name) into projectDir + "\\Store packages\\windows10\\test_install.ps1"
@@ -184,7 +184,7 @@ exports.create = function(client, storage, pwabuilder, raygun){
           })
           .then(function(err) {
             // Copy Readme File into project directory
-            return Q.nfcall(fs.copy, "src\\controllers\\readme.md", projectDirectory + "\\Store packages\\windows10\\readme.md");
+            return Q.nfcall(fs.copy, "assets\\readme.md", projectDirectory + "\\Store packages\\windows10\\readme.md");
           })
           .then(function(err) {
             // Manifest file is now ready to be processed by packager
