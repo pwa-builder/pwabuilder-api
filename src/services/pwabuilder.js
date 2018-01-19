@@ -172,7 +172,8 @@ PWABuilder.prototype.createProject = function(manifest,outputDir,platforms){
       var options = {
         'crosswalk' : false,
         'build'     : false,
-        'assets'    : manifest.assets
+        'assets'    : manifest.assets,
+        'format'    : 'w3c'
       };
 
       self.lib.projectBuilder.createApps(cleanManifest, outputDir, platforms, options, function (err, projectDir) {
