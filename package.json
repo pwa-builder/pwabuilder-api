@@ -24,7 +24,7 @@
     "pwabuilder-lib": "^2.0.1-beta.3",
     "pwabuilder-cordova": "^2.0.0-rc",
     "pwabuilder-web": "^2.0.0-rc",
-    "pwabuilder-windows10": "^2.0.3-rc.0",
+    "pwabuilder-windows10": "^2.0.3-rc.1",
     "morgan": "~1.5.1",
     "multer": "^0.1.8",
     "node-uuid": "^1.4.3",
