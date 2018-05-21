@@ -12,5 +12,6 @@ module.exports = function(pwabuilderLib, azure){
 
     return router
         .get('/',controller.getServiceWorkerLocation)
-        .get('/previewcode',controller.getServiceWorkerCodePreview);
+        .get('/previewcode',controller.getServiceWorkerCodePreview)
+        .get('/getServiceWorkersDescription', controller.getServiceWorkersDescription);
 };

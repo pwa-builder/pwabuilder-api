@@ -95,6 +95,49 @@ exports.create = function(pwabuilder, storage){
                         serviceWorker: serviceWorkerFileContent
                     });
                 });
+        },
+        getServiceWorkersDescription: function(req, res, next){
+            pwabuilder.getServiceWorkersDescription()                
+                .then(function(resultFolders) {
+                    return resultFolders;
+                 })
+                .then(function(file){
+                    var pendingTasks = [];
+                    var defer = Q.defer();
+                    pendingTasks.push(defer.promise);
+
+                    fs.readFile(file, 'utf8', function (error, data) {
+                        if (error) {
+                            defer.reject(error);
+                        }
+                        defer.resolve( {fileName: file, fileContent: JSON.parse(data) } );
+                    });
+
+                    return Q.allSettled(pendingTasks).then(function(results) {
+                        var result = results.reduce(function (success, result) {
+                            if (result.state !== 'fulfilled') {
+                                log.error(result.reason.getMessage());
+                                return false;
+                            }
+                            return success;
+                        }, true);
+
+                        if (!result) {
+                            return Q.reject(new Error('One or more files could not be generated successfully.'));
+                        } else {
+                            return Q.resolve(
+                                results.map(function(data){
+                                    return data.value;
+                                })
+                            );
+                        }
+                    });
+                })
+                .then(function (file){
+                    return res.json({
+                        serviceworkers: file[0].fileContent.serviceworkers
+                    });
+                });
         }
     };
 
