@@ -21,7 +21,7 @@
     "jade": "~1.9.2",
     "lodash": "^3.6.0",
     "loglevel": "^1.2.0",
-    "pwabuilder-lib": "^2.0.1-beta.3",
+    "pwabuilder-lib": "^2.0.2-RC.0",
     "pwabuilder-cordova": "^2.0.0-rc",
     "pwabuilder-web": "^2.0.0-rc",
     "pwabuilder-windows10": "^2.0.3-rc.1",
