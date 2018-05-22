@@ -222,6 +222,16 @@ PWABuilder.prototype.getServiceWorkers = function(id) {
   });
 };
 
+PWABuilder.prototype.getServiceWorkersDescription = function() {
+  var self = this;
+
+  return Q.Promise(function (resolve, reject) {
+    self.lib.serviceWorkerTools.getServiceWorkersDescription(function (err, resultURL) {
+      return resolve(resultURL);
+    });
+  });
+};
+
 PWABuilder.prototype.assignValidationErrors = function(errors,manifest){
   var data = { errors: []};
 
