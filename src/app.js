@@ -50,8 +50,8 @@ var PWABuilder = {
       next();
     });
 
-    app.use(bodyParser.json());
-    app.use(bodyParser.urlencoded({ extended: false }));
+    app.use(bodyParser.json({limit: '1mb'}));
+    app.use(bodyParser.urlencoded({limit: '1mb', extended: true }));
     app.use(multer({ dest: '../tmp/'}));
     app.use(cookieParser());
     app.use(express.static(path.join(__dirname, 'public')));
