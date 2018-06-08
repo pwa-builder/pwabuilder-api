@@ -95,7 +95,7 @@ function onListening() {
  * first request following a cold start. This causes the default socket timeout on the connection
  * to be exceeded and the server returning a 500 - Internal Error.
  */
-server.timeout = 300000;
+server.timeout = 900000;
 
 /**
  * Listen on provided port, on all network interfaces.
