@@ -31,7 +31,7 @@ PWABuilder.prototype.createManifestFromUrl = function(url,client){
 
       self.validateManifest(manifest)
       .then(function(manifest){
-        client.set(manifest.id,JSON.stringify(manifest));
+        client.set(manifest.id,JSON.stringify(manifest), 'EX', 60*60*24*7);
         return resolve(manifest);
       })
       .fail(reject);
@@ -62,7 +62,7 @@ PWABuilder.prototype.createManifestFromFile = function(file,client){
       var manifest = _.assign(manifestInfo,{ id: uuid.v4().slice(0,8) });
       self.validateManifest(manifest)
       .then(function(manifest){
-        client.set(manifest.id,JSON.stringify(manifest));
+        client.set(manifest.id,JSON.stringify(manifest), 'EX', 60*60*24*7);
         return resolve(manifest);
       })
       .fail(reject);
@@ -117,7 +117,7 @@ PWABuilder.prototype.updateManifest = function(client,manifestId,updates,assets)
 
       return self.validateManifest(manifest)
       .then(function(manifest){
-        client.set(manifest.id,JSON.stringify(manifest));
+        client.set(manifest.id,JSON.stringify(manifest), 'EX', 60*60*24*7);
 
         resolve(manifest);
       });
