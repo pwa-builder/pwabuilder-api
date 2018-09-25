@@ -8,8 +8,8 @@
         "source": "pwabuilder-android"
     },
     "mac": {
-        "packageName": "pwabuilder-mac",
-        "source": "pwabuilder-mac"
+        "packageName": "pwabuilder-macos",
+        "source": "pwabuilder-macos"
     },
     "ios": {
         "packageName": "pwabuilder-cordova",
