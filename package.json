@@ -30,6 +30,8 @@
     "pwabuilder-lib": "^2.0.3-RC.0",
     "pwabuilder-web": "^2.0.0-rc.2",
     "pwabuilder-windows10": "^2.0.3-rc.1",
+    "pwabuilder-android": "^2.0.0-rc",
+    "pwabuilder-macos": "^0.3.0",
     "q": "^1.5.1",
     "raygun": "^0.10.0",
     "redis": "^2.8.0",
@@ -56,6 +58,6 @@
     "supertest": "^0.15.0"
   },
   "peerDependencies": {
-    "eslint-plugin-hapi": "4.x.x"
+    "eslint-plugin-hapi": "4.1.0"
   }
 }

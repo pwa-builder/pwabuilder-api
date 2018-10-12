@@ -13,6 +13,8 @@ function PWABuilder(pwabuilderLib){
   this.lib.platformTools.configurePlatforms(platformsConfig);
 }
 
+const expirationTime = 604800;
+
 PWABuilder.prototype.createManifestFromUrl = function(url,client){
   var self = this;
 
@@ -28,10 +30,10 @@ PWABuilder.prototype.createManifestFromUrl = function(url,client){
       }
 
       var manifest = _.assign(manifestInfo,{ id: uuid.v4().slice(0,8) });
-
+      
       self.validateManifest(manifest)
       .then(function(manifest){
-        client.set(manifest.id,JSON.stringify(manifest));
+        client.set(manifest.id,JSON.stringify(manifest), 'EX', expirationTime);
         return resolve(manifest);
       })
       .fail(reject);
@@ -62,7 +64,7 @@ PWABuilder.prototype.createManifestFromFile = function(file,client){
       var manifest = _.assign(manifestInfo,{ id: uuid.v4().slice(0,8) });
       self.validateManifest(manifest)
       .then(function(manifest){
-        client.set(manifest.id,JSON.stringify(manifest));
+        client.set(manifest.id,JSON.stringify(manifest), 'EX', expirationTime);
         return resolve(manifest);
       })
       .fail(reject);
@@ -117,7 +119,7 @@ PWABuilder.prototype.updateManifest = function(client,manifestId,updates,assets)
 
       return self.validateManifest(manifest)
       .then(function(manifest){
-        client.set(manifest.id,JSON.stringify(manifest));
+        client.set(manifest.id,JSON.stringify(manifest), 'EX', expirationTime);
 
         resolve(manifest);
       });
