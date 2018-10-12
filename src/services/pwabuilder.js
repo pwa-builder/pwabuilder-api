@@ -259,7 +259,7 @@ PWABuilder.prototype.assignSuggestions = function(suggestions,manifest){
   var data = { suggestions: []};
 
   _.each(suggestions,function(s){
-    if(_.any(data.suggestions,'member',s.member)){
+    if(_.some(data.suggestions,'member',s.member)){
       var suggestion = _.find(data.suggestions,'member',s.member);
       suggestion.issues = suggestion.issues || [];
       suggestion.issues.push({ description: s.description, platform: s.platform, code: s.code });
