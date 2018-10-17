@@ -31,8 +31,8 @@ exports.create = function(client, storage, pwabuilder, raygun){
         .fail(function(err){
           return res.status(422).json({error: err.message});
         });
-      }else if(req.files.file){
-        var file = req.files.file;
+      }else if(req.files && req.files[0]){
+        var file = req.files[0];
         pwabuilder.createManifestFromFile(file,client)
         .then(function(manifest){
           res.json(manifest);
@@ -304,7 +304,7 @@ exports.create = function(client, storage, pwabuilder, raygun){
 
         var persistedIcons = JSON.parse(JSON.stringify(manifestInfo.content.icons));
 
-        var imageFile = req.files.file;
+        var imageFile = req.files[0];
         Q.nfcall(fs.readFile, imageFile.path).then(function (imageContents) {
           pwabuilder.generateImagesForManifest(imageContents, manifestInfo, client)
             .then(function (manifest) {
