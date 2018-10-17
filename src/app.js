@@ -52,10 +52,7 @@ var PWABuilder = {
 
     app.use(bodyParser.json({limit: '2mb'}));
     app.use(bodyParser.urlencoded({limit: '2mb', extended: true }));
-    app.use(function (req, res, next) {
-      multer({ dest: '../tmp/'});
-      next();
-    });
+    app.use(multer({ dest: '../tmp/' }).any());
     app.use(cookieParser());
     app.use(express.static(path.join(__dirname, 'public')));
 
