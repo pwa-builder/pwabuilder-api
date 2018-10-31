@@ -236,7 +236,7 @@ PWABuilder.prototype.assignValidationErrors = function(errors,manifest){
   var data = { errors: []};
 
   _.each(errors,function(e){
-    if(_.any(data.errors,'member',e.member)){
+    if(_.some(data.errors,'member',e.member)){
       var error = _.find(data.errors,'member',e.member);
       error.issues = error.issues || [];
       error.issues.push({ description: e.description, platform: e.platform, code: e.code });
@@ -259,7 +259,7 @@ PWABuilder.prototype.assignSuggestions = function(suggestions,manifest){
   var data = { suggestions: []};
 
   _.each(suggestions,function(s){
-    if(_.any(data.suggestions,'member',s.member)){
+    if(_.some(data.suggestions,'member',s.member)){
       var suggestion = _.find(data.suggestions,'member',s.member);
       suggestion.issues = suggestion.issues || [];
       suggestion.issues.push({ description: s.description, platform: s.platform, code: s.code });
@@ -282,7 +282,7 @@ PWABuilder.prototype.assignWarnings = function(warnings,manifest){
   var data = { warnings: []};
 
   _.each(warnings,function(w){
-    if(_.any(data.warnings,'member',w.member)){
+    if(_.some(data.warnings,'member',w.member)){
       var warning = _.find(data.warnings,'member',w.member);
       warning.issues = warning.issues || [];
       warning.issues.push({ description: w.description, platform: w.platform, code: w.code });
