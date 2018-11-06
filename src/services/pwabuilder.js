@@ -5,6 +5,7 @@ var uuid = require('node-uuid'),
   _ = require('lodash'),
   path = require('path'),
   config = require(path.join(__dirname,'../config')),
+  puppeteer = require('puppeteer'),
   platforms = config.platforms;
 
 function PWABuilder(pwabuilderLib){
@@ -318,6 +319,22 @@ PWABuilder.prototype.generateImagesForManifest = function(image, manifestInfo, c
     });
   });
 }
+
+PWABuilder.prototype.serviceWorkerChecker = async function swChecker(url, mils) {
+  const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.goto(url, {waitUntil: ['networkidle0','load', 'domcontentloaded']});
+  try {
+    const serviceWorkerHandle = await page.waitForFunction(async () => {
+      return navigator.serviceWorker.ready.then((res) => res.active.scriptURL);
+    }, {timeout: mils});
+    
+    return serviceWorkerHandle.jsonValue();
+  } catch (error) {
+    return false;
+  }
+}
+
 
 exports.create = function(pwabuilderLib){
   return new PWABuilder(pwabuilderLib);
