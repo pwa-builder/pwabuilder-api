@@ -7,6 +7,7 @@ var path    = require('path'),
   util      = require('util'),
   Q         = require('q'),
   fs        = require('fs-extra'),
+  puppeteer = require('puppeteer'),
   pwa10     = require('pwabuilder-windows10');
 
 exports.create = function(client, storage, pwabuilder, raygun){
@@ -22,8 +23,28 @@ exports.create = function(client, storage, pwabuilder, raygun){
         res.json(manifest);
       });
     },
-    create: function(req,res,next){
+    create: async function(req,res,next){
+      
       if(req.body.siteUrl){
+
+        async function swChecker(url, mils) {
+          const browser = await puppeteer.launch();
+            const page = await browser.newPage();
+            await page.goto(url, {waitUntil: ['networkidle0','load', 'domcontentloaded']});
+          try {
+            const serviceWorkerHandle = await page.waitForFunction(async () => {
+              return navigator.serviceWorker.ready.then((res) => res.active.scriptURL);
+            }, {timeout: mils});
+
+            return serviceWorkerHandle.jsonValue();
+          } catch (error) {
+            return false;
+          }
+        }
+
+        var swHandle = await swChecker(req.body.siteUrl, 1500);
+        console.log("swHandle", swHandle);
+
         pwabuilder.createManifestFromUrl(req.body.siteUrl,client)
         .then(function(manifest){
           res.json(manifest);
