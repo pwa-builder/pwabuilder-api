@@ -320,7 +320,7 @@ PWABuilder.prototype.generateImagesForManifest = function(image, manifestInfo, c
   });
 }
 
-PWABuilder.prototype.serviceWorkerChecker =  function swChecker(url) {
+PWABuilder.prototype.getServiceWorkerFromURL = function(url) {
   return Q.Promise(async function(resolve,reject){
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
