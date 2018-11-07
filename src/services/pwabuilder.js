@@ -320,19 +320,25 @@ PWABuilder.prototype.generateImagesForManifest = function(image, manifestInfo, c
   });
 }
 
-PWABuilder.prototype.serviceWorkerChecker = async function swChecker(url, mils) {
-  const browser = await puppeteer.launch();
+PWABuilder.prototype.serviceWorkerChecker =  function swChecker(url, mils) {
+  
+
+
+  return Q.Promise(async function(resolve,reject){
+    const browser = await puppeteer.launch();
     const page = await browser.newPage();
     await page.goto(url, {waitUntil: ['networkidle0','load', 'domcontentloaded']});
-  try {
-    const serviceWorkerHandle = await page.waitForFunction(async () => {
-      return navigator.serviceWorker.ready.then((res) => res.active.scriptURL);
-    }, {timeout: mils});
-    
-    return serviceWorkerHandle.jsonValue();
-  } catch (error) {
-    return false;
-  }
+
+    try {
+      let serviceWorkerHandle = await page.waitForFunction(() => {
+        return navigator.serviceWorker.ready.then((res) => res.active.scriptURL);
+      }, {timeout: mils});
+      
+      return resolve(serviceWorkerHandle.jsonValue());
+    } catch (error) {
+      return reject(false);
+    }
+  })
 }
 
 

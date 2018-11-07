@@ -22,11 +22,13 @@ exports.create = function(client, storage, pwabuilder, raygun){
         res.json(manifest);
       });
     },
-    create: async function(req,res,next){
+    create: function(req,res,next){
       
       if(req.body.siteUrl){
-        var swHandle = await pwabuilder.serviceWorkerChecker(req.body.siteUrl, 1500);
-        
+        pwabuilder.serviceWorkerChecker(req.body.siteUrl, 1500)
+        .then((res) => console.log("res", res))
+       
+                        
         pwabuilder.createManifestFromUrl(req.body.siteUrl,client)
         .then(function(manifest){
           res.json(manifest);
