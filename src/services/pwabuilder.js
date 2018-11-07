@@ -320,10 +320,7 @@ PWABuilder.prototype.generateImagesForManifest = function(image, manifestInfo, c
   });
 }
 
-PWABuilder.prototype.serviceWorkerChecker =  function swChecker(url, mils) {
-  
-
-
+PWABuilder.prototype.serviceWorkerChecker =  function swChecker(url) {
   return Q.Promise(async function(resolve,reject){
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
@@ -332,7 +329,7 @@ PWABuilder.prototype.serviceWorkerChecker =  function swChecker(url, mils) {
     try {
       let serviceWorkerHandle = await page.waitForFunction(() => {
         return navigator.serviceWorker.ready.then((res) => res.active.scriptURL);
-      }, {timeout: mils});
+      }, {timeout: config.serviceWorkerChecker.timeout});
       
       return resolve(serviceWorkerHandle.jsonValue());
     } catch (error) {
