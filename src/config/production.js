@@ -16,5 +16,4 @@ module.exports = {
     serviceWorkerChecker: {
         timeout: 1500
     }
-
 };

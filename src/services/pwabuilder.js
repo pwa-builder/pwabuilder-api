@@ -333,7 +333,7 @@ PWABuilder.prototype.serviceWorkerChecker =  function swChecker(url) {
       
       return resolve(serviceWorkerHandle.jsonValue());
     } catch (error) {
-      return reject(false);
+      return reject();
     }
   })
 }

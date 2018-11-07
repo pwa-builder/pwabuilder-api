@@ -23,9 +23,7 @@ exports.create = function(client, storage, pwabuilder, raygun){
       });
     },
     create: function(req,res,next){
-      
       if(req.body.siteUrl){
-                       
         pwabuilder.createManifestFromUrl(req.body.siteUrl,client)
         .then(function(manifest){
           res.json(manifest);
