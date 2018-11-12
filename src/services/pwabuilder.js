@@ -335,7 +335,7 @@ PWABuilder.prototype.getServiceWorkerFromURL = function(url) {
       
       return resolve(serviceWorkerHandle.jsonValue());
     } catch (error) {
-      return reject();
+      return reject(false);
     }
   })
 }
