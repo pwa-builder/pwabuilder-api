@@ -335,7 +335,10 @@ PWABuilder.prototype.getServiceWorkerFromURL = function(url) {
       
       return resolve(serviceWorkerHandle.jsonValue());
     } catch (error) {
-      return reject(false);
+      if(error.name && error.name.indexOf("TimeoutError") > -1){
+        return resolve(false);
+      }
+      return reject(error);
     }
   })
 }
