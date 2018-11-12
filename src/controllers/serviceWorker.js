@@ -142,7 +142,7 @@ exports.create = function(pwabuilder, storage){
         getServiceWorkerFromURL: function(req, res, next) {
                pwabuilder.getServiceWorkerFromURL(req.query.siteUrl)
                 .then((swURL) => {
-                    return swURL
+                    return res.json ({swURL: swURL});
                 });
         }
     };
