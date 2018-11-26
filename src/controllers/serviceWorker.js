@@ -138,6 +138,12 @@ exports.create = function(pwabuilder, storage){
                         serviceworkers: file[0].fileContent.serviceworkers
                     });
                 });
+        },
+        getServiceWorkerFromURL: function(req, res, next) {
+               pwabuilder.getServiceWorkerFromURL(req.query.siteUrl)
+                .then((swURL) => {
+                    return res.json ({swURL: swURL});
+                });
         }
     };
 
@@ -186,4 +192,5 @@ exports.create = function(pwabuilder, storage){
             });
         });
     }
+
 };
