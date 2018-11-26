@@ -23,7 +23,7 @@
     "loglevel": "^1.2.0",
     "morgan": "^1.9.1",
     "multer": "^0.1.8",
-    "uuid": "3.3.2",
+    "uuid": "^3.3.2",
     "pug": "^2.0.3",
     "pwabuilder-cordova": "^2.0.0-rc",
     "pwabuilder-lib": "^2.0.3-RC.0",
