@@ -11,7 +11,7 @@ var chai = require('chai'),
     PWABuilder = require('../../src/services/pwabuilder'),
     Q = require('q'),
     _ = require('lodash'),
-    uuid = require('node-uuid');
+    uuid = require('uuid');
 
 describe('manifests',function(){
     describe('show route',function(){

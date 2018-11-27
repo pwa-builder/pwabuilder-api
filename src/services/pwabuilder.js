@@ -1,6 +1,6 @@
 'use strict';
 
-var uuid = require('node-uuid'),
+var uuid = require('uuid'),
   Q = require('q'),
   _ = require('lodash'),
   path = require('path'),

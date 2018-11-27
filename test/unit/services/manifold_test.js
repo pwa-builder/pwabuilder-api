@@ -5,7 +5,7 @@ var chai = require('chai'),
     sinon = require('sinon'),
     path = require('path'),
     PWABuilder = require('../../../src/services/pwabuilder'),
-    uuid = require('node-uuid');
+    uuid = require('uuid');
 
 describe('pwabuilder service',function(){
     var pwabuilder,

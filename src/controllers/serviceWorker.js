@@ -1,7 +1,7 @@
 'use strict';
 
 var archiver = require('archiver'),
-    uuid = require('node-uuid'),
+    uuid = require('uuid'),
     path = require('path'),
     Q = require('q'),
     fs = require('fs'),
