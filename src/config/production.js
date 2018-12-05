@@ -14,6 +14,6 @@ module.exports = {
         generationSvcUrl: process.env.IMG_GEN_SVC_URL || 'http://appimagegenerator-prod.azurewebsites.net'
     },
     serviceWorkerChecker: {
-        timeout: 1500
+        timeout: 2500
     }
 };

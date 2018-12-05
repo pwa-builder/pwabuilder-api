@@ -7,7 +7,7 @@
   },
   "scripts": {
     "start": "node ./bin/www",
-    "setup": "npm install && npm-install-peers"
+    "setup": "npm install && npm install-peers"
   },
   "dependencies": {
     "archiver": "^3.0.0",

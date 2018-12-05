@@ -326,15 +326,64 @@ PWABuilder.prototype.getServiceWorkerFromURL = function(url) {
   return Q.Promise(async function(resolve,reject){
     const browser = await puppeteer.launch({headless: true, args: ["--no-sandbox"]});
     const page = await browser.newPage();
+
     await page.goto(url, {waitUntil: ['networkidle0','load', 'domcontentloaded']});
 
+    // empty object that we fill with data below
+    let swInfo = {};
+
     try {
+      // Check to see if there is a service worker
       let serviceWorkerHandle = await page.waitForFunction(() => {
         return navigator.serviceWorker.ready.then((res) => res.active.scriptURL);
+      }, {timeout: config.serviceWorkerChecker.timeout});  
+
+      swInfo['hasSW'] = await serviceWorkerHandle.jsonValue();
+
+      // try to grab service worker scope
+      const serviceWorkerScope = await page.evaluate(() => {
+        return navigator.serviceWorker.getRegistration().then((res) => res.scope);
       }, {timeout: config.serviceWorkerChecker.timeout});
+
+      swInfo['scope'] = serviceWorkerScope;
+
+      // checking push reg
+      const pushReg = await page.evaluate(() => {
+        return navigator.serviceWorker.getRegistration().then((reg) => {
+          return reg.pushManager.getSubscription().then((sub) => sub);
+        });
+      }, {timeout: config.serviceWorkerChecker.timeout});
+
+      swInfo['pushReg'] = pushReg;
+
+      // Checking cache
+      // Capture requests during 2nd load.
+      const allRequests = new Map();
+      page.on('request', req => {
+        allRequests.set(req.url(), req);
+      });
+
+      // Reload page to pick up any runtime caching done by the service worker.
+      await page.reload({waitUntil: ['networkidle0','load', 'domcontentloaded']});
+
+      const swRequests = Array.from(allRequests.values());
+
+      let requestChecks = [];
+      swRequests.forEach((req) => {
+        const fromSW = req.response().fromServiceWorker();
+        const requestURL = req.response().url();
+
+        requestChecks.push({
+          fromSW,
+          requestURL
+        });
+      });
+
+      swInfo['cache'] = requestChecks;
       
-      return resolve(serviceWorkerHandle.jsonValue());
+      return resolve(swInfo);
     } catch (error) {
+      console.log('timing out', error);
       if(error.name && error.name.indexOf("TimeoutError") > -1){
         return resolve(false);
       }
