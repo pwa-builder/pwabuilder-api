@@ -140,15 +140,10 @@ exports.create = function(pwabuilder, storage){
                 });
         },
         getServiceWorkerFromURL: function(req, res, next) {
-            let regex = /^(ftp|http|https):\/\/(([a-zA-Z0-9$\-_.+!*'(),;:&=]|%[0-9a-fA-F]{2})+@)?(((25[0-5]|2[0-4][0-9]|[0-1][0-9][0-9]|[1-9][0-9]|[0-9])(\.(25[0-5]|2[0-4][0-9]|[0-1][0-9][0-9]|[1-9][0-9]|[0-9])){3})|localhost|([a-zA-Z0-9\-\u00C0-\u017F]+\.)+([a-zA-Z]{2,}))(:[0-9]+)?(\/(([a-zA-Z0-9$\-_.+!*'(),;:@&=]|%[0-9a-fA-F]{2})*(\/([a-zA-Z0-9$\-_.+!*'(),;:@&=]|%[0-9a-fA-F]{2})*)*)?(\?([a-zA-Z0-9$\-_.+!*'(),;:@&=\/?]|%[0-9a-fA-F]{2})*)?(\#([a-zA-Z0-9$\-_.+!*'(),;:@&=\/?]|%[0-9a-fA-F]{2})*)?)?$/;
-            
-            if(!regex.test(req.query.siteUrl)){
-                return res.status(422) .json({ error: err.message, trace: err.stackTrace });
-            }
-            pwabuilder.getServiceWorkerFromURL(req.query.siteUrl)
-            .then((swURL) => {
-                return res.json ({swURL: swURL});
-            });
+               pwabuilder.getServiceWorkerFromURL(req.query.siteUrl)
+                .then((swData) => {
+                    return res.json(swData);
+                });
         }
     };
 
