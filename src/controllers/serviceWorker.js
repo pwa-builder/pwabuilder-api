@@ -1,7 +1,7 @@
 'use strict';
 
 var archiver = require('archiver'),
-    uuid = require('node-uuid'),
+    uuid = require('uuid'),
     path = require('path'),
     Q = require('q'),
     fs = require('fs'),
@@ -138,6 +138,12 @@ exports.create = function(pwabuilder, storage){
                         serviceworkers: file[0].fileContent.serviceworkers
                     });
                 });
+        },
+        getServiceWorkerFromURL: function(req, res, next) {
+               pwabuilder.getServiceWorkerFromURL(req.query.siteUrl)
+                .then((swData) => {
+                    return res.json(swData);
+                });
         }
     };
 
@@ -186,4 +192,5 @@ exports.create = function(pwabuilder, storage){
             });
         });
     }
+
 };

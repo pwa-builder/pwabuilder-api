@@ -3,7 +3,7 @@
 var chai = require('chai'),
     expect = chai.expect,
     Q = require('q'),
-    uuid = require('node-uuid'),
+    uuid = require('uuid'),
     manifestController = require('../../../src/controllers/manifests');
 
 describe('manifests controller',function(){

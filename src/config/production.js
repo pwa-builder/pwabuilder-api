@@ -12,5 +12,8 @@ module.exports = {
     platforms: ['windows10','windows','android','ios','web'],
     images: {
         generationSvcUrl: process.env.IMG_GEN_SVC_URL || 'http://appimagegenerator-prod.azurewebsites.net'
+    },
+    serviceWorkerChecker: {
+        timeout: 2500
     }
 };

@@ -17,11 +17,12 @@ if(config.redis.password){
     redisOptions.auth_pass = config.redis.password;
 }
 
-console.log('Connecting to Redis...');
+console.log('Connecting to Redis...', config.redis.port, config.redis.host);
 
 var app = pwabuilder.init(redis.createClient(config.redis.port,config.redis.host,redisOptions), azure.createBlobService(config.azure.account_name,config.azure.access_key),require('pwabuilder-lib')),
     debug = require('debug')('pwabuilder-api:server'),
     http = require('http');
+
 
 /**
  * Normalize a port into a number, string, or false.
