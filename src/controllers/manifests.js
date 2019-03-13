@@ -149,11 +149,11 @@ exports.create = function(client, storage, pwabuilder, raygun){
           .then(function(projectDir) { 
             console.log("Making Windows 10 Package");
 
-            projectDir += "\\PWA";
+            projectDir = path.join(projectDir, "PWA");
             projectDirectory = projectDir;
 
             // Read our manifest template
-            return Q.nfcall(fs.readFile, projectDirectory + "\\Store packages\\windows10\\manifest\\appxmanifest.xml");
+            return Q.nfcall(fs.readFile, path.join(projectDirectory, "Store packages", "windows10", "manifest", "appxmanifest.xml"));
           })
           .then(function(data) {
             // Inject Data (Package/Publisher Identity, Publisher Display Name) into projectDir + "\\Store packages\\windows10\\manifest\\appxmanifest.xml"
@@ -164,11 +164,11 @@ exports.create = function(client, storage, pwabuilder, raygun){
             str = str.replace("INSERT-YOUR-PACKAGE-IDENTITY-NAME-HERE", req.body.package);
             str = str.replace("1.0.0.0", req.body.version);
             
-            return Q.nfcall(fs.writeFile, projectDirectory + "\\Store packages\\windows10\\manifest\\appxmanifest.xml", str);
+            return Q.nfcall(fs.writeFile, path.join(projectDirectory, "Store packages", "windows10", "manifest", "appxmanifest.xml"), str);
           })
           .then(function(err) {
             // Copy PowerShell Script to Aid in Running AppX Locally
-            return Q.nfcall(fs.readFile, projectDirectory + "\\Store packages\\windows10\\test_install.ps1");
+            return Q.nfcall(fs.readFile, path.join(projectDirectory, "Store packages", "windows10", "test_install.ps1"));
           })
           .then(function(data) {
             // Inject Data (Package Identity Name) into projectDir + "\\Store packages\\windows10\\test_install.ps1"
@@ -176,15 +176,15 @@ exports.create = function(client, storage, pwabuilder, raygun){
             
             str = str.replace("INSERT-YOUR-PACKAGE-IDENTITY-NAME-HERE", req.body.package);
             
-            return Q.nfcall(fs.writeFile, projectDirectory + "\\Store packages\\windows10\\test_install.ps1", str);
+            return Q.nfcall(fs.writeFile, path.join(projectDirectory, "Store packages", "windows10", "test_install.ps1"), str);
           })
           .then(function(err) {
             // Remove existing package readme so that we can call our new 'readme' whatever we want below.
-            return Q.nfcall(fs.remove, projectDirectory + "\\Store packages\\windows10\\Windows10-next-steps.md");
+            return Q.nfcall(fs.remove, path.join(projectDirectory, "Store packages", "windows10", "Windows10-next-steps.md"));
           })
           .then(function(err) {
             // Copy Readme File into project directory
-            return Q.nfcall(fs.copy, "assets\\readme.md", projectDirectory + "\\Store packages\\windows10\\readme.md");
+            return Q.nfcall(fs.copy, path.join("bin", "assets", "readme.md"), path.join(projectDirectory, "Store packages", "windows10", "readme.md"));
           })
           .then(function(err) {
             // Manifest file is now ready to be processed by packager
