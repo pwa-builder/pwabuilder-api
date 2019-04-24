@@ -36,7 +36,7 @@ Storage.prototype.createZip = function(output, fileName){
         archive.pipe(zip);
 
         var folderName = path.join(output, utils.sanitizeName(fileName));
-        archive.directory(folderName, 'projects', { mode: '0755' }).finalize();
+        archive.directory(folderName, '', { mode: '0755' }).finalize();
     });
 };
 
