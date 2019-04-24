@@ -327,11 +327,24 @@ PWABuilder.prototype.getServiceWorkerFromURL = function(url) {
     const browser = await puppeteer.launch({headless: true, args: ["--no-sandbox"]});
     const page = await browser.newPage();
 
-    await page.goto(url, {waitUntil: ['networkidle0','load', 'domcontentloaded']});
-
     // empty object that we fill with data below
     let swInfo = {};
 
+       
+    await page.setRequestInterception(true);
+    
+    let whiteList = ['document', 'plain', 'script', 'javascript']
+    page.on('request' ,(req) => {
+      const type = req.resourceType();
+      if(whiteList.some(el => type.indexOf(el) >= 0 )) {
+        req.continue();
+      } else {
+        req.abort();
+      }
+    })
+    
+    await page.goto(url, {waitUntil: ['domcontentloaded']});
+    
     try {
       // Check to see if there is a service worker
       let serviceWorkerHandle = await page.waitForFunction(() => {
@@ -364,14 +377,14 @@ PWABuilder.prototype.getServiceWorkerFromURL = function(url) {
       });
 
       // Reload page to pick up any runtime caching done by the service worker.
-      await page.reload({waitUntil: ['networkidle0','load', 'domcontentloaded']});
+      await page.reload({waitUntil: ['domcontentloaded']});
 
       const swRequests = Array.from(allRequests.values());
 
       let requestChecks = [];
       swRequests.forEach((req) => {
-        const fromSW = req.response().fromServiceWorker();
-        const requestURL = req.response().url();
+        const fromSW = req.response() != null ? req.response().fromServiceWorker() : null;
+        const requestURL = req.response() != null ? req.response().url() : null;
 
         requestChecks.push({
           fromSW,
@@ -388,6 +401,9 @@ PWABuilder.prototype.getServiceWorkerFromURL = function(url) {
         return resolve(false);
       }
       return reject(error);
+    } finally {
+      await page.close();
+      await browser.close();
     }
   })
 }
