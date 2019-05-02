@@ -30,5 +30,9 @@
     "androidTWA": {
       "packageName": "pwabuilder-android-twa",
       "source": "pwabuilder-android-twa"
+    },
+    "samsung": {
+      "packageName": "pwabuilder-samsung",
+      "source": "pwabuilder-samsung"
     }
 }
