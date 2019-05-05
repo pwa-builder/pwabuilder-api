@@ -26,5 +26,13 @@
     "web": {
         "packageName": "pwabuilder-web",
         "source": "pwabuilder-web"
+    },
+    "androidTWA": {
+      "packageName": "pwabuilder-android-twa",
+      "source": "pwabuilder-android-twa"
+    },
+    "samsung": {
+      "packageName": "pwabuilder-samsung",
+      "source": "pwabuilder-samsung"
     }
 }
