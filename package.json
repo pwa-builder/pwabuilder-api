@@ -32,7 +32,7 @@
     "pwabuilder-macos": "^0.3.0",
     "pwabuilder-samsung": "^1.0.0",
     "pwabuilder-web": "^2.0.0-rc.3",
-    "pwabuilder-windows10": "^2.0.4-rc.1",
+    "pwabuilder-windows10": "^2.0.4-rc.2",
     "q": "^1.5.1",
     "raygun": "^0.10.0",
     "redis": "^2.8.0",
