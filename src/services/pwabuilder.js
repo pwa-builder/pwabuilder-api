@@ -419,8 +419,3 @@ PWABuilder.prototype.getServiceWorkerFromURL = function (url) {
     }
   })
 }
-
-
-exports.create = function(pwabuilderLib){
-  return new PWABuilder(pwabuilderLib);
-};
