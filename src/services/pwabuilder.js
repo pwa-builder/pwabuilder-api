@@ -322,41 +322,50 @@ PWABuilder.prototype.generateImagesForManifest = function(image, manifestInfo, c
   });
 }
 
-PWABuilder.prototype.getServiceWorkerFromURL = function(url) {
-  return Q.Promise(async function(resolve,reject){
-    const browser = await puppeteer.launch({headless: true, args: ["--no-sandbox"]});
+PWABuilder.prototype.getServiceWorkerFromURL = function (url) {
+  return Q.Promise(async function (resolve, reject) {
+    const browser = await puppeteer.launch({
+      headless: true,
+      ignoreHTTPSErrors: true,
+      args: ["--no-sandbox"]
+    });
     const page = await browser.newPage();
 
     // empty object that we fill with data below
     let swInfo = {};
 
-       
     await page.setRequestInterception(true);
-    
+
     let whiteList = ['document', 'plain', 'script', 'javascript']
-    page.on('request' ,(req) => {
+    page.on('request', (req) => {
       const type = req.resourceType();
-      if(whiteList.some(el => type.indexOf(el) >= 0 )) {
+      if (whiteList.some(el => type.indexOf(el) >= 0)) {
         req.continue();
       } else {
         req.abort();
       }
     })
-    
-    await page.goto(url, {waitUntil: ['domcontentloaded']});
-    
+
+    await page.goto(url, {
+      waitUntil: ['domcontentloaded']
+    });
+
     try {
       // Check to see if there is a service worker
       let serviceWorkerHandle = await page.waitForFunction(() => {
-        return navigator.serviceWorker.ready.then((res) => res.active.scriptURL);
-      }, {timeout: config.serviceWorkerChecker.timeout});  
+        return navigator.serviceWorker && navigator.serviceWorker.ready.then((res) => res.active.scriptURL);
+      }, {
+        timeout: config.serviceWorkerChecker.timeout
+      });
 
-      swInfo['hasSW'] = await serviceWorkerHandle.jsonValue();
+      swInfo['hasSW'] = serviceWorkerHandle && await serviceWorkerHandle.jsonValue();
 
       // try to grab service worker scope
       const serviceWorkerScope = await page.evaluate(() => {
         return navigator.serviceWorker.getRegistration().then((res) => res.scope);
-      }, {timeout: config.serviceWorkerChecker.timeout});
+      }, {
+        timeout: config.serviceWorkerChecker.timeout
+      });
 
       swInfo['scope'] = serviceWorkerScope;
 
@@ -365,7 +374,9 @@ PWABuilder.prototype.getServiceWorkerFromURL = function(url) {
         return navigator.serviceWorker.getRegistration().then((reg) => {
           return reg.pushManager.getSubscription().then((sub) => sub);
         });
-      }, {timeout: config.serviceWorkerChecker.timeout});
+      }, {
+        timeout: config.serviceWorkerChecker.timeout
+      });
 
       swInfo['pushReg'] = pushReg;
 
@@ -377,7 +388,9 @@ PWABuilder.prototype.getServiceWorkerFromURL = function(url) {
       });
 
       // Reload page to pick up any runtime caching done by the service worker.
-      await page.reload({waitUntil: ['domcontentloaded']});
+      await page.reload({
+        waitUntil: ['domcontentloaded']
+      });
 
       const swRequests = Array.from(allRequests.values());
 
@@ -393,11 +406,10 @@ PWABuilder.prototype.getServiceWorkerFromURL = function(url) {
       });
 
       swInfo['cache'] = requestChecks;
-      
       return resolve(swInfo);
     } catch (error) {
       console.log('timing out', error);
-      if(error.name && error.name.indexOf("TimeoutError") > -1){
+      if (error.name && error.name.indexOf("TimeoutError") > -1) {
         return resolve(false);
       }
       return reject(error);
@@ -407,8 +419,3 @@ PWABuilder.prototype.getServiceWorkerFromURL = function(url) {
     }
   })
 }
-
-
-exports.create = function(pwabuilderLib){
-  return new PWABuilder(pwabuilderLib);
-};
