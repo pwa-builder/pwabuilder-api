@@ -132,6 +132,8 @@ PWABuilder.prototype.normalize = function(manifest){
   var self = this;
 
   return Q.Promise(function(resolve,reject){
+    manifest.content.orientation = manifest.content.orientation.toLowerCase();
+
     console.log('Validating start url...');
     self.lib.manifestTools.validateAndNormalizeStartUrl(manifest.content.start_url,manifest,function(err,normManifest){
       if(err){
