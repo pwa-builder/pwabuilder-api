@@ -132,7 +132,14 @@ PWABuilder.prototype.normalize = function(manifest){
   var self = this;
 
   return Q.Promise(function(resolve,reject){
-    manifest.content.orientation = manifest.content.orientation.toLowerCase();
+
+    // check for orientation and set to portrait as default
+    if (manifest.content.orientation) {
+      manifest.content.orientation = manifest.content.orientation.toLowerCase();
+    }
+    else {
+      manifest.content.orientation = 'portrait';
+    }
 
     console.log('Validating start url...');
     self.lib.manifestTools.validateAndNormalizeStartUrl(manifest.content.start_url,manifest,function(err,normManifest){
