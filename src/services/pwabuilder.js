@@ -4,11 +4,11 @@ var uuid = require('uuid'),
   Q = require('q'),
   _ = require('lodash'),
   path = require('path'),
-  config = require(path.join(__dirname,'../config')),
+  config = require(path.join(__dirname, '../config')),
   puppeteer = require('puppeteer'),
   platforms = config.platforms;
 
-function PWABuilder(pwabuilderLib){
+function PWABuilder(pwabuilderLib) {
   this.lib = pwabuilderLib;
   var platformsConfig = path.resolve(__dirname, '..', '..', 'platforms.json');
   this.lib.platformTools.configurePlatforms(platformsConfig);
@@ -16,80 +16,92 @@ function PWABuilder(pwabuilderLib){
 
 const expirationTime = 604800;
 
-PWABuilder.prototype.createManifestFromUrl = function(url,client){
+PWABuilder.prototype.createManifestFromUrl = function (url, client) {
   var self = this;
 
-  if(url.indexOf('http') === -1){
-    url = 'http://'+url;
+  if (url.indexOf('http') === -1) {
+    url = 'http://' + url;
   }
 
-  return Q.Promise(function(resolve,reject){
+  return Q.Promise(function (resolve, reject) {
 
-    var callback = function(err, manifestInfo) {
+    var callback = function (err, manifestInfo) {
       if (err) {
         return reject(err);
       }
 
-      var manifest = _.assign(manifestInfo,{ id: uuid.v4().slice(0,8) });
-      
+      var manifest = _.assign(manifestInfo, { id: uuid.v4().slice(0, 8) });
+
       self.validateManifest(manifest)
-      .then(function(manifest){
-        client.set(manifest.id,JSON.stringify(manifest), 'EX', expirationTime);
-        return resolve(manifest);
-      })
-      .fail(reject);
+        .then(function (manifest) {
+          client.set(manifest.id, JSON.stringify(manifest), 'EX', expirationTime);
+          return resolve(manifest);
+        })
+        .fail(reject);
     }
 
-    var resolveStartUrl =  function (err, manifestInfo) {
-    if (err) {
-      return callback(err, manifestInfo);
-    }
+    var resolveStartUrl = function (err, manifestInfo) {
+      if (err) {
+        return callback(err, manifestInfo);
+      }
 
-    if (manifestInfo.format === self.lib.constants.BASE_MANIFEST_FORMAT) {
-      return self.lib.manifestTools.validateAndNormalizeStartUrl(url, manifestInfo, callback);
-    } else {
-      return callback(undefined, manifestInfo);
+      if (manifestInfo.format === self.lib.constants.BASE_MANIFEST_FORMAT) {
+        return self.lib.manifestTools.validateAndNormalizeStartUrl(url, manifestInfo, callback);
+      } else {
+        return callback(undefined, manifestInfo);
+      }
     }
-  }
     self.lib.manifestTools.getManifestFromSite(url, undefined, resolveStartUrl);
   });
 };
 
-PWABuilder.prototype.createManifestFromFile = function(file,client){
+PWABuilder.prototype.createManifestFromFile = function (file, client) {
   var self = this;
 
-  return Q.Promise(function(resolve,reject){
+  return Q.Promise(function (resolve, reject) {
     self.lib.manifestTools.getManifestFromFile(file.path, function (err, manifestInfo) {
       if (err) { return reject(err); }
 
-      var manifest = _.assign(manifestInfo,{ id: uuid.v4().slice(0,8) });
+      var manifest = _.assign(manifestInfo, { id: uuid.v4().slice(0, 8) });
       self.validateManifest(manifest)
-      .then(function(manifest){
-        client.set(manifest.id,JSON.stringify(manifest), 'EX', expirationTime);
-        return resolve(manifest);
-      })
-      .fail(reject);
+        .then(function (manifest) {
+          client.set(manifest.id, JSON.stringify(manifest), 'EX', expirationTime);
+          return resolve(manifest);
+        })
+        .fail(reject);
     });
   });
 };
 
-PWABuilder.prototype.validateManifest = function(manifest){
+PWABuilder.prototype.validateManifest = function (manifest) {
   var self = this;
 
   var originalIcons = manifest.content.icons;
   manifest = self.cleanGeneratedIcons(manifest);
 
-  return Q.Promise(function(resolve,reject){
-    self.lib.manifestTools.validateManifest(manifest, platforms, function(err,results){
-      if(err){ return reject(err); }
+  // handle related apps issue
+  // this should always be an array
+  if (manifest.content.related_applications && typeof manifest.content.related_applications === 'string') {
+    manifest.content.related_applications = [];
+  }
 
-      var errors = _.filter(results,{level: 'error'}),
-        suggestions = _.filter(results,{level: 'suggestion'}),
-        warnings = _.filter(results,{level: 'warning'});
+  // handle prefer related applications
+  // should always be a boolean
+  if (manifest.content.prefer_related_applications && typeof manifest.content.prefer_related_applications === 'string') {
+    manifest.content.prefer_related_applications = JSON.parse(manifest.content.prefer_related_applications);
+  }
 
-      self.assignValidationErrors(errors,manifest);
-      self.assignSuggestions(suggestions,manifest);
-      self.assignWarnings(warnings,manifest);
+  return Q.Promise(function (resolve, reject) {
+    self.lib.manifestTools.validateManifest(manifest, platforms, function (err, results) {
+      if (err) { return reject(err); }
+
+      var errors = _.filter(results, { level: 'error' }),
+        suggestions = _.filter(results, { level: 'suggestion' }),
+        warnings = _.filter(results, { level: 'warning' });
+
+      self.assignValidationErrors(errors, manifest);
+      self.assignSuggestions(suggestions, manifest);
+      self.assignWarnings(warnings, manifest);
 
       // restore original icons
       manifest.content.icons = originalIcons;
@@ -99,13 +111,13 @@ PWABuilder.prototype.validateManifest = function(manifest){
   });
 };
 
-PWABuilder.prototype.updateManifest = function(client,manifestId,updates,assets) {
+PWABuilder.prototype.updateManifest = function (client, manifestId, updates, assets) {
   var self = this;
 
-  return Q.Promise(function(resolve,reject){
-    client.get(manifestId,function(err,reply){
-      if(err) return reject(err);
-      if(!reply) return reject(new Error('Manifest not found'));
+  return Q.Promise(function (resolve, reject) {
+    client.get(manifestId, function (err, reply) {
+      if (err) return reject(err);
+      if (!reply) return reject(new Error('Manifest not found'));
 
       var manifest = JSON.parse(reply);
       manifest.content = updates;
@@ -113,25 +125,25 @@ PWABuilder.prototype.updateManifest = function(client,manifestId,updates,assets)
       if (assets) {
         manifest.assets = assets;
       } else {
-        if ((updates.icons || []).filter(function(icon) { return icon.generated; }).length === 0) {
+        if ((updates.icons || []).filter(function (icon) { return icon.generated; }).length === 0) {
           delete manifest.assets;
         }
       }
 
       return self.validateManifest(manifest)
-      .then(function(manifest){
-        client.set(manifest.id,JSON.stringify(manifest), 'EX', expirationTime);
+        .then(function (manifest) {
+          client.set(manifest.id, JSON.stringify(manifest), 'EX', expirationTime);
 
-        resolve(manifest);
-      });
+          resolve(manifest);
+        });
     });
   });
 };
 
-PWABuilder.prototype.normalize = function(manifest){
+PWABuilder.prototype.normalize = function (manifest) {
   var self = this;
 
-  return Q.Promise(function(resolve,reject){
+  return Q.Promise(function (resolve, reject) {
 
     // check for orientation and set to portrait as default
     if (manifest.content.orientation) {
@@ -142,23 +154,23 @@ PWABuilder.prototype.normalize = function(manifest){
     }
 
     console.log('Validating start url...');
-    self.lib.manifestTools.validateAndNormalizeStartUrl(manifest.content.start_url,manifest,function(err,normManifest){
-      if(err){
-        console.log('Normalizing Error',err);
+    self.lib.manifestTools.validateAndNormalizeStartUrl(manifest.content.start_url, manifest, function (err, normManifest) {
+      if (err) {
+        console.log('Normalizing Error', err);
         return reject(err);
       }
 
-      manifest = _.assign(manifest,normManifest);
+      manifest = _.assign(manifest, normManifest);
 
       resolve(manifest);
     });
   });
 };
 
-PWABuilder.prototype.cleanGeneratedIcons = function(manifest){
+PWABuilder.prototype.cleanGeneratedIcons = function (manifest) {
   var self = this;
 
-// remove properties in the manifest to track generated icons
+  // remove properties in the manifest to track generated icons
   manifest.content.icons = (manifest.content.icons || []).map(function (icon) {
     return _.omit(icon, 'generated', 'fileName');
   });
@@ -166,14 +178,14 @@ PWABuilder.prototype.cleanGeneratedIcons = function(manifest){
   return manifest;
 };
 
-PWABuilder.prototype.createProject = function(manifest,outputDir,platforms){
+PWABuilder.prototype.createProject = function (manifest, outputDir, platforms) {
   var self = this;
 
-  return Q.Promise(function(resolve, reject){
-    var cleanManifest = _.omit(manifest,'id');
-    cleanManifest = _.assign(cleanManifest,{ generatedFrom: 'Website Wizard' });
-    console.log('Building the project...',cleanManifest,outputDir,platforms);
-    try{
+  return Q.Promise(function (resolve, reject) {
+    var cleanManifest = _.omit(manifest, 'id');
+    cleanManifest = _.assign(cleanManifest, { generatedFrom: 'Website Wizard' });
+    console.log('Building the project...', cleanManifest, outputDir, platforms);
+    try {
       if (!manifest.assets) {
         manifest.assets = [];
       }
@@ -182,49 +194,49 @@ PWABuilder.prototype.createProject = function(manifest,outputDir,platforms){
       });
 
       var options = {
-        'crosswalk' : false,
-        'build'     : false,
-        'assets'    : manifest.assets
+        'crosswalk': false,
+        'build': false,
+        'assets': manifest.assets
       };
 
       self.lib.projectBuilder.createApps(cleanManifest, outputDir, platforms, options, function (err, projectDir) {
 
-        if(err){
-          console.log('Create Projects Errors!!!',err);
+        if (err) {
+          console.log('Create Projects Errors!!!', err);
           return reject(err);
         }
 
         return resolve(projectDir);
       });
-    }catch(e){
+    } catch (e) {
       return reject(e);
     }
   });
 };
 
-PWABuilder.prototype.packageProject = function(platforms,outputDir,options){
+PWABuilder.prototype.packageProject = function (platforms, outputDir, options) {
   var self = this;
 
-  return Q.Promise(function(resolve, reject){
-    console.log('Packaging the project...',outputDir,platforms);
-    try{
+  return Q.Promise(function (resolve, reject) {
+    console.log('Packaging the project...', outputDir, platforms);
+    try {
 
       self.lib.projectBuilder.packageApps(platforms, outputDir, options, function (err, packagePaths) {
 
-        if(err){
-          console.log('Package Project Errors!!!',err);
+        if (err) {
+          console.log('Package Project Errors!!!', err);
           return reject(err);
         }
 
         return resolve(packagePaths);
       });
-    }catch(e){
+    } catch (e) {
       return reject(e);
     }
   });
 };
 
-PWABuilder.prototype.getServiceWorkers = function(id) {
+PWABuilder.prototype.getServiceWorkers = function (id) {
   var self = this;
 
   return Q.Promise(function (resolve, reject) {
@@ -234,7 +246,7 @@ PWABuilder.prototype.getServiceWorkers = function(id) {
   });
 };
 
-PWABuilder.prototype.getServiceWorkersDescription = function() {
+PWABuilder.prototype.getServiceWorkersDescription = function () {
   var self = this;
 
   return Q.Promise(function (resolve, reject) {
@@ -244,15 +256,15 @@ PWABuilder.prototype.getServiceWorkersDescription = function() {
   });
 };
 
-PWABuilder.prototype.assignValidationErrors = function(errors,manifest){
-  var data = { errors: []};
+PWABuilder.prototype.assignValidationErrors = function (errors, manifest) {
+  var data = { errors: [] };
 
-  _.each(errors,function(e){
-    if(_.some(data.errors,'member',e.member)){
-      var error = _.find(data.errors,'member',e.member);
+  _.each(errors, function (e) {
+    if (_.some(data.errors, 'member', e.member)) {
+      var error = _.find(data.errors, 'member', e.member);
       error.issues = error.issues || [];
       error.issues.push({ description: e.description, platform: e.platform, code: e.code });
-    }else{
+    } else {
       data.errors.push({
         member: e.member,
         issues: [{
@@ -264,18 +276,18 @@ PWABuilder.prototype.assignValidationErrors = function(errors,manifest){
     }
   });
 
-  manifest = _.assign(manifest,data);
+  manifest = _.assign(manifest, data);
 };
 
-PWABuilder.prototype.assignSuggestions = function(suggestions,manifest){
-  var data = { suggestions: []};
+PWABuilder.prototype.assignSuggestions = function (suggestions, manifest) {
+  var data = { suggestions: [] };
 
-  _.each(suggestions,function(s){
-    if(_.some(data.suggestions,'member',s.member)){
-      var suggestion = _.find(data.suggestions,'member',s.member);
+  _.each(suggestions, function (s) {
+    if (_.some(data.suggestions, 'member', s.member)) {
+      var suggestion = _.find(data.suggestions, 'member', s.member);
       suggestion.issues = suggestion.issues || [];
       suggestion.issues.push({ description: s.description, platform: s.platform, code: s.code });
-    }else{
+    } else {
       data.suggestions.push({
         member: s.member,
         issues: [{
@@ -287,18 +299,18 @@ PWABuilder.prototype.assignSuggestions = function(suggestions,manifest){
     }
   });
 
-  manifest = _.assign(manifest,data);
+  manifest = _.assign(manifest, data);
 };
 
-PWABuilder.prototype.assignWarnings = function(warnings,manifest){
-  var data = { warnings: []};
+PWABuilder.prototype.assignWarnings = function (warnings, manifest) {
+  var data = { warnings: [] };
 
-  _.each(warnings,function(w){
-    if(_.some(data.warnings,'member',w.member)){
-      var warning = _.find(data.warnings,'member',w.member);
+  _.each(warnings, function (w) {
+    if (_.some(data.warnings, 'member', w.member)) {
+      var warning = _.find(data.warnings, 'member', w.member);
       warning.issues = warning.issues || [];
       warning.issues.push({ description: w.description, platform: w.platform, code: w.code });
-    }else{
+    } else {
       data.warnings.push({
         member: w.member,
         issues: [{
@@ -310,18 +322,18 @@ PWABuilder.prototype.assignWarnings = function(warnings,manifest){
     }
   });
 
-  manifest = _.assign(manifest,data);
+  manifest = _.assign(manifest, data);
 };
 
-PWABuilder.prototype.generateImagesForManifest = function(image, manifestInfo, client) {
+PWABuilder.prototype.generateImagesForManifest = function (image, manifestInfo, client) {
   var self = this;
 
   var options = {
     generationSvcUrl: config.images.generationSvcUrl
   };
 
-  return Q.Promise(function(resolve, reject) {
-    self.lib.manifestTools.generateImagesForManifest(image, manifestInfo.content, options, function(err, resultManifestInfo) {
+  return Q.Promise(function (resolve, reject) {
+    self.lib.manifestTools.generateImagesForManifest(image, manifestInfo.content, options, function (err, resultManifestInfo) {
       if (err) {
         return reject(err);
       } else {
@@ -331,41 +343,41 @@ PWABuilder.prototype.generateImagesForManifest = function(image, manifestInfo, c
   });
 }
 
-PWABuilder.prototype.getServiceWorkerFromURL = function(url) {
-  return Q.Promise(async function(resolve,reject){
-    const browser = await puppeteer.launch({headless: true, args: ["--no-sandbox"]});
+PWABuilder.prototype.getServiceWorkerFromURL = function (url) {
+  return Q.Promise(async function (resolve, reject) {
+    const browser = await puppeteer.launch({ headless: true, args: ["--no-sandbox"] });
     const page = await browser.newPage();
 
     // empty object that we fill with data below
     let swInfo = {};
 
-       
+
     await page.setRequestInterception(true);
-    
+
     let whiteList = ['document', 'plain', 'script', 'javascript']
-    page.on('request' ,(req) => {
+    page.on('request', (req) => {
       const type = req.resourceType();
-      if(whiteList.some(el => type.indexOf(el) >= 0 )) {
+      if (whiteList.some(el => type.indexOf(el) >= 0)) {
         req.continue();
       } else {
         req.abort();
       }
     })
-    
-    await page.goto(url, {waitUntil: ['domcontentloaded']});
-    
+
+    await page.goto(url, { waitUntil: ['domcontentloaded'] });
+
     try {
       // Check to see if there is a service worker
       let serviceWorkerHandle = await page.waitForFunction(() => {
         return navigator.serviceWorker.ready.then((res) => res.active.scriptURL);
-      }, {timeout: config.serviceWorkerChecker.timeout});  
+      }, { timeout: config.serviceWorkerChecker.timeout });
 
       swInfo['hasSW'] = await serviceWorkerHandle.jsonValue();
 
       // try to grab service worker scope
       const serviceWorkerScope = await page.evaluate(() => {
         return navigator.serviceWorker.getRegistration().then((res) => res.scope);
-      }, {timeout: config.serviceWorkerChecker.timeout});
+      }, { timeout: config.serviceWorkerChecker.timeout });
 
       swInfo['scope'] = serviceWorkerScope;
 
@@ -374,7 +386,7 @@ PWABuilder.prototype.getServiceWorkerFromURL = function(url) {
         return navigator.serviceWorker.getRegistration().then((reg) => {
           return reg.pushManager.getSubscription().then((sub) => sub);
         });
-      }, {timeout: config.serviceWorkerChecker.timeout});
+      }, { timeout: config.serviceWorkerChecker.timeout });
 
       swInfo['pushReg'] = pushReg;
 
@@ -386,7 +398,7 @@ PWABuilder.prototype.getServiceWorkerFromURL = function(url) {
       });
 
       // Reload page to pick up any runtime caching done by the service worker.
-      await page.reload({waitUntil: ['domcontentloaded']});
+      await page.reload({ waitUntil: ['domcontentloaded'] });
 
       const swRequests = Array.from(allRequests.values());
 
@@ -402,11 +414,11 @@ PWABuilder.prototype.getServiceWorkerFromURL = function(url) {
       });
 
       swInfo['cache'] = requestChecks;
-      
+
       return resolve(swInfo);
     } catch (error) {
       console.log('timing out', error);
-      if(error.name && error.name.indexOf("TimeoutError") > -1){
+      if (error.name && error.name.indexOf("TimeoutError") > -1) {
         return resolve(false);
       }
       return reject(error);
@@ -418,6 +430,6 @@ PWABuilder.prototype.getServiceWorkerFromURL = function(url) {
 }
 
 
-exports.create = function(pwabuilderLib){
+exports.create = function (pwabuilderLib) {
   return new PWABuilder(pwabuilderLib);
 };
