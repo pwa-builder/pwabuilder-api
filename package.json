@@ -25,7 +25,7 @@
     "multer": "^1.4.1",
     "pug": "^2.0.3",
     "puppeteer": "^1.12.2",
-    "pwabuilder-android": "^2.0.0-rc.1",
+    "pwabuilder-android": "^2.0.0-rc.2",
     "pwabuilder-android-twa": "^2.0.0-rc.0",
     "pwabuilder-cordova": "^2.0.0-rc.3",
     "pwabuilder-lib": "^2.0.4-RC.3",
