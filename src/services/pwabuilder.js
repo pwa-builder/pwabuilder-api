@@ -92,7 +92,7 @@ PWABuilder.prototype.validateManifest = function (manifest) {
   }
 
   return Q.Promise(function (resolve, reject) {
-    self.lib.manifestTools.validateManifest(manifest, platforms, function (err, results) {
+     self.lib.manifestTools.validateManifest(manifest, platforms, function (err, results) {
       if (err) { return reject(err); }
 
       var errors = _.filter(results, { level: 'error' }),
@@ -151,6 +151,14 @@ PWABuilder.prototype.normalize = function (manifest) {
     }
     else {
       manifest.content.orientation = 'portrait';
+    }
+
+    if (manifest.content.short_name.includes('-')) {
+      manifest.content.short_name = manifest.content.short_name.replace(/-/g, ' ');
+    }
+  
+    if (manifest.content.name.includes('-')) {
+      manifest.content.name = manifest.content.name.replace(/-/g, ' ');
     }
 
     console.log('Validating start url...');

@@ -136,14 +136,11 @@ exports.create = function(client, storage, pwabuilder, raygun){
           output += "-" + dirSuffix;
         }
 
-        console.log("Output: ", output);
-        console.log("ManifestInfo: ");
-        console.log(manifest);
-
         storage.removeDir(output)
           .then(function(){ return pwabuilder.normalize(manifest); })
           .then(function(normManifest){
               manifest = normManifest;
+
               return pwabuilder.createProject(manifest, output, ['windows10']);
           })
           .then(function(projectDir) { 
