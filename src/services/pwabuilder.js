@@ -186,13 +186,15 @@ PWABuilder.prototype.cleanGeneratedIcons = function (manifest) {
   return manifest;
 };
 
-PWABuilder.prototype.createProject = function (manifest, outputDir, platforms) {
+PWABuilder.prototype.createProject = function (manifest, outputDir, platforms, href) {
   var self = this;
 
   return Q.Promise(function (resolve, reject) {
     var cleanManifest = _.omit(manifest, 'id');
     cleanManifest = _.assign(cleanManifest, { generatedFrom: 'Website Wizard' });
     console.log('Building the project...', cleanManifest, outputDir, platforms);
+
+    
     try {
       if (!manifest.assets) {
         manifest.assets = [];
@@ -207,7 +209,7 @@ PWABuilder.prototype.createProject = function (manifest, outputDir, platforms) {
         'assets': manifest.assets
       };
 
-      self.lib.projectBuilder.createApps(cleanManifest, outputDir, platforms, options, function (err, projectDir) {
+      self.lib.projectBuilder.createApps(cleanManifest, outputDir, platforms, options, href, function (err, projectDir) {
 
         if (err) {
           console.log('Create Projects Errors!!!', err);

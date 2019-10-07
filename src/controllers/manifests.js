@@ -88,9 +88,9 @@ exports.create = function(client, storage, pwabuilder, raygun){
         storage.removeDir(output)
           .then(function(){ return pwabuilder.cleanGeneratedIcons(manifest); })
           .then(function(){ return pwabuilder.normalize(manifest); })
-          .then(function(normManifest){
+          .then(function(normManifest) {
               manifest = normManifest;
-              return pwabuilder.createProject(manifest,output,platforms);
+              return pwabuilder.createProject(manifest, output, platforms, req.query.href || '');
           })
           .then(function(projectDir){ 
             if(req.query.ids){
