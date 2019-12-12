@@ -107,8 +107,6 @@ Storage.prototype.setPermissions = function (outputDir) {
   console.log('Setting permissions on', outputDir, '...');
 
   try {
-    // wrench.chmodSyncRecursive(outputDir, '0755');
-
     filewalker(outputDir, (err, data) => {
       if (err) {
         console.log(err);

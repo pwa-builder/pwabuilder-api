@@ -104,7 +104,7 @@ exports.create = function(client, storage, pwabuilder, raygun){
                 });
               }
           })
-          .then(function(){ return storage.setPermissions(output); })
+          //.then(function(){ return storage.setPermissions(output); })
           .then(function(){ return storage.createZip(output, manifest.content.short_name); })
           .then(function(){ return storage.createContainer(manifest.id); })
           .then(function(){ return storage.uploadZip(manifest.id, manifest.content.short_name, output, dirSuffix); })
@@ -146,17 +146,20 @@ exports.create = function(client, storage, pwabuilder, raygun){
               return pwabuilder.createProject(manifest, output, ['windows10']);
           })
           .then(function(projectDir) { 
-            console.log("Making Windows 10 Package");
+            console.log("Making Windows 10 Package", projectDir);
 
             projectDir = path.join(projectDir);
             projectDirectory = projectDir;
+            console.log(projectDirectory);
 
             // Read our manifest template
             return Q.nfcall(fs.readFile, path.join(projectDirectory, "windows10", "appxmanifest", "appxmanifest.xml"));
           })
           .then(function(data) {
+            console.log(data);
             // Inject Data (Package/Publisher Identity, Publisher Display Name) into projectDir + "\\Store packages\\windows10\\manifest\\appxmanifest.xml"
             var str = data.toString();
+            console.log(str);
 
             str = str.replace("INSERT-YOUR-PACKAGE-PROPERTIES-PUBLISHERDISPLAYNAME-HERE", req.body.name);
             str = str.replace("CN=INSERT-YOUR-PACKAGE-IDENTITY-PUBLISHER-HERE", req.body.publisher);
@@ -180,6 +183,7 @@ exports.create = function(client, storage, pwabuilder, raygun){
           .then(function(err) {
             // Remove existing package readme so that we can call our new 'readme' whatever we want below.
             return Q.nfcall(fs.remove, path.join(projectDirectory, "windows10", "Windows10-next-steps.md"));
+
           })
           .then(function(err) {
             // Copy Readme File into project directory
@@ -189,7 +193,7 @@ exports.create = function(client, storage, pwabuilder, raygun){
             // Manifest file is now ready to be processed by packager
             return pwa10.package(projectDirectory, { DotWeb: false, AutoPublish: false, Sign: false }); 
           })
-          .then(function(){ return storage.setPermissions(output); })
+          // .then(function(){ return storage.setPermissions(output); })
           // TODO: In the future, grab inner sub-directory to zip (so will contain 'windows10' folder)?
           .then(function(){ 
             return storage.createZip(output, manifest.content.short_name); 

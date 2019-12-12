@@ -367,7 +367,6 @@ PWABuilder.prototype.getServiceWorkerFromURL = function (url) {
     // empty object that we fill with data below
     let swInfo = {};
 
-
     await page.setRequestInterception(true);
 
     let whiteList = ['document', 'plain', 'script', 'javascript']
@@ -388,7 +387,7 @@ PWABuilder.prototype.getServiceWorkerFromURL = function (url) {
         return navigator.serviceWorker.ready.then((res) => res.active.scriptURL);
       }, { timeout: config.serviceWorkerChecker.timeout });
 
-      swInfo['hasSW'] = await serviceWorkerHandle.jsonValue();
+      swInfo['hasSW'] = serviceWorkerHandle && await serviceWorkerHandle.jsonValue();
 
       // try to grab service worker scope
       const serviceWorkerScope = await page.evaluate(() => {
