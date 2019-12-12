@@ -88,9 +88,10 @@ exports.create = function(client, storage, pwabuilder, raygun){
         storage.removeDir(output)
           .then(function(){ return pwabuilder.cleanGeneratedIcons(manifest); })
           .then(function(){ return pwabuilder.normalize(manifest); })
-          .then(function(normManifest){
+          .then(function(normManifest) {
+              console.log('normManifest', normManifest);
               manifest = normManifest;
-              return pwabuilder.createProject(manifest,output,platforms);
+              return pwabuilder.createProject(manifest, output, platforms, req.query.href || '');
           })
           .then(function(projectDir){ 
             if(req.query.ids){
@@ -112,6 +113,7 @@ exports.create = function(client, storage, pwabuilder, raygun){
           .then(function(url){ res.json({archive: url}); })
           .fail(function(err){
             //raygun.send(err);
+            console.log('error', err);
             return res.status(500).json({ error: err.message });
           });
       });
@@ -136,20 +138,17 @@ exports.create = function(client, storage, pwabuilder, raygun){
           output += "-" + dirSuffix;
         }
 
-        console.log("Output: ", output);
-        console.log("ManifestInfo: ");
-        console.log(manifest);
-
         storage.removeDir(output)
           .then(function(){ return pwabuilder.normalize(manifest); })
           .then(function(normManifest){
               manifest = normManifest;
+
               return pwabuilder.createProject(manifest, output, ['windows10']);
           })
           .then(function(projectDir) { 
             console.log("Making Windows 10 Package", projectDir);
 
-            // projectDir = path.join(projectDir, "PWA");
+            projectDir = path.join(projectDir);
             projectDirectory = projectDir;
             console.log(projectDirectory);
 
@@ -183,7 +182,8 @@ exports.create = function(client, storage, pwabuilder, raygun){
           })
           .then(function(err) {
             // Remove existing package readme so that we can call our new 'readme' whatever we want below.
-            // return Q.nfcall(fs.remove, path.join(projectDirectory, "windows10", "Windows10-next-steps.md"));
+            return Q.nfcall(fs.remove, path.join(projectDirectory, "windows10", "Windows10-next-steps.md"));
+
           })
           .then(function(err) {
             // Copy Readme File into project directory

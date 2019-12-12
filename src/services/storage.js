@@ -36,7 +36,7 @@ Storage.prototype.createZip = function (output, fileName) {
     archive.pipe(zip);
 
     var folderName = path.join(output, utils.sanitizeName(fileName));
-    archive.directory(folderName, '', { mode: '0755' }).finalize();
+    archive.directory(folderName, 'projects', { mode: '0755' }).finalize();
   });
 };
 
@@ -70,10 +70,59 @@ Storage.prototype.uploadFile = function (containerName, fileName, filePath, exte
   });
 };
 
+function filewalker(dir, done) {
+  let results = [];
+
+  fs.readdir(dir, function (err, list) {
+    if (err) return done(err);
+
+    var pending = list.length;
+
+    if (!pending) return done(null, results);
+
+    list.forEach(function (file) {
+      file = path.resolve(dir, file);
+
+      fs.stat(file, function (err, stat) {
+        // If directory, execute a recursive call
+        if (stat && stat.isDirectory()) {
+          // Add directory to array [comment if you need to remove the directories from the array]
+          results.push(file);
+
+          filewalker(file, function (err, res) {
+            results = results.concat(res);
+            if (!--pending) done(null, results);
+          });
+        } else {
+          results.push(file);
+
+          if (!--pending) done(null, results);
+        }
+      });
+    });
+  });
+};
+
 Storage.prototype.setPermissions = function (outputDir) {
   console.log('Setting permissions on', outputDir, '...');
-  // todo: remove wrench 
-  wrench.chmodSyncRecursive(outputDir, '0755')
+
+  try {
+    filewalker(outputDir, (err, data) => {
+      if (err) {
+        console.log(err);
+      }
+      else {
+        console.log(data);
+        
+        data.forEach((path) => {
+          fs.chmodSync(path, '0755');
+        })
+      }
+    });
+  }
+  catch (err) {
+    console.log(err, err.message);
+  }
 };
 
 Storage.prototype.createDirectory = function (folderName) {

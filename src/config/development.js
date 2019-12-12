@@ -13,6 +13,6 @@ module.exports = {
     generationSvcUrl: process.env.IMG_GEN_SVC_URL || 'http://localhost:49080/'
   },
   serviceWorkerChecker: {
-    timeout: 5500
+    timeout: 8500
   }
 };
