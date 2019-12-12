@@ -89,6 +89,7 @@ exports.create = function(client, storage, pwabuilder, raygun){
           .then(function(){ return pwabuilder.cleanGeneratedIcons(manifest); })
           .then(function(){ return pwabuilder.normalize(manifest); })
           .then(function(normManifest) {
+              console.log('normManifest', normManifest);
               manifest = normManifest;
               return pwabuilder.createProject(manifest, output, platforms, req.query.href || '');
           })
@@ -112,6 +113,7 @@ exports.create = function(client, storage, pwabuilder, raygun){
           .then(function(url){ res.json({archive: url}); })
           .fail(function(err){
             //raygun.send(err);
+            console.log('error', err);
             return res.status(500).json({ error: err.message });
           });
       });

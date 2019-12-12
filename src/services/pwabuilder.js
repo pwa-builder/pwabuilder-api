@@ -153,15 +153,21 @@ PWABuilder.prototype.normalize = function (manifest) {
       manifest.content.orientation = 'portrait';
     }
 
-    if (manifest.content.short_name.includes('-')) {
+    if (manifest.content.short_name && manifest.content.short_name.includes('-')) {
       manifest.content.short_name = manifest.content.short_name.replace(/-/g, ' ');
     }
+    else if (manifest.content.name) {
+      manifest.content.short_name === manifest.content.name;
+    }
+    else if(manifest.default.short_name) {
+      manifest.content.short_name = manifest.default.short_name;
+    }
   
-    if (manifest.content.name.includes('-')) {
+    if (manifest.content.name && manifest.content.name.includes('-')) {
       manifest.content.name = manifest.content.name.replace(/-/g, ' ');
     }
 
-    console.log('Validating start url...');
+    console.log('Validating start url...', manifest);
     self.lib.manifestTools.validateAndNormalizeStartUrl(manifest.content.start_url, manifest, function (err, normManifest) {
       if (err) {
         console.log('Normalizing Error', err);
