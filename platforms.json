@@ -15,7 +15,7 @@
         "packageName": "pwabuilder-cordova",
         "source": "pwabuilder-cordova"
     },
-    "MacOS": {
+    "macos": {
         "packageName": "pwabuilder-macos",
         "source": "pwabuilder-macos"
     },
