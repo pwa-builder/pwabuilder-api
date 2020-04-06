@@ -20,7 +20,7 @@ Storage.prototype.createZip = function (output, fileName) {
     console.log('Creating zip archive...');
     var archive = archiver('zip'),
 
-      zip = fs.createWriteStream(path.join(output, fileName + '.zip'));
+      zip = fs.createWriteStream(path.join(output, fileName.replace(/[^a-zA-Z0-9]/g,'_') + '.zip'));
 
     zip.on('close', function () {
       console.log(archive.pointer() + ' total bytes');
@@ -35,7 +35,7 @@ Storage.prototype.createZip = function (output, fileName) {
 
     archive.pipe(zip);
 
-    var folderName = path.join(output, utils.sanitizeName(fileName));
+    var folderName = path.join(output, utils.sanitizeName(fileName.replace(/[^a-zA-Z0-9]/g,'_')));
     archive.directory(folderName, 'projects', { mode: '0755' }).finalize();
   });
 };
@@ -53,8 +53,8 @@ Storage.prototype.createContainer = function (containerName) {
 
 Storage.prototype.uploadZip = function (containerName, fileName, outputDir, suffix, blobName) {
   var extension = '.zip';
-  var _blobName = blobName || fileName;
-  return this.uploadFile(containerName, _blobName, path.join(outputDir, fileName + extension), extension, "-" + suffix);
+  var _blobName = blobName || fileName.replace(/[^a-zA-Z0-9]/g,'_');
+  return this.uploadFile(containerName, _blobName, path.join(outputDir, fileName.replace(/[^a-zA-Z0-9]/g,'_') + extension), extension, "-" + suffix);
 };
 
 Storage.prototype.uploadFile = function (containerName, fileName, filePath, extension, suffix) {
@@ -63,7 +63,7 @@ Storage.prototype.uploadFile = function (containerName, fileName, filePath, exte
     contentType = (extension == ".zip") ? 'application/zip' : 'application/octet-stream';
   return Q.Promise(function (resolve, reject) {
     console.log('Uploading ' + extension + '...');
-    self.blobService.createBlockBlobFromLocalFile(containerName, fileName + suffix + extension, filePath, { contentType: contentType }, function (err) {
+    self.blobService.createBlockBlobFromLocalFile(containerName, fileName.replace(/[^a-zA-Z0-9]/g,'_') + suffix + extension, filePath, { contentType: contentType }, function (err) {
       if (err) { return reject(err); }
       return resolve();
     });
@@ -151,7 +151,7 @@ Storage.prototype.removeDir = function (outputDir) {
 
 Storage.prototype.getUrlForFile = function (containerName, fileName, extension, suffix) {
   var container = suffix = suffix || '',
-    blob = fileName + suffix + extension;
+    blob = fileName.replace(/[^a-zA-Z0-9]/g,'_') + suffix + extension;
 
   var startDate = new Date();
   startDate.setMinutes(startDate.getMinutes() - 15);
@@ -173,13 +173,13 @@ Storage.prototype.getUrlForFile = function (containerName, fileName, extension, 
 };
 
 Storage.prototype.getUrlForZip = function (containerName, fileName, suffix) {
-  return this.getUrlForFile(containerName, fileName, '.zip', "-" + suffix);
+  return this.getUrlForFile(containerName, fileName.replace(/[^a-zA-Z0-9]/g,'_'), '.zip', "-" + suffix);
 };
 
 Storage.prototype.createZipFromDirs = function (folders, folderName, fileName) {
   return Q.Promise(function (resolve, reject) {
     console.log('Creating zip archive...');
-    var resultFilePath = path.join(folderName, fileName + '.zip');
+    var resultFilePath = path.join(folderName, fileName.replace(/[^a-zA-Z0-9]/g,'_') + '.zip');
     var archive = archiver('zip'),
 
       zip = fs.createWriteStream(resultFilePath);
