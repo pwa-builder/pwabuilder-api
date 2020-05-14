@@ -162,7 +162,7 @@ PWABuilder.prototype.normalize = function (manifest) {
     else if(manifest.default.short_name) {
       manifest.content.short_name = manifest.default.short_name;
     }
-  
+
     if (manifest.content.name && manifest.content.name.includes('-')) {
       manifest.content.name = manifest.content.name.replace(/-/g, ' ');
     }
@@ -192,7 +192,7 @@ PWABuilder.prototype.cleanGeneratedIcons = function (manifest) {
   return manifest;
 };
 
-PWABuilder.prototype.createProject = function (manifest, outputDir, platforms, href) {
+PWABuilder.prototype.createProject = function (manifest, outputDir, platforms, href, parameters = []) {
   var self = this;
 
   return Q.Promise(function (resolve, reject) {
@@ -200,7 +200,6 @@ PWABuilder.prototype.createProject = function (manifest, outputDir, platforms, h
     cleanManifest = _.assign(cleanManifest, { generatedFrom: 'Website Wizard' });
     console.log('Building the project...', cleanManifest, outputDir, platforms);
 
-    
     try {
       if (!manifest.assets) {
         manifest.assets = [];
@@ -214,6 +213,13 @@ PWABuilder.prototype.createProject = function (manifest, outputDir, platforms, h
         'build': false,
         'assets': manifest.assets
       };
+
+      // the parameters are unused from the PWABuilder app. This will need to change if parameters are passed from other paths.
+      if (platforms.indexOf('msteams') !== -1) {
+        options['schema'] = {
+          'msteams': JSON.parse(parameters[0])
+        }
+      }
 
       self.lib.projectBuilder.createApps(cleanManifest, outputDir, platforms, options, href, function (err, projectDir) {
 

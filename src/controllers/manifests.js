@@ -91,7 +91,7 @@ exports.create = function(client, storage, pwabuilder, raygun){
           .then(function(normManifest) {
               console.log('normManifest', normManifest);
               manifest = normManifest;
-              return pwabuilder.createProject(manifest, output, platforms, req.query.href || '');
+              return pwabuilder.createProject(manifest, output, platforms, req.query.href || '', req.body.parameters);
           })
           .then(function(projectDir){ 
             if(req.query.ids){
