@@ -1,7 +1,8 @@
 'use strict';
 
 var path    = require('path'),
-  outputDir = process.env.TMP || process.env.TEMP || process.env.TMPDIR,
+  os        = require('os'),
+  outputDir = os.tmpdir(),
   cheerio   = require('cheerio'),
   config    = require(path.join(__dirname,'../config')),
   util      = require('util'),
