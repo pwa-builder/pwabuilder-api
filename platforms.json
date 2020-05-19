@@ -23,6 +23,10 @@
         "packageName": "pwabuilder-cordova",
         "source": "pwabuilder-cordova"
     },
+    "msteams": {
+        "packageName": "pwabuilder-msteams",
+        "source": "pwabuilder-msteams"
+    },
     "web": {
         "packageName": "pwabuilder-web",
         "source": "pwabuilder-web"
