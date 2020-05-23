@@ -403,12 +403,19 @@ PWABuilder.prototype.getServiceWorkerFromURL = function (url) {
       swInfo['scope'] = serviceWorkerScope;
 
       // checking push reg
-      const pushReg = await page.evaluate(() => {
+      var pushReg = await page.evaluate(() => {
         return navigator.serviceWorker.getRegistration().then((reg) => {
           return reg.pushManager.getSubscription().then((sub) => sub);
         });
       }, { timeout: config.serviceWorkerChecker.timeout });
 
+      if(!pushReg && swInfo.hasSW)
+      {
+        await page.goto(swInfo.hasSW, { waitUntil: ['domcontentloaded'] });
+        pushReg = await page.content().then((content) => {
+          return content.indexOf('self.addEventListener("push"') >= 0 || content.indexOf("self.addEventListener('push'") >= 0
+        });
+      }
       swInfo['pushReg'] = pushReg;
 
       // Checking cache
