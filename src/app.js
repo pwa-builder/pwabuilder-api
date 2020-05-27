@@ -15,6 +15,14 @@ var PWABuilder = {
   init: function(redisClient, azure, pwabuilder){
     var app = express();
 
+    redisClient.on('ready', () => {
+      console.log("Redis is ready");
+    });
+
+    redisClient.on('connect', () => {
+      console.log("Application has connected to redis");
+    });
+
     pwabuilder.log.setLevel('debug');
 
     // view engine setup
