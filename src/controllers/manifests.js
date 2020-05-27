@@ -1,7 +1,8 @@
 'use strict';
 
 var path    = require('path'),
-  outputDir = process.env.TMP,
+  os        = require('os'),
+  outputDir = os.tmpdir(),
   cheerio   = require('cheerio'),
   config    = require(path.join(__dirname,'../config')),
   util      = require('util'),
@@ -67,6 +68,8 @@ exports.create = function(client, storage, pwabuilder, raygun){
         if(!reply) return res.status(404).send('NOT FOUND');
 
         var platforms = req.body.platforms;
+        var parameters = req.body.parameters || [];
+
         if (!platforms) {
           // No platforms were selected by the user. Using default configured platforms.
           platforms = config.platforms;
@@ -86,12 +89,18 @@ exports.create = function(client, storage, pwabuilder, raygun){
         console.log("ManifestInfo: " + manifest);
 
         storage.removeDir(output)
-          .then(function(){ return pwabuilder.cleanGeneratedIcons(manifest); })
+          .then(function(){
+            if (platforms.indexOf('msteams') !== -1) {
+              return manifest;
+            }
+
+            return pwabuilder.cleanGeneratedIcons(manifest);
+          })
           .then(function(){ return pwabuilder.normalize(manifest); })
           .then(function(normManifest) {
               console.log('normManifest', normManifest);
               manifest = normManifest;
-              return pwabuilder.createProject(manifest, output, platforms, req.query.href || '', req.body.parameters);
+              return pwabuilder.createProject(manifest, output, platforms, req.query.href || '', parameters);
           })
           .then(function(projectDir){ 
             if(req.query.ids){
