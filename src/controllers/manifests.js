@@ -1,7 +1,8 @@
 'use strict';
 
 var path    = require('path'),
-  outputDir = process.env.TMP,
+  os        = require('os'),
+  outputDir = os.tmpdir(),
   cheerio   = require('cheerio'),
   config    = require(path.join(__dirname,'../config')),
   util      = require('util'),
@@ -91,9 +92,9 @@ exports.create = function(client, storage, pwabuilder, raygun){
           .then(function(normManifest) {
               console.log('normManifest', normManifest);
               manifest = normManifest;
-              return pwabuilder.createProject(manifest, output, platforms, req.query.href || '');
+              return pwabuilder.createProject(manifest, output, platforms, req.query.href || '', req.body.parameters);
           })
-          .then(function(projectDir){ 
+          .then(function(projectDir){
             if(req.query.ids){
               // Copy service worker code into the output folder
               return pwabuilder.getServiceWorkers(req.query.ids)
@@ -128,7 +129,7 @@ exports.create = function(client, storage, pwabuilder, raygun){
         if(!reply) return res.status(404).send('NOT FOUND');
 
         console.log('Building AppX...');
-        
+
         var manifest = JSON.parse(reply),
           output = path.join(outputDir,manifest.id),
           dirSuffix = req.body.dirSuffix;
@@ -145,7 +146,7 @@ exports.create = function(client, storage, pwabuilder, raygun){
 
               return pwabuilder.createProject(manifest, output, ['windows10']);
           })
-          .then(function(projectDir) { 
+          .then(function(projectDir) {
             console.log("Making Windows 10 Package", projectDir);
 
             projectDir = path.join(projectDir);
@@ -165,7 +166,7 @@ exports.create = function(client, storage, pwabuilder, raygun){
             str = str.replace("CN=INSERT-YOUR-PACKAGE-IDENTITY-PUBLISHER-HERE", req.body.publisher);
             str = str.replace("INSERT-YOUR-PACKAGE-IDENTITY-NAME-HERE", req.body.package);
             str = str.replace("1.0.0.0", req.body.version);
-            
+
             return Q.nfcall(fs.writeFile, path.join(projectDirectory, "windows10", "appxmanifest", "appxmanifest.xml"), str);
           })
           .then(function(err) {
@@ -175,9 +176,9 @@ exports.create = function(client, storage, pwabuilder, raygun){
           .then(function(data) {
             // Inject Data (Package Identity Name) into projectDir + "\\Store packages\\windows10\\test_install.ps1"
             var str = data.toString();
-            
+
             str = str.replace("INSERT-YOUR-PACKAGE-IDENTITY-NAME-HERE", req.body.package);
-            
+
             return Q.nfcall(fs.writeFile, path.join(projectDirectory, "windows10", "test_install.ps1"), str);
           })
           .then(function(err) {
@@ -191,12 +192,12 @@ exports.create = function(client, storage, pwabuilder, raygun){
           })
           .then(function(err) {
             // Manifest file is now ready to be processed by packager
-            return pwa10.package(projectDirectory, { DotWeb: false, AutoPublish: false, Sign: false }); 
+            return pwa10.package(projectDirectory, { DotWeb: false, AutoPublish: false, Sign: false });
           })
           // .then(function(){ return storage.setPermissions(output); })
           // TODO: In the future, grab inner sub-directory to zip (so will contain 'windows10' folder)?
-          .then(function(){ 
-            return storage.createZip(output, manifest.content.short_name); 
+          .then(function(){
+            return storage.createZip(output, manifest.content.short_name);
           })
           .then(function(){ return storage.createContainer(manifest.id); })
           .then(function(){ return storage.uploadZip(manifest.id, manifest.content.short_name, output, 'appx'); })
