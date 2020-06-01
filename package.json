@@ -30,7 +30,7 @@
     "pwabuilder-cordova": "^2.0.0-rc.4",
     "pwabuilder-lib": "^2.1.0",
     "pwabuilder-macos": "^0.3.3",
-    "pwabuilder-msteams": "^0.0.2",
+    "pwabuilder-msteams": "^0.0.1",
     "pwabuilder-samsung": "^1.3.3",
     "pwabuilder-web": "^2.0.0-rc.4",
     "pwabuilder-windows10": "^2.0.4-rc.6",
