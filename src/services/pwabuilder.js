@@ -97,6 +97,7 @@ PWABuilder.prototype.validateManifest = function (manifest) {
   var self = this;
 
   var originalIcons = manifest.content.icons;
+  var originalScreenshots = manifest.content.screenshots;
   manifest = self.cleanGeneratedIcons(manifest);
   manifest = self.cleanGeneratedScreenshots(manifest);
 
@@ -139,6 +140,8 @@ PWABuilder.prototype.validateManifest = function (manifest) {
 
       // restore original icons
       manifest.content.icons = originalIcons;
+      //restore original screenshots
+      manifest.content.screenshots = originalScreenshots;
 
       return resolve(manifest);
     });
@@ -246,7 +249,7 @@ PWABuilder.prototype.changeScreenshotPathsInManifest = function (manifest) {
   for (var i = 0; i < manifest.content.screenshots.length; i++) {
     if (manifest.content.screenshots[i].generated) {
       manifest.content.screenshots[i].src =
-        manifest.content.screenshots[i].filePath;
+        manifest.content.screenshots[i].fileName;
     }
   }
   return manifest;
@@ -267,7 +270,7 @@ PWABuilder.prototype.cleanGeneratedScreenshots = function (manifest) {
   // remove properties in the manifest to track generated icons
   manifest.content.screenshots = (manifest.content.screenshots || []).map(
     function (screenshot) {
-      return _.omit(screenshot, 'generated', 'filePath');
+      return _.omit(screenshot, 'generated', 'fileName');
     }
   );
 

@@ -74,6 +74,8 @@ exports.create = function (client, storage, pwabuilder, raygun) {
         if (!reply) return res.status(404).send('NOT FOUND');
 
         var platforms = req.body.platforms;
+        var parameters = req.body.parameters || [];
+
         if (!platforms) {
           // No platforms were selected by the user. Using default configured platforms.
           platforms = config.platforms;
