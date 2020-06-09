@@ -15,13 +15,17 @@
         "packageName": "pwabuilder-cordova",
         "source": "pwabuilder-cordova"
     },
-    "MacOS": {
+    "macos": {
         "packageName": "pwabuilder-macos",
         "source": "pwabuilder-macos"
     },
     "windows": {
         "packageName": "pwabuilder-cordova",
         "source": "pwabuilder-cordova"
+    },
+    "msteams": {
+        "packageName": "pwabuilder-msteams",
+        "source": "pwabuilder-msteams"
     },
     "web": {
         "packageName": "pwabuilder-web",
