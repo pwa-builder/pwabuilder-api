@@ -7,6 +7,7 @@ module.exports = function () {
   let service = new api();
 
   return router
+    .get('/create', service.createVapidKey)
     .get('/register', service.registerVapidKey)
     .get('/unregister', service.unregisterVapidKey)
     .get('/subscribe', service.subscribeUser)
