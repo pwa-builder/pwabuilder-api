@@ -48,7 +48,7 @@ module.exports = class {
     }
 
     try {
-      const response = await request.get(this.url + "?action=register", {
+      const response = await request.post(this.url + "?action=register", {
         json: {
           subject: "mailto:" + req.body.userEmail,
           publicKey: req.body.publicKey,
@@ -92,7 +92,7 @@ module.exports = class {
     }
 
     try {
-      const response = await request.get(this.url + "?action=unregister", {
+      const response = await request.post(this.url + "?action=unregister", {
         json: {
           publicKey: req.body.publicKey,
           privateKey: req.body.privateKey,
@@ -124,7 +124,7 @@ module.exports = class {
     }
 
     try {
-      const response = await request.get(this.url + "?action=subscribe", {
+      const response = await request.post(this.url + "?action=subscribe", {
         json: {
           publicKey: req.body.publicKey,
           subscription: req.body.subscription,
@@ -156,7 +156,7 @@ module.exports = class {
     }
 
     try {
-      const response = await request.get(this.url + "?action=unsubscribe", {
+      const response = await request.post(this.url + "?action=unsubscribe", {
         json: {
           publicKey: req.body.publicKey,
           subscription: req.body.subscription,
@@ -194,7 +194,7 @@ module.exports = class {
     }
 
     try {
-      const response = await request.get(this.url + "?action=register", {
+      const response = await request.post(this.url + "?action=register", {
         json: {
           publicKey: req.body.publicKey,
           privateKey: req.body.privateKey,
