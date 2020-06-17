@@ -7,7 +7,7 @@ module.exports = function () {
   let service = new PushApi();
 
   return router
-    .get('/create', service.createVapidKey)
+    .post('/create', service.createVapidKey)
     .post('/register', service.registerVapidKey)
     .post('/unregister', service.unregisterVapidKey)
     .post('/subscribe', service.subscribeUser)
