@@ -1,16 +1,16 @@
 var express = require('express'),
   router = express.Router();
 
-var api = require('../services/push');
+var PushApi = require('../services/push');
 
 module.exports = function () {
-  let service = new api();
+  let service = new PushApi();
 
   return router
     .get('/create', service.createVapidKey)
-    .get('/register', service.registerVapidKey)
-    .get('/unregister', service.unregisterVapidKey)
-    .get('/subscribe', service.subscribeUser)
-    .get('/unsubscribe', service.unsubscribeUser)
-    .get('/send', service.sendPushNotification)
+    .post('/register', service.registerVapidKey)
+    .post('/unregister', service.unregisterVapidKey)
+    .post('/subscribe', service.subscribeUser)
+    .post('/unsubscribe', service.unsubscribeUser)
+    .post('/send', service.sendPushNotification)
 }
