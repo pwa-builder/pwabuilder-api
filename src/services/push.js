@@ -2,7 +2,7 @@ var request = require('got');
 var lib = require('pwabuilder-lib');
 
 module.exports = class {
-  url = ""; // dev
+  url = "http://localhost:7071/api/HttpTrigger"; // dev
   // url = "https://webpush-azurefunction.azurewebsites.net/api/HttpTrigger"; // deployed
 
   constructor() {
@@ -26,7 +26,7 @@ module.exports = class {
         status: 200,
       })
     } catch (e) {
-      return e;
+      return res.status(400);
     }
   }
 
@@ -99,10 +99,6 @@ module.exports = class {
         }
       }).json();
 
-      if (response.res.status.toLowerCase() !== "ok") {
-        throw new Exception();
-      }
-
       res.status(200);
     } catch (e) {
       res.send({
@@ -134,10 +130,6 @@ module.exports = class {
           subscription: req.body.subscription,
         }
       }).json();
-
-      if (response.res.status.toLowerCase() !== "ok") {
-        throw new Exception();
-      }
 
       res.status(200);
     } catch (e) {
