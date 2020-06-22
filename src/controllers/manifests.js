@@ -491,7 +491,7 @@ exports.create = function (client, storage, pwabuilder, raygun) {
               'data:' + screenshots[i].type + ';base64,' + screenshots[i].src,
             sizes: screenshots[i].sizes,
             type: screenshots[i].type,
-            filePath: 'Assets/screenshot' + (i + 1).toString() + '.png',
+            fileName: 'Assets/screenshot' + (i + 1).toString() + '.png',
             generated: true,
           };
           let buff = new Buffer(screenshots[i].src, 'base64');
