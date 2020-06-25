@@ -1,18 +1,20 @@
 'use strict';
 
-var express      = require('express'),
-  path         = require('path'),
-  logger       = require('morgan'),
+var express = require('express'),
+  path = require('path'),
+  logger = require('morgan'),
   cookieParser = require('cookie-parser'),
-  bodyParser   = require('body-parser'),
-  multer       = require('multer'),
-  manifests    = require('./routes/manifests'),
-  serviceworkers= require('./routes/serviceworkers'),
-  raygun       = require('raygun'),
-  raygunClient = new raygun.Client().init({ apiKey: 'PrRN4HizgQVI2xeXBxdSzw==' });
+  bodyParser = require('body-parser'),
+  multer = require('multer'),
+  manifests = require('./routes/manifests'),
+  serviceworkers = require('./routes/serviceworkers'),
+  raygun = require('raygun'),
+  raygunClient = new raygun.Client().init({
+    apiKey: 'PrRN4HizgQVI2xeXBxdSzw==',
+  });
 
 var PWABuilder = {
-  init: function(redisClient, azure, pwabuilder){
+  init: function (redisClient, azure, pwabuilder) {
     var app = express();
 
     redisClient.on('ready', () => {
@@ -51,25 +53,33 @@ var PWABuilder = {
       // }
 
       res.setHeader('Access-Control-Allow-Origin', '*');
-      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-      res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+      res.setHeader(
+        'Access-Control-Allow-Methods',
+        'GET, POST, OPTIONS, PUT, PATCH, DELETE'
+      );
+      res.setHeader(
+        'Access-Control-Allow-Headers',
+        'X-Requested-With,content-type'
+      );
       res.setHeader('Access-Control-Allow-Credentials', true);
 
       next();
     });
 
-    app.use(bodyParser.json({limit: '2mb'}));
-    app.use(bodyParser.urlencoded({limit: '2mb', extended: true }));
+    app.use(bodyParser.json({ limit: '20mb' }));
+    app.use(bodyParser.urlencoded({ limit: '2mb', extended: true }));
     app.use(multer({ dest: '../tmp/' }).any());
     app.use(cookieParser());
     app.use(express.static(path.join(__dirname, 'public')));
 
-
-    app.use('/manifests', manifests(redisClient,azure,pwabuilder,raygunClient));
+    app.use(
+      '/manifests',
+      manifests(redisClient, azure, pwabuilder, raygunClient)
+    );
     app.use('/serviceworkers', serviceworkers(pwabuilder, azure));
 
     // catch 404 and forward to error handler
-    app.use(function(req, res, next) {
+    app.use(function (req, res, next) {
       var err = new Error('Not Found');
       err.status = 404;
       next(err);
@@ -80,11 +90,11 @@ var PWABuilder = {
     // development error handler
     // will print stacktrace
     if (app.get('env') === 'development') {
-      app.use(function(err, req, res) {
+      app.use(function (err, req, res) {
         res.status(err.status || 500);
         res.render('error', {
           message: err.message,
-          error: err
+          error: err,
         });
       });
     }
@@ -92,16 +102,16 @@ var PWABuilder = {
     // production error handler
     // no stacktraces leaked to user
     app.use(raygunClient.expressHandler);
-    app.use(function(err, req, res) {
+    app.use(function (err, req, res) {
       res.status(err.status || 500);
       res.render('error', {
         message: err.message,
-        error: {}
+        error: {},
       });
     });
 
     return app;
-  }
+  },
 };
 
 module.exports = PWABuilder;
