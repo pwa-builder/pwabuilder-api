@@ -8,10 +8,16 @@ var express = require('express'),
   multer = require('multer'),
   manifests = require('./routes/manifests'),
   serviceworkers = require('./routes/serviceworkers'),
+<<<<<<< HEAD
   raygun = require('raygun'),
   raygunClient = new raygun.Client().init({
     apiKey: 'PrRN4HizgQVI2xeXBxdSzw==',
   });
+=======
+  push = require('./routes/push'),
+  raygun = require('raygun'),
+  raygunClient = new raygun.Client().init({ apiKey: 'PrRN4HizgQVI2xeXBxdSzw==' });
+>>>>>>> 30bce97... add routes
 
 var PWABuilder = {
   init: function (redisClient, azure, pwabuilder) {
@@ -77,6 +83,7 @@ var PWABuilder = {
       manifests(redisClient, azure, pwabuilder, raygunClient)
     );
     app.use('/serviceworkers', serviceworkers(pwabuilder, azure));
+    app.use('/push', push());
 
     // catch 404 and forward to error handler
     app.use(function (req, res, next) {
