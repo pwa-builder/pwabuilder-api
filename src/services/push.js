@@ -22,7 +22,7 @@ exports.create = function () {
           console.log("vapid key called");
           return res.send(
             {
-              ...response,
+              ...response.res,
               status: 200,
             })
 
