@@ -4,7 +4,7 @@ var express = require('express'),
 var PushApi = require('../services/push');
 
 module.exports = function () {
-  let service = new PushApi();
+  let service = PushApi();
 
   return router
     .get('/create', service.createVapidKey)
