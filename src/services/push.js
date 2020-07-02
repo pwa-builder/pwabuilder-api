@@ -6,6 +6,7 @@ var url = "https://webpush-azurefunction.azurewebsites.net/api/HttpTrigger"; // 
 module.exports = {
   /*
     createVapidKey
+    url: https://pwabuilder-api-prod.azurewebsites.net/push/create
       res:
         - status: number
         - keys:
@@ -27,6 +28,7 @@ module.exports = {
   },
   /*
   registerVapidKey
+  url: https://pwabuilder-api-prod.azurewebsites.net/push/register
     req
       - userEmail: string
       - publicKey: string
@@ -71,6 +73,7 @@ module.exports = {
   },
   /*
     unregisterVapidKey
+    url: https://pwabuilder-api-prod.azurewebsites.net/push/unregister
       req
         - publicKey: string
         - privateKey: string
@@ -106,6 +109,7 @@ module.exports = {
   },
   /*
     subscribeUser
+    url: https://pwabuilder-api-prod.azurewebsites.net/push/subscribe
       req
         - publicKey: string
         - subscription: url
@@ -141,6 +145,7 @@ module.exports = {
   },
   /*
     unsubscribeUser
+    url: https://pwabuilder-api-prod.azurewebsites.net/push/unsubscribe
       req
         - publicKey: string
         - subscription: url
@@ -176,6 +181,7 @@ module.exports = {
   },
   /*
       sendPushNotification
+      url: https://pwabuilder-api-prod.azurewebsites.net/push/send
       req
         - publicKey: string
         - privateKey: string
