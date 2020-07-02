@@ -13,20 +13,16 @@ module.exports = {
           - privateKey: string
     */
   createVapidKey: function (req, res) {
-
     request.get(url + "?action=vapidkeys", {
       responseType: 'json'
     }).then(response => response.body)
       .then((response) => {
-        console.log("vapid key called");
         res.send(
           {
             ...response.res,
-            status: 200,
-          })
-
+          });
       }).catch((err) => {
-        res.status(400);
+        res.status(400).send({ status: 400 });
       });
   },
   /*
@@ -40,8 +36,7 @@ module.exports = {
   */
   registerVapidKey: function (req, res) {
     if (req.body && !req.body.publicKey && !req.body.privateKey && !req.body.userEmail) {
-      return res.send({
-        status: 400,
+      return res.status(400).send({
         message: "missing publicKey, privateKey, or userEmail",
       });
     }
@@ -56,16 +51,15 @@ module.exports = {
     }).then(response => response.body)
       .then(response => {
         if (response.res.status.toLowerCase() !== "ok") {
-          res.status(400);
+          res.status(400).send({ status: 400 });
         } else {
-          res.status(200);
+          res.status(200).send({ status: 200 });
         }
       })
       .catch(e => {
         if (e.response && e.response.body) {
           // service error
-          return res.send({
-            status: 400,
+          return res.status(400).send({
             message: "error from registration"
           });
 
@@ -85,8 +79,7 @@ module.exports = {
   */
   unregisterVapidKey: function (req, res) {
     if (req.body && !req.body.publicKey && !req.body.privateKey) {
-      return res.send({
-        status: 400,
+      return res.status(400).send({
         message: "missing publicKey, or privateKey",
       })
     }
@@ -100,14 +93,13 @@ module.exports = {
     }).then(response => response.body)
       .then(response => {
         if (response.res.status.toLowerCase() !== "ok") {
-          res.status(400);
+          res.status(400).send({ status: 400 });
         } else {
-          res.status(200);
+          res.status(200).send({ status: 200 });
         }
       })
       .catch(e => {
-        res.send({
-          status: 400,
+        res.status(400).send({
           message: "failed to unregister key"
         });
       });
@@ -122,8 +114,7 @@ module.exports = {
   */
   subscribeUser: function (req, res) {
     if (req.body && !req.body.publicKey && !req.body.subscription) {
-      return res.send({
-        status: 400,
+      return res.status(400).send({
         message: "missing publicKey, or subscription url",
       })
     }
@@ -137,14 +128,13 @@ module.exports = {
     }).then(response => response.body)
       .then(response => {
         if (response.res.status.toLowerCase() !== "ok") {
-          res.status(400);
+          res.status(400).send({ status: 400 });
         } else {
-          res.status(200);
+          res.status(200).send({ status: 200 });
         }
       })
       .catch(e => {
-        res.send({
-          status: 400,
+        res.status(400).send({
           message: "failed to unregister key"
         });
       });
@@ -174,13 +164,12 @@ module.exports = {
     }).then(response => response.body)
       .then(response => {
         if (response.res.status.toLowerCase() !== "ok") {
-          res.status(400);
+          res.status(400).send({ status: 400 });
         } else {
-          res.status(200);
+          res.status(200).send({ status: 200 });
         }
       }).catch(e => {
-        res.send({
-          status: 400,
+        res.status(400).send({
           message: "failed to unregister key"
         });
       });
@@ -197,30 +186,28 @@ module.exports = {
   */
   sendPushNotification: function (req, res) {
     if (req.body && !req.body.publicKey && !req.body.subject && !req.body.privateKey && !req.body.notification) {
-      return res.send({
-        status: 400,
+      return res.status(400).send({
         message: "missing publicKey, privateKey, notification, or subscription url",
       })
     }
 
-    request.post(url + "?action=register", {
+    request.post(url + "?action=sendnotification", {
       json: {
         publicKey: req.body.publicKey,
         privateKey: req.body.privateKey,
-        subscription: req.body.subscription,
+        subject: req.body.subject,
         notification: req.body.notification,
       },
       responseType: 'json'
     }).then(response => response.body)
       .then(response => {
         if (response.res.status.toLowerCase() !== "ok") {
-          res.status(400);
+          res.status(400).send({ status: 400 });
         } else {
-          res.status(200);
+          res.status(200).send({ status: 200 });
         }
       }).catch(e => {
-        res.send({
-          status: 400,
+        res.status(400).send({
           message: "failed to unregister key"
         });
       });
