@@ -18,6 +18,7 @@
     "debug": "^4.1.0",
     "express": "^4.16.4",
     "fs-extra": "7.0.1",
+    "got": "^11.3.0",
     "imagesize": "^1.0.0",
     "lodash": "^4.17.13",
     "loglevel": "^1.6.1",
