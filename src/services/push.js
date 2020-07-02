@@ -1,7 +1,7 @@
 var request = require('got');
 
-var url = "http://localhost:7071/api/HttpTrigger"; // dev
-// var url = "https://webpush-azurefunction.azurewebsites.net/api/HttpTrigger"; // deployed
+// var url = "http://localhost:7071/api/HttpTrigger"; // dev
+var url = "https://webpush-azurefunction.azurewebsites.net/api/HttpTrigger"; // deployed
 
 module.exports = {
   /*
