@@ -8,16 +8,11 @@ var express = require('express'),
   multer = require('multer'),
   manifests = require('./routes/manifests'),
   serviceworkers = require('./routes/serviceworkers'),
-<<<<<<< HEAD
+  push = require('./routes/push'),
   raygun = require('raygun'),
   raygunClient = new raygun.Client().init({
     apiKey: 'PrRN4HizgQVI2xeXBxdSzw==',
   });
-=======
-  push = require('./routes/push'),
-  raygun = require('raygun'),
-  raygunClient = new raygun.Client().init({ apiKey: 'PrRN4HizgQVI2xeXBxdSzw==' });
->>>>>>> 30bce97... add routes
 
 var PWABuilder = {
   init: function (redisClient, azure, pwabuilder) {
