@@ -1,7 +1,7 @@
-var request = require('got');
+var request = require('request');
 
-// var url = "http://localhost:7071/api/HttpTrigger"; // dev
-var url = "https://webpush-azurefunction.azurewebsites.net/api/HttpTrigger"; // deployed
+var url = "http://localhost:7071/api/HttpTrigger"; // dev
+// var url = "https://webpush-azurefunction.azurewebsites.net/api/HttpTrigger"; // deployed
 
 module.exports = {
   /*
@@ -14,17 +14,15 @@ module.exports = {
           - privateKey: string
     */
   createVapidKey: function (req, res) {
-    request.get(url + "?action=vapidkeys", {
-      responseType: 'json'
-    }).then(response => response.body)
-      .then((response) => {
-        res.send(
-          {
-            ...response.res,
-          });
-      }).catch((err) => {
+    request.get(url + "?action=vapidkeys", { json: true }, function (err, response, body) {
+      if (err || response.statusCode !== 200 || body.res.status.toLowerCase() !== "ok") {
         res.status(400).send({ status: 400 });
-      });
+      } else {
+        res.send({
+          ...body.res
+        });
+      }
+    });
   },
   /*
   registerVapidKey
@@ -43,33 +41,32 @@ module.exports = {
       });
     }
 
-    request.post(url + "?action=register", {
-      json: {
-        subject: "mailto:" + req.body.userEmail,
-        publicKey: req.body.publicKey,
-        privateKey: req.body.privateKey,
-      },
-      responseType: 'json'
-    }).then(response => response.body)
-      .then(response => {
-        if (response.res.status.toLowerCase() !== "ok") {
+    try {
+      request.post(url + "?action=register", {
+        json: {
+          subject: "mailto:" + req.body.userEmail,
+          publicKey: req.body.publicKey,
+          privateKey: req.body.privateKey,
+        }
+      }, function (err, response, body) {
+        if (err || response.statusCode !== 200 || body.res.status.toLowerCase() !== "ok") {
           res.status(400).send({ status: 400 });
         } else {
           res.status(200).send({ status: 200 });
         }
-      })
-      .catch(e => {
-        if (e.response && e.response.body) {
-          // service error
-          return res.status(400).send({
-            message: "error from registration"
-          });
-
-        } else if (e.message) {
-          // network error
-          return res.status(500);
-        }
       });
+    } catch (e) {
+      if (e.response && e.response.body) {
+        // service error
+        return res.status(400).send({
+          message: "error from registration"
+        });
+
+      } else if (e.message) {
+        // network error
+        return res.status(500);
+      }
+    }
   },
   /*
     unregisterVapidKey
@@ -87,25 +84,31 @@ module.exports = {
       })
     }
 
-    request.post(url + "?action=unregister", {
-      json: {
-        publicKey: req.body.publicKey,
-        privateKey: req.body.privateKey,
-      },
-      responseType: 'json'
-    }).then(response => response.body)
-      .then(response => {
-        if (response.res.status.toLowerCase() !== "ok") {
+    try {
+      request.post(url + "?action=unregister", {
+        json: {
+          publicKey: req.body.publicKey,
+          privateKey: req.body.privateKey,
+        },
+      }, function (err, response, body) {
+        if (err || response.statusCode !== 200 || body.res.status.toLowerCase() !== "ok") {
           res.status(400).send({ status: 400 });
         } else {
           res.status(200).send({ status: 200 });
         }
-      })
-      .catch(e => {
-        res.status(400).send({
-          message: "failed to unregister key"
-        });
       });
+    } catch (e) {
+      if (e.response && e.response.body) {
+        // service error
+        return res.status(400).send({
+          message: "error from unregistration"
+        });
+
+      } else if (e.message) {
+        // network error
+        return res.status(500);
+      }
+    }
   },
   /*
     subscribeUser
@@ -122,26 +125,31 @@ module.exports = {
         message: "missing publicKey, or subscription url",
       })
     }
-
-    request.post(url + "?action=subscribe", {
-      json: {
-        publicKey: req.body.publicKey,
-        subscription: req.body.subscription,
-      },
-      responseType: 'json'
-    }).then(response => response.body)
-      .then(response => {
-        if (response.res.status.toLowerCase() !== "ok") {
+    try {
+      request.post(url + "?action=subscribe", {
+        json: {
+          publicKey: req.body.publicKey,
+          subscription: req.body.subscription,
+        }
+      }, function (err, response, body) {
+        if (err || response.statusCode !== 200 || body.res.status.toLowerCase() !== "ok") {
           res.status(400).send({ status: 400 });
         } else {
           res.status(200).send({ status: 200 });
         }
-      })
-      .catch(e => {
-        res.status(400).send({
-          message: "failed to unregister key"
-        });
       });
+    } catch (e) {
+      if (e.response && e.response.body) {
+        // service error
+        return res.status(400).send({
+          message: "error from subscription"
+        });
+
+      } else if (e.message) {
+        // network error
+        return res.status(500);
+      }
+    }
   },
   /*
     unsubscribeUser
@@ -160,24 +168,24 @@ module.exports = {
       })
     }
 
-    request.post(url + "?action=unsubscribe", {
-      json: {
-        publicKey: req.body.publicKey,
-        subscription: req.body.subscription,
-      },
-      responseType: 'json'
-    }).then(response => response.body)
-      .then(response => {
-        if (response.res.status.toLowerCase() !== "ok") {
+    try {
+      request.post(url + "?action=unsubscribe", {
+        json: {
+          publicKey: req.body.publicKey,
+          subscription: req.body.subscription,
+        },
+      }, function (err, response, body) {
+        if (err || response.statusCode !== 200 || body.res.status.toLowerCase() !== "ok") {
           res.status(400).send({ status: 400 });
         } else {
           res.status(200).send({ status: 200 });
         }
-      }).catch(e => {
-        res.status(400).send({
-          message: "failed to unregister key"
-        });
       });
+    } catch (e) {
+      res.status(400).send({
+        message: "failed to unsubscribe key"
+      });
+    }
   },
   /*
       sendPushNotification
@@ -197,25 +205,25 @@ module.exports = {
       })
     }
 
-    request.post(url + "?action=sendnotification", {
-      json: {
-        publicKey: req.body.publicKey,
-        privateKey: req.body.privateKey,
-        subject: req.body.subject,
-        notification: req.body.notification,
-      },
-      responseType: 'json'
-    }).then(response => response.body)
-      .then(response => {
-        if (response.res.status.toLowerCase() !== "ok") {
+    try {
+      request.post(url + "?action=sendnotification", {
+        json: {
+          publicKey: req.body.publicKey,
+          privateKey: req.body.privateKey,
+          subject: req.body.subject,
+          notification: req.body.notification,
+        },
+      }, function (err, response, body) {
+        if (err || response.statusCode !== 200 || body.res.status.toLowerCase() !== "ok") {
           res.status(400).send({ status: 400 });
         } else {
           res.status(200).send({ status: 200 });
         }
-      }).catch(e => {
-        res.status(400).send({
-          message: "failed to unregister key"
-        });
       });
+    } catch (e) {
+      res.status(400).send({
+        message: "failed to send push notification"
+      });
+    }
   }
 }
