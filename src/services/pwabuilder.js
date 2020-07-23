@@ -246,7 +246,11 @@ PWABuilder.prototype.normalize = function (manifest) {
 };
 
 PWABuilder.prototype.changeScreenshotPathsInManifest = function (manifest) {
-  for (var i = 0; i < manifest.content.screenshots && manifest.content.screenshots.length; i++) {
+  if (!manifest.content.screenshots) {
+    return manifest;
+  }
+
+  for (var i = 0; i < manifest.content.screenshots.length; i++) {
     if (manifest.content.screenshots[i].generated) {
       manifest.content.screenshots[i].src =
         manifest.content.screenshots[i].fileName;
