@@ -26,30 +26,34 @@ PWABuilder.prototype.createManifestFromUrl = function (url, client) {
 
   return Q.Promise(function (resolve, reject) {
     // Attempt to use the azure function
-    return Q.Promise(function (azureResolve, azureReject) {
-      request.get({
-        url: config.services.azureFn + "Site" + "?site=" + url,
-        json: true,
-      }, function (err, res, body) {
-        if (err) {
-          return azureReject(err);
-        }
+    request.get({
+      url: config.services.azureFn + "Site" + "?site=" + url,
+      json: true,
+    }, function (err, res, body) {
+      if (err) {
+        return reject(err);
+      }
 
-        var manifest = _.assign(body, { id: uuid.v4().slice(0, 8) });
+      var manifest = _.assign(body, { id: uuid.v4().slice(0, 8) });
 
-        self
-          .validateManifest(manifest)
-          .then(function (manifest) {
-            client.set(
-              manifest.id,
-              JSON.stringify(manifest),
-              'EX',
-              expirationTime
-            );
-            return azureResolve(resolve(manifest));
-          }).fail(azureReject);
-      });
-    }).catch(reason => {
+      self
+        .validateManifest(manifest)
+        .then(function (manifest) {
+          client.set(
+            manifest.id,
+            JSON.stringify(manifest),
+            'EX',
+            expirationTime
+          );
+          return resolve(manifest);
+        }).fail(reject);
+    });
+  }).catch(reason => {
+    console.log("catch block");
+
+    return Q.Promise((resolve, reject) => {
+      console.log("promise in catch block");
+
       // If failed, try the old school approach.
       var callback = function (err, manifestInfo) {
         if (err) {
