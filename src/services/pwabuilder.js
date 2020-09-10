@@ -6,6 +6,7 @@ var uuid = require('uuid'),
   path = require('path'),
   config = require(path.join(__dirname, '../config')),
   puppeteer = require('puppeteer'),
+  request = require('request'),
   platforms = config.platforms;
 
 function PWABuilder(pwabuilderLib) {
@@ -24,43 +25,70 @@ PWABuilder.prototype.createManifestFromUrl = function (url, client) {
   }
 
   return Q.Promise(function (resolve, reject) {
-    var callback = function (err, manifestInfo) {
-      if (err) {
-        return reject(err);
-      }
+    // Attempt to use the azure function
+    return Q.Promise(function (azureResolve, azureReject) {
+      request.get({
+        url: config.services.azureFn + "Site" + "?site=" + url,
+        json: true,
+      }, function (err, res, body) {
+        if (err) {
+          return azureReject(err);
+        }
 
-      var manifest = _.assign(manifestInfo, { id: uuid.v4().slice(0, 8) });
+        var manifest = _.assign(body, { id: uuid.v4().slice(0, 8) });
 
-      self
-        .validateManifest(manifest)
-        .then(function (manifest) {
-          client.set(
-            manifest.id,
-            JSON.stringify(manifest),
-            'EX',
-            expirationTime
+        self
+          .validateManifest(manifest)
+          .then(function (manifest) {
+            client.set(
+              manifest.id,
+              JSON.stringify(manifest),
+              'EX',
+              expirationTime
+            );
+            return azureResolve(resolve(manifest));
+          }).fail(azureReject);
+      });
+    }).catch(reason => {
+      // If failed, try the old school approach.
+      var callback = function (err, manifestInfo) {
+        if (err) {
+          return reject(err);
+        }
+
+        var manifest = _.assign(manifestInfo, { id: uuid.v4().slice(0, 8) });
+
+        self
+          .validateManifest(manifest)
+          .then(function (manifest) {
+            client.set(
+              manifest.id,
+              JSON.stringify(manifest),
+              'EX',
+              expirationTime
+            );
+            return resolve(manifest);
+          })
+          .fail(reject);
+      };
+
+      var resolveStartUrl = function (err, manifestInfo) {
+        if (err) {
+          return callback(err, manifestInfo);
+        }
+
+        if (manifestInfo.format === self.lib.constants.BASE_MANIFEST_FORMAT) {
+          return self.lib.manifestTools.validateAndNormalizeStartUrl(
+            url,
+            manifestInfo,
+            callback
           );
-          return resolve(manifest);
-        })
-        .fail(reject);
-    };
-
-    var resolveStartUrl = function (err, manifestInfo) {
-      if (err) {
-        return callback(err, manifestInfo);
-      }
-
-      if (manifestInfo.format === self.lib.constants.BASE_MANIFEST_FORMAT) {
-        return self.lib.manifestTools.validateAndNormalizeStartUrl(
-          url,
-          manifestInfo,
-          callback
-        );
-      } else {
-        return callback(undefined, manifestInfo);
-      }
-    };
-    self.lib.manifestTools.getManifestFromSite(url, undefined, resolveStartUrl);
+        } else {
+          return callback(undefined, manifestInfo);
+        }
+      };
+      self.lib.manifestTools.getManifestFromSite(url, undefined, resolveStartUrl);
+    });
   });
 };
 
