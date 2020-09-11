@@ -12,6 +12,9 @@ module.exports = {
   images: {
     generationSvcUrl: process.env.IMG_GEN_SVC_URL || 'http://localhost:49080/'
   },
+  services: {
+    azureFn: "http://localhost:7071/api/"
+  },
   serviceWorkerChecker: {
     timeout: 8500
   }

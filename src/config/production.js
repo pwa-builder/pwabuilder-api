@@ -13,6 +13,9 @@ module.exports = {
   images: {
     generationSvcUrl: process.env.IMG_GEN_SVC_URL || 'http://appimagegenerator-prod.azurewebsites.net'
   },
+  services: {
+    azureFn: "https://pwabuilder-tests.azurewebsites.net/api/"
+  },
   serviceWorkerChecker: {
     timeout: 6500
   }
