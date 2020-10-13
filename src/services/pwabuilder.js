@@ -125,6 +125,24 @@ PWABuilder.prototype.createManifestFromFile = function (file, client) {
   });
 };
 
+PWABuilder.prototype.uploadManifest = function (manifestInput, client) {
+  var self = this;
+
+  return Q.Promise((resolve, reject) => {
+    var manifest = _.assign(manifestInput, { id: uuid.v4().slice(0, 8) });
+
+    self
+      .validateManifest(manifest)
+      .then(function (manifest) {
+        client.set(manifest.id,
+          JSON.stringify(manifest),
+          'EX',
+          expirationTime);
+        return resolve(manifest);
+      }).fail(reject);
+  });
+}
+
 PWABuilder.prototype.validateManifest = function (manifest) {
   var self = this;
 
