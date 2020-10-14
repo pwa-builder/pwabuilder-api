@@ -33,7 +33,7 @@ exports.create = function (client, storage, pwabuilder, raygun) {
           .fail(function (err) {
             return res.status(422).json({ error: err.message });
           });
-      } else if (req.body.manifest) {
+      } else if (req.body.content && req.body.format === "w3c") {
         pwabuilder
           .uploadManifest(req.body.manifest, client)
           .then(function (manifest) {
