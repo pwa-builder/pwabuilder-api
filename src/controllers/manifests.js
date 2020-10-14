@@ -35,7 +35,7 @@ exports.create = function (client, storage, pwabuilder, raygun) {
           });
       } else if (req.body.content && req.body.format === "w3c") {
         pwabuilder
-          .uploadManifest(req.body.manifest, client)
+          .uploadManifest(req.body, client)
           .then(function (manifest) {
             res.json(manifest);
           })
