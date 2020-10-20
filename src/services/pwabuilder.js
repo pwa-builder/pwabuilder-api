@@ -286,12 +286,12 @@ PWABuilder.prototype.normalize = function (manifest) {
       manifest.content.name = manifest.content.name.replace(/-/g, ' ');
     }
 
-    if (manifest.start_url === ".") {
-      manifest.start_url = "/";
+    if (manifest.content.start_url === ".") {
+      manifest.content.start_url = "/";
     }
 
     self.lib.manifestTools.validateAndNormalizeStartUrl(
-      normalizedUrl,
+      manifest.content.start_url,
       manifest,
       function (err, normManifest) {
         if (err) {
