@@ -72,11 +72,6 @@ exports.create = function (client, storage, pwabuilder, raygun) {
     },
     // Create zip for user to download
     build: function (req, res) {
-      //TODO see the manifest info
-
-      console.log(pwabuilder.log);
-      console.log("testing 2");
-
       client.get(req.params.id, function (err, reply) {
         if (err) {
           //raygun.send(err);
@@ -345,8 +340,6 @@ exports.create = function (client, storage, pwabuilder, raygun) {
     },
     // Send to our DropBox
     package: function (req, res) {
-      console.log(req);
-
       client.get(req.params.id, function (err, reply) {
         if (err) {
           //raygun.send(err);
