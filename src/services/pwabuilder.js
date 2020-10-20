@@ -36,17 +36,21 @@ PWABuilder.prototype.createManifestFromUrl = function (url, client) {
 
       var manifest = _.assign(body, { id: uuid.v4().slice(0, 8) });
 
-      self
-        .validateManifest(manifest)
-        .then(function (manifest) {
-          client.set(
-            manifest.id,
-            JSON.stringify(manifest),
-            'EX',
-            expirationTime
-          );
-          return resolve(manifest);
-        }).fail(reject);
+        try {
+          self
+            .validateManifest(manifest)
+            .then(function (manifest) {
+              client.set(
+                manifest.id,
+                JSON.stringify(manifest),
+                'EX',
+                expirationTime
+              );
+              return resolve(manifest);
+            }).fail(reject);
+        } catch (e) {
+          return reject(e);
+        }
     });
   }).catch(reason => {
     console.log("catch block");
@@ -62,18 +66,22 @@ PWABuilder.prototype.createManifestFromUrl = function (url, client) {
 
         var manifest = _.assign(manifestInfo, { id: uuid.v4().slice(0, 8) });
 
-        self
-          .validateManifest(manifest)
-          .then(function (manifest) {
-            client.set(
-              manifest.id,
-              JSON.stringify(manifest),
-              'EX',
-              expirationTime
-            );
-            return resolve(manifest);
-          })
-          .fail(reject);
+        try {
+          self
+            .validateManifest(manifest)
+            .then(function (manifest) {
+              client.set(
+                manifest.id,
+                JSON.stringify(manifest),
+                'EX',
+                expirationTime
+              );
+              return resolve(manifest);
+            })
+            .fail(reject);
+        } catch (e) {
+          return reject(e);
+        }
       };
 
       var resolveStartUrl = function (err, manifestInfo) {
@@ -124,6 +132,24 @@ PWABuilder.prototype.createManifestFromFile = function (file, client) {
     });
   });
 };
+
+PWABuilder.prototype.uploadManifest = function (manifestInput, client) {
+  var self = this;
+
+  return Q.Promise((resolve, reject) => {
+    var manifest = _.assign(manifestInput, { id: uuid.v4().slice(0, 8) });
+
+    self
+      .validateManifest(manifest)
+      .then(function (manifest) {
+        client.set(manifest.id,
+          JSON.stringify(manifest),
+          'EX',
+          expirationTime);
+        return resolve(manifest);
+      }).fail(reject);
+  });
+}
 
 PWABuilder.prototype.validateManifest = function (manifest) {
   var self = this;
