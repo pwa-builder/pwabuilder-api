@@ -3,6 +3,7 @@
 var uuid = require('uuid'),
   Q = require('q'),
   _ = require('lodash'),
+  url = require('url'),
   path = require('path'),
   config = require(path.join(__dirname, '../config')),
   puppeteer = require('puppeteer'),
@@ -285,9 +286,9 @@ PWABuilder.prototype.normalize = function (manifest, baseUrl) {
       manifest.content.name = manifest.content.name.replace(/-/g, ' ');
     }
 
-    var normalizedUrl = url.parse(baseUrl, manifest, content.start_url) 
+    var normalizedUrl = url.parse(baseUrl, manifest.content.start_url);
     if (typeof normalizedUrl !== "string") {
-      normalizedUrl = normalizedUrl.toString();
+      normalizedUrl = normalizedUrl.href;
     }
 
     self.lib.manifestTools.validateAndNormalizeStartUrl(
@@ -295,7 +296,7 @@ PWABuilder.prototype.normalize = function (manifest, baseUrl) {
       manifest,
       function (err, normManifest) {
         if (err) {
-          //console.log('Normalizing Error', err);
+          // console.log('Normalizing Error', err);
           return reject(err);
         }
 
