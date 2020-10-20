@@ -257,7 +257,7 @@ PWABuilder.prototype.updateManifest = function (
   });
 };
 
-PWABuilder.prototype.normalize = function (manifest, baseUrl) {
+PWABuilder.prototype.normalize = function (manifest) {
   var self = this;
 
   return Q.Promise(function (resolve, reject) {
@@ -286,9 +286,8 @@ PWABuilder.prototype.normalize = function (manifest, baseUrl) {
       manifest.content.name = manifest.content.name.replace(/-/g, ' ');
     }
 
-    var normalizedUrl = url.parse(baseUrl, manifest.content.start_url);
-    if (typeof normalizedUrl !== "string") {
-      normalizedUrl = normalizedUrl.href;
+    if (manifest.start_url === ".") {
+      manifest.start_url = "/";
     }
 
     self.lib.manifestTools.validateAndNormalizeStartUrl(
