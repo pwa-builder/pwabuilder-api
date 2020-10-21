@@ -112,7 +112,7 @@ exports.create = function (client, storage, pwabuilder, raygun) {
             return pwabuilder.changeScreenshotPathsInManifest(manifest);
           })
           .then(function () {
-            return pwabuilder.normalize(manifest);
+            return pwabuilder.normalize(manifest, req.query.href);
           })
           .then(function (normManifest) {
             ////console.log('normManifest', normManifest);
