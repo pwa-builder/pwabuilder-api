@@ -257,7 +257,7 @@ PWABuilder.prototype.updateManifest = function (
   });
 };
 
-PWABuilder.prototype.normalize = function (manifest) {
+PWABuilder.prototype.normalize = function (manifest, siteUrl) {
   var self = this;
 
   return Q.Promise(function (resolve, reject) {
@@ -291,7 +291,7 @@ PWABuilder.prototype.normalize = function (manifest) {
     }
 
     self.lib.manifestTools.validateAndNormalizeStartUrl(
-      manifest.content.start_url,
+      siteUrl,
       manifest,
       function (err, normManifest) {
         if (err) {
