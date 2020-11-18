@@ -95,9 +95,16 @@ exports.create = function (client, storage, pwabuilder, raygun) {
         var manifest = JSON.parse(reply),
           output = path.join(outputDir, manifest.id),
           dirSuffix = req.body.dirSuffix;
-
-        if (dirSuffix) {
-          output += '-' + dirSuffix;
+          
+          if (dirSuffix) {
+            output += '-' + dirSuffix;
+          }
+          
+        var projectName = utils.sanitizeName(manifest.content.short_name || manifest.content.name) || "";
+        if (!projectName || projectName === "") {
+          res.status(406).json({
+            error: "Manifest missing required attribute: name or short_name"
+          });
         }
 
         // //console.log('Output: ', output);
@@ -139,7 +146,7 @@ exports.create = function (client, storage, pwabuilder, raygun) {
           })
           //.then(function(){ return storage.setPermissions(output); })
           .then(function () {
-            return storage.createZip(output, manifest.content.short_name);
+            return storage.createZip(output, projectName);
           })
           .then(function () {
             return storage.createContainer(manifest.id);
@@ -147,7 +154,7 @@ exports.create = function (client, storage, pwabuilder, raygun) {
           .then(function () {
             return storage.uploadZip(
               manifest.id,
-              manifest.content.short_name,
+              projectName,
               output,
               dirSuffix
             );
@@ -158,7 +165,7 @@ exports.create = function (client, storage, pwabuilder, raygun) {
           .then(function () {
             return storage.getUrlForZip(
               manifest.id,
-              manifest.content.short_name,
+              projectName,
               dirSuffix
             );
           })
@@ -193,6 +200,13 @@ exports.create = function (client, storage, pwabuilder, raygun) {
 
         if (dirSuffix) {
           output += '-' + dirSuffix;
+        }
+
+        var projectName = utils.sanitizeName(manifest.content.short_name || manifest.content.name) || "";
+        if (!projectName || projectName === "") {
+          res.status(406).json({
+            error: "Manifest missing required attribute: name or short_name"
+          });
         }
 
         storage
@@ -306,7 +320,7 @@ exports.create = function (client, storage, pwabuilder, raygun) {
           // .then(function(){ return storage.setPermissions(output); })
           // TODO: In the future, grab inner sub-directory to zip (so will contain 'windows10' folder)?
           .then(function () {
-            return storage.createZip(output, manifest.content.short_name);
+            return storage.createZip(output, projectName);
           })
           .then(function () {
             return storage.createContainer(manifest.id);
@@ -314,7 +328,7 @@ exports.create = function (client, storage, pwabuilder, raygun) {
           .then(function () {
             return storage.uploadZip(
               manifest.id,
-              manifest.content.short_name,
+              projectName,
               output,
               'appx'
             );
@@ -325,7 +339,7 @@ exports.create = function (client, storage, pwabuilder, raygun) {
           .then(function () {
             return storage.getUrlForZip(
               manifest.id,
-              manifest.content.short_name,
+              projectName,
               'appx'
             );
           })
@@ -370,6 +384,13 @@ exports.create = function (client, storage, pwabuilder, raygun) {
 
         if (dirSuffix) {
           output += '-' + dirSuffix;
+        }
+
+        var projectName = utils.sanitizeName(manifest.content.short_name || manifest.content.name) || "";
+        if (!projectName || projectName === "") {
+          return res.status(406).json({
+            error: "Manifest missing required attribute: name or short_name"
+          })
         }
 
         //console.log('Output: ', output);
@@ -440,7 +461,7 @@ exports.create = function (client, storage, pwabuilder, raygun) {
             .then(function () {
               return storage.uploadFile(
                 manifest.id,
-                manifest.content.short_name,
+                projectName,
                 dotWebPath,
                 '.web'
               );
@@ -451,7 +472,7 @@ exports.create = function (client, storage, pwabuilder, raygun) {
             .then(function () {
               return storage.getUrlForFile(
                 manifest.id,
-                manifest.content.short_name,
+                projectName,
                 '.web'
               );
             })
