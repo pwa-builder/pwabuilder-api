@@ -18,9 +18,9 @@ function Storage(blobService) {
 Storage.prototype.createZip = function (output, fileName) {
   return Q.Promise(function (resolve, reject) {
     console.log('Creating zip archive...');
-    var archive = archiver('zip'),
-
-      zip = fs.createWriteStream(path.join(output, fileName.replace(/[^a-zA-Z0-9]/g,'_') + '.zip'));
+    var archive = archiver('zip');
+    var sanitizedName = utils.sanitizeName(fileName);
+    var zip = fs.createWriteStream(path.join(output, sanitizedName + '.zip'));
 
     zip.on('close', function () {
       console.log(archive.pointer() + ' total bytes');
@@ -35,7 +35,7 @@ Storage.prototype.createZip = function (output, fileName) {
 
     archive.pipe(zip);
 
-    var folderName = path.join(output, utils.sanitizeName(fileName.replace(/[^a-zA-Z0-9]/g,'_')));
+    var folderName = path.join(output, sanitizedName);
     archive.directory(folderName, 'projects', { mode: '0755' }).finalize();
   });
 };
