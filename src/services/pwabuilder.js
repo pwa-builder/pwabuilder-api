@@ -299,7 +299,13 @@ PWABuilder.prototype.normalize = function (manifest, siteUrl) {
           return reject(err);
         }
 
+        var originalStartUrl = manifest.start_url;
         manifest = _.assign(manifest, normManifest);
+
+        // Preserve the original start_url. The front end needs to know it, and can do its own resolution as needed.
+        if (originalStartUrl !== undefined) {
+          manifest.start_url = originalStartUrl;
+        }
 
         resolve(manifest);
       }
