@@ -23,7 +23,7 @@
     "loglevel": "^1.6.1",
     "morgan": "^1.9.1",
     "multer": "^1.4.1",
-    "pug": "^2.0.3",
+    "pug": "^3.0.1",
     "puppeteer": "^1.12.2",
     "pwabuilder-android": "^2.0.0-rc.3",
     "pwabuilder-android-twa": "^2.0.0-rc.2",
